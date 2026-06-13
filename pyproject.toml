@@ -33,6 +33,7 @@ dev = [
 
 [project.scripts]
 safeeyes-build-splits = "safeeyes.data.build_splits:main"
+safeeyes-train-eye-state = "safeeyes.models.train_eye_state:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -55,9 +56,9 @@ mypy_path = "src"
 strict = true
 warn_unused_configs = true
 
-# OpenCV ships without type information.
+# OpenCV and MediaPipe ship without type information.
 [[tool.mypy.overrides]]
-module = ["cv2"]
+module = ["cv2", "mediapipe"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

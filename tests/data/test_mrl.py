@@ -53,6 +53,15 @@ def test_to_sample_uses_closed_label_for_closed_eye() -> None:
     assert to_sample(record).label == "closed"
 
 
+def test_build_mrl_manifest_sample_id_is_path_relative_to_root(tmp_path: Path) -> None:
+    nested = tmp_path / "s0003"
+    nested.mkdir()
+    (nested / "s0003_00001_0_0_1_0_1_01.png").write_bytes(b"")
+    manifest = build_mrl_manifest(tmp_path)
+    assert manifest[0].sample_id == "s0003/s0003_00001_0_0_1_0_1_01.png"
+    assert manifest[0].subject_id == "s0003"
+
+
 def test_build_mrl_manifest_walks_images_and_ignores_other_files(tmp_path: Path) -> None:
     (tmp_path / "s0001_00001_0_0_1_0_1_01.png").write_bytes(b"")
     (tmp_path / "s0001_00002_0_0_0_0_1_01.png").write_bytes(b"")

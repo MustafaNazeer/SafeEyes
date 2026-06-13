@@ -13,7 +13,7 @@ classifier never sees the same subject in both training and evaluation.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from safeeyes.data.splits import Sample
@@ -79,5 +79,6 @@ def build_mrl_manifest(
     for path in sorted(root.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in exts:
             continue
-        samples.append(to_sample(parse_mrl_filename(path)))
+        sample = to_sample(parse_mrl_filename(path))
+        samples.append(replace(sample, sample_id=str(path.relative_to(root))))
     return samples
