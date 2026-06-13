@@ -1,0 +1,58 @@
+# Local-only project scaffolding (never tracked, never pushed)
+CLAUDE.md
+SPEC.md
+STATUS.md
+GETTING-STARTED.md
+future-ideas.md
+agents/
+docs/plan.md
+docs/audits/
+
+# Tooling artifacts
+.claude/
+.claude-plugins/
+.specstory/
+.serena/
+claude-mem*
+*.mem.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.python-version
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ML artifacts and data (too large / not source)
+data/
+datasets/
+*.mp4
+*.avi
+*.mov
+models/checkpoints/
+*.pt
+*.pth
+*.onnx
+*.tflite
+runs/
+wandb/
+mlruns/
+
+# Build / packaging
+build/
+dist/
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
