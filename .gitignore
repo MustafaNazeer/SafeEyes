@@ -31,8 +31,9 @@ env/
 .ipynb_checkpoints/
 
 # ML artifacts and data (too large / not source)
-data/
-datasets/
+# Anchored to the repo root so source packages named data/ stay tracked.
+/data/
+/datasets/
 *.mp4
 *.avi
 *.mov

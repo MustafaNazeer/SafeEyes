@@ -31,6 +31,9 @@ dev = [
     "mypy>=1.10",
 ]
 
+[project.scripts]
+safeeyes-build-splits = "safeeyes.data.build_splits:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -51,6 +54,11 @@ packages = ["safeeyes"]
 mypy_path = "src"
 strict = true
 warn_unused_configs = true
+
+# OpenCV ships without type information.
+[[tool.mypy.overrides]]
+module = ["cv2"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
