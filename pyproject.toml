@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safeeyes"
+version = "0.1.0"
+description = "On device computer vision system that detects driver drowsiness from a cabin camera."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Mustafa Nazeer" }]
+
+# Core runtime and training dependencies for the laptop development environment.
+# The perception stage relies on MediaPipe FaceMesh, OpenCV, and numpy. Models are
+# trained with PyTorch, and scikit-learn provides the gradient boosted baseline for
+# the temporal fatigue classifier. The lighter on device runtime for the Raspberry Pi
+# is defined separately in requirements-pi.txt.
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python>=4.9",
+    "mediapipe>=0.10",
+    "torch>=2.2",
+    "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+safeeyes = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["safeeyes"]
+mypy_path = "src"
+strict = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

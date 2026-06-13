@@ -24,4 +24,4 @@ SafeEyes is an engineering and research prototype for exploring on device driver
 
 ## License
 
-To be determined.
+Released under the MIT License. See [LICENSE](LICENSE) for details.

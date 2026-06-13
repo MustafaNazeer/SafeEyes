@@ -1,0 +1,11 @@
+# Edge runtime for the Raspberry Pi 4B. This is the lightweight on device
+# inference environment and is intentionally distinct from the laptop development
+# and training environment defined in pyproject.toml. It excludes PyTorch and the
+# development tooling, and instead carries a quantized inference runtime plus the
+# perception stage dependencies. Pin or adjust these against the wheels actually
+# available for the target Pi OS and architecture.
+
+numpy>=1.26
+opencv-python>=4.9
+mediapipe>=0.10
+onnxruntime>=1.17
