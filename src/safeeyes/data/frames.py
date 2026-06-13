@@ -52,7 +52,7 @@ def extract_sampled_frames(video_path: str | Path, target_fps: float) -> list[np
             ok, frame = capture.read()
             if not ok:
                 raise OSError(f"failed to read frame {index} from {video_path}")
-            return frame  # type: ignore[no-any-return]
+            return frame
 
         return extract_frames(read_frame, indices)
     finally:
