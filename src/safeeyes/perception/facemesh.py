@@ -10,12 +10,7 @@ frames.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import numpy as np
-
-if TYPE_CHECKING:
-    import numpy.typing as npt
 
 
 class FaceMeshDetector:
@@ -35,7 +30,7 @@ class FaceMeshDetector:
             min_tracking_confidence=min_tracking_confidence,
         )
 
-    def landmarks(self, frame_bgr: npt.NDArray[np.uint8]) -> np.ndarray | None:
+    def landmarks(self, frame_bgr: np.ndarray) -> np.ndarray | None:
         """Return per landmark pixel coordinates (N, 2), or None if no face is found."""
         import cv2
 

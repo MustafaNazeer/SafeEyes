@@ -66,7 +66,7 @@ class FeatureWindow:
         self._n_features = n_features
         self._frames: deque[list[float]] = deque(maxlen=capacity)
 
-    def push(self, features: Sequence[float]) -> None:
+    def push(self, features: Sequence[float] | np.ndarray) -> None:
         if len(features) != self._n_features:
             raise ValueError(
                 f"expected {self._n_features} features, got {len(features)}"
