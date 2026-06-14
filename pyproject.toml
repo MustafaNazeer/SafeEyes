@@ -43,6 +43,7 @@ safeeyes-train-temporal = "safeeyes.temporal.train_temporal:main"
 safeeyes-run = "safeeyes.alert.run:main"
 safeeyes-export-edge = "safeeyes.edge.export_models:main"
 safeeyes-bench-edge = "safeeyes.edge.bench:main"
+safeeyes-edge-run = "safeeyes.edge.run:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
