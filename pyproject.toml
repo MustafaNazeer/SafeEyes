@@ -70,7 +70,7 @@ warn_unused_configs = true
 
 # OpenCV, MediaPipe, scikit-learn, and the ONNX toolchain ship without type information.
 [[tool.mypy.overrides]]
-module = ["cv2", "mediapipe", "sklearn.*", "onnx", "onnx.*", "onnxruntime", "onnxruntime.*"]
+module = ["cv2", "mediapipe", "mediapipe.*", "sklearn.*", "onnx", "onnx.*", "onnxruntime", "onnxruntime.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
