@@ -49,6 +49,9 @@ runs/
 wandb/
 mlruns/
 
+# uv lockfile: the documented workflow is pip with pyproject.toml, so this is incidental.
+uv.lock
+
 # Build / packaging
 build/
 dist/
