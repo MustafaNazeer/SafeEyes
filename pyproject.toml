@@ -39,6 +39,7 @@ dev = [
 [project.scripts]
 safeeyes-build-splits = "safeeyes.data.build_splits:main"
 safeeyes-train-eye-state = "safeeyes.models.train_eye_state:main"
+safeeyes-eval-eye-state = "safeeyes.models.eval_eye_state:main"
 safeeyes-train-temporal = "safeeyes.temporal.train_temporal:main"
 safeeyes-run = "safeeyes.alert.run:main"
 safeeyes-export-edge = "safeeyes.edge.export_models:main"

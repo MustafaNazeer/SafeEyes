@@ -37,10 +37,13 @@ env/
 *.mp4
 *.avi
 *.mov
-models/checkpoints/
+# Local model build output: checkpoints, edge artifacts, and their metric traces.
+# The canonical reported metrics live under docs/ml/, not here.
+/models/
 *.pt
 *.pth
 *.onnx
+*.onnx.data
 *.tflite
 runs/
 wandb/

@@ -1,0 +1,26 @@
+{
+  "counts": {
+    "test": {
+      "class_distribution": {
+        "closed": 5334,
+        "open": 9608
+      },
+      "samples": 14942,
+      "subjects": 7
+    },
+    "train": {
+      "class_distribution": {
+        "closed": 36612,
+        "open": 33344
+      },
+      "samples": 69956,
+      "subjects": 30
+    },
+    "val": {
+      "class_distribution": {},
+      "samples": 0,
+      "subjects": 0
+    }
+  },
+  "seed": 0
+}
