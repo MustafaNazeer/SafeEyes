@@ -34,6 +34,8 @@ env/
 # Anchored to the repo root so source packages named data/ stay tracked.
 /data/
 /datasets/
+/features/
+*.npy
 *.mp4
 *.avi
 *.mov
