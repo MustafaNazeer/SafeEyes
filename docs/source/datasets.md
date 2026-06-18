@@ -107,9 +107,11 @@ Class balance differs by dataset and is reported, never hidden:
   per subject. Because the split is made at the subject level (the correctness
   requirement), the per split open/closed ratio can drift from the global ratio. The
   `summary.json` written next to every split records the exact class distribution per
-  bucket so any imbalance is visible. Where a residual imbalance matters for training,
-  it is addressed at training time with class weighting rather than by leaking subjects
-  across splits to force a balance.
+  bucket so any imbalance is visible. Inverse-frequency class weighting is available at
+  training time but is off by default: it was evaluated and found to lower held out
+  accuracy on the MRL split, so the imbalance is surfaced through balanced accuracy and
+  per class recall rather than corrected by weighting. Subjects are never leaked across
+  splits to force a balance.
 
 ## Datasets deliberately not used
 

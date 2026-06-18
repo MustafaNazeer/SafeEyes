@@ -60,13 +60,29 @@ def evaluate(model: nn.Module, loader: DataLoader[tuple[torch.Tensor, int]]) -> 
     return correct / total if total else 0.0
 
 
+def compute_class_weights(labels: Sequence[int], n_classes: int) -> torch.Tensor:
+    """Inverse frequency class weights, normalized to average one.
+
+    A residual open/closed imbalance in a subject level split is corrected here,
+    at training time, rather than by leaking subjects across splits to force a
+    balance. The minority class gets the larger weight; a balanced split yields
+    uniform weights of one.
+    """
+    counts = torch.zeros(n_classes)
+    for label in labels:
+        counts[label] += 1
+    total = counts.sum()
+    return total / (n_classes * counts.clamp(min=1.0))
+
+
 def train(
     model: nn.Module,
     loader: DataLoader[tuple[torch.Tensor, int]],
     epochs: int,
     lr: float,
+    class_weights: torch.Tensor | None = None,
 ) -> None:
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     model.train()
     for _ in range(epochs):
@@ -88,6 +104,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--size", type=int, default=24)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument(
+        "--class-weighting",
+        action="store_true",
+        help="apply inverse-frequency class weighting (off by default; it lowered held-out "
+        "accuracy on the MRL split, see the model card)",
+    )
     args = parser.parse_args(argv)
 
     train_ds = EyeStateDataset(args.train_manifest, args.image_root, size=args.size)
@@ -99,15 +121,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         val_ds, batch_size=args.batch_size
     )
 
+    class_weights = None
+    if args.class_weighting:
+        train_labels = [_LABEL_TO_INDEX[s.label] for s in read_manifest(args.train_manifest)]
+        class_weights = compute_class_weights(train_labels, n_classes=len(_LABEL_TO_INDEX))
+
     model = EyeStateCNN()
-    train(model, train_loader, epochs=args.epochs, lr=args.lr)
+    train(model, train_loader, epochs=args.epochs, lr=args.lr, class_weights=class_weights)
     accuracy = evaluate(model, val_loader)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), out)
 
-    metrics = {"held_out_accuracy": accuracy, "val_samples": len(val_ds), "epochs": args.epochs}
+    metrics = {
+        "held_out_accuracy": accuracy,
+        "val_samples": len(val_ds),
+        "epochs": args.epochs,
+        "class_weighting": args.class_weighting,
+    }
     if args.metrics_out:
         Path(args.metrics_out).write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
     print(f"held out accuracy: {accuracy:.4f} on {len(val_ds)} samples; checkpoint at {out}")

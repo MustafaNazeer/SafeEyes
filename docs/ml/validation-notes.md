@@ -143,9 +143,11 @@ distribution per bucket, so any imbalance is visible.
   counts vary. Because the split is made at the subject level (the correctness
   requirement comes first), the per bucket open to closed ratio can drift from the
   global ratio. This is the correct trade off: subject independence is not
-  sacrificed to force a balance. Where residual imbalance matters for training, it
-  is handled at training time with class weighting. The exact per bucket
-  distribution is always recorded in the summary so the drift is never silent.
+  sacrificed to force a balance. Inverse-frequency class weighting was evaluated as
+  a correction but lowered held out accuracy on this split, so it is available yet
+  off by default and the imbalance is reported through balanced accuracy and per
+  class recall instead. The exact per bucket distribution is always recorded in the
+  summary so the drift is never silent.
 
 ## Verdict and scope
 

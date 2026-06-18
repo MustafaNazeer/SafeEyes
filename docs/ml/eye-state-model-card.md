@@ -45,22 +45,44 @@ fold). The full metrics are recorded in
 
 | Metric | Value |
 |--------|-------|
-| Overall accuracy | 94.73% |
-| Balanced accuracy | 94.84% |
-| Recall, closed | 95.22% (5,079 of 5,334) |
-| Recall, open | 94.45% (9,075 of 9,608) |
+| Overall accuracy | 94.36% |
+| Balanced accuracy | 94.47% |
+| Recall, closed | 94.86% (5,060 of 5,334) |
+| Recall, open | 94.08% (9,039 of 9,608) |
 
 Confusion matrix (rows are the true label, columns the predicted label):
 
 | | predicted closed | predicted open |
 |---|---|---|
-| **true closed** | 5,079 | 255 |
-| **true open** | 533 | 9,075 |
+| **true closed** | 5,060 | 274 |
+| **true open** | 569 | 9,039 |
 
 The test split is open skewed (9,608 open against 5,334 closed), so balanced
 accuracy is reported next to overall accuracy and neither class is allowed to
 hide behind the other. Both classes clear 94% recall, so the headline figure is
 not propped up by the majority class.
+
+### Class imbalance and weighting
+
+Because the split is made at the subject level, the per split open and closed
+counts drift from an even balance. Inverse-frequency class weighting was
+implemented and evaluated against the unweighted baseline on this same fixed
+split (reproduce it by adding `--class-weighting` to the training command):
+
+| Metric | Unweighted (reported) | Weighted |
+|--------|-----------------------|----------|
+| Overall accuracy | 94.36% | 94.28% |
+| Balanced accuracy | 94.47% | 93.70% |
+| Recall, closed | 94.86% | 91.68% |
+| Recall, open | 94.08% | 95.72% |
+
+In the training split closed is the majority, so weighting pushed the model
+toward open: open recall rose but closed recall fell further, and both overall
+and balanced accuracy dropped. The unweighted model is already well balanced
+across both classes, so the reported model is trained without weighting. The
+residual imbalance is surfaced honestly through balanced accuracy and per class
+recall rather than corrected by a weighting that the evidence shows does not
+help here.
 
 Overall held out accuracy is produced directly by the training command, which
 writes it to a metrics file alongside the checkpoint:
@@ -96,5 +118,7 @@ than to a remembered value.
 - The classifier answers open or closed only. It does not identify a person and
   builds no face profile (see the privacy threat model under docs/security).
 - Per subject open and closed counts vary, so any residual class imbalance in a
-  split is recorded in that split's summary and handled at training time with
-  class weighting rather than by mixing subjects across splits.
+  split is recorded in that split's summary rather than corrected by mixing
+  subjects across splits. Inverse-frequency class weighting was evaluated and
+  found to lower held out accuracy on this split (see Class imbalance and
+  weighting above), so the reported model does not use it.

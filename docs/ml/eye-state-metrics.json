@@ -1,5 +1,5 @@
 {
-  "balanced_accuracy": 0.948359435659635,
+  "balanced_accuracy": 0.9447049694870573,
   "confusion_matrix": {
     "labels": [
       "closed",
@@ -7,19 +7,19 @@
     ],
     "rows_true_cols_pred": [
       [
-        5079,
-        255
+        5060,
+        274
       ],
       [
-        533,
-        9075
+        569,
+        9039
       ]
     ]
   },
-  "overall_accuracy": 0.9472627492972828,
+  "overall_accuracy": 0.9435818498193013,
   "per_class_recall": {
-    "closed": 0.952193475815523,
-    "open": 0.9445253955037469
+    "closed": 0.948631421072366,
+    "open": 0.9407785179017485
   },
   "support": {
     "closed": 5334,
