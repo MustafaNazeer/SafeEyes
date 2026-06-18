@@ -23,9 +23,17 @@ independent splits.
   class), three classes. The class is encoded in the clip file name: `0` is alert,
   `5` is low vigilance, `10` is drowsy. The 60 subjects are organized into five folds
   of twelve.
-- **Source:** project page at https://sites.google.com/view/utarldd/home. A community
-  Kaggle mirror (`rishab260/uta-reallife-drowsiness-dataset`) exists if the primary
-  source is slow; confirm its contents against the project page before relying on it.
+- **Source:** project page at https://sites.google.com/view/utarldd/home, which
+  distributes the data through Google Drive. That source carries a per file download
+  quota that can block automated retrieval, so the community Kaggle mirror
+  (`rishab260/uta-reallife-drowsiness-dataset`, CC0-1.0) is used instead.
+- **Coverage of the mirror used:** the Kaggle mirror carries folds 1 to 4 only, that
+  is 48 of the 60 subjects (141 clips, 47 per class), not the full five folds. The
+  reported temporal results are on these 48 subjects. Subject numbering is global, so
+  no subject is split across folds and the subject independent property holds. The
+  mirror nests each clip one level deeper than the canonical layout
+  (`Fold{N}_part{M}/Fold{N}_part{M}/<subjectID>/{0,5,10}.<ext>`, with a mix of `.mov`,
+  `.MOV`, and `.mp4`), which the recursive split tooling handles transparently.
 - **Expected layout** (point `--root` at the directory that holds the fold folders):
 
   ```

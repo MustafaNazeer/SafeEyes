@@ -31,6 +31,12 @@ provenance and the obtain steps are recorded in
   fold per subject folders with the class encoded in the file name, the layout
   the split tooling expects. The permissive CC0-1.0 license is suitable for this
   use.
+- The mirror carries folds 1 to 4 only, 48 of the 60 subjects (141 clips), not the
+  full dataset. This was verified after download and is accepted: 48 subjects with a
+  subject independent split is sufficient for the project's bar, and chasing the
+  missing fold means re-entering the Drive quota for marginal gain. The coverage is
+  recorded in [docs/source/datasets.md](../source/datasets.md) and the temporal
+  methodology so no reported number implies the full 60 subjects.
 - If the mirror were removed or changed, the official Drive source remains the
   fallback once its quota clears, and the recorded provenance allows the contents
   to be re-verified.

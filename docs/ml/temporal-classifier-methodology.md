@@ -56,8 +56,13 @@ Build the subject independent split manifests from the downloaded videos:
 
 ```
 python -m safeeyes.data.build_splits \
-    --dataset uta-rldd --root data/uta-rldd --out splits/uta-rldd
+    --dataset uta-rldd --root data/uta-rldd --out splits/uta-rldd --ratios 0.8 0.0 0.2
 ```
+
+The split is 80/20 at the subject level (no validation fold, since training uses
+train and test only), seed 0. With the folds 1 to 4 coverage of the Kaggle mirror
+(48 subjects, see [docs/source/datasets.md](../source/datasets.md)) this is 38
+training and 10 held out test subjects.
 
 Extract the per frame feature sequence for every clip, driving the same
 perception path the live runtime uses (FaceMesh landmarks then the fixed feature
@@ -68,8 +73,12 @@ resumable, so an interrupted run continues where it stopped:
 ```
 python -m safeeyes.perception.extract \
     --manifest splits/uta-rldd/train.csv splits/uta-rldd/test.csv \
-    --video-root data/uta-rldd --feature-root features/uta-rldd
+    --video-root data/uta-rldd --feature-root features/uta-rldd --frame-step 5
 ```
+
+`--frame-step 5` processes every fifth frame, which keeps the extraction tractable
+on a CPU and the window count within memory while preserving the slow signals
+(eye closure, blink, yawn, nod) that drowsiness produces.
 
 Train and evaluate the classifier on the extracted features:
 
@@ -92,5 +101,10 @@ run is recorded, this document states the protocol, not a number.
 - The UTA-RLDD labels are self reported predominant states over a clip, so a
   window label is the clip level label; brief within clip state changes are not
   separately annotated.
+- The results are on folds 1 to 4 of UTA-RLDD (48 subjects), the coverage of the
+  Kaggle mirror used, not the full 60 subjects, and on a single subject independent
+  split rather than full cross validation. The held out set is 10 subjects, so the
+  estimate is honest but has the variance of a small test set; this is stated rather
+  than hidden.
 - Real time behaviour, alert escalation, and the cost of a missed detection are
   the concern of the alert stage and are documented with that stage, not here.
