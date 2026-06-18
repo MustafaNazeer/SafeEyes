@@ -43,6 +43,7 @@ def train_and_evaluate(
     lr: float,
     seed: int = 0,
     alarm_class: int | None = None,
+    batch_size: int = 512,
 ) -> dict[str, object]:
     torch.manual_seed(seed)
     x_train, y_train = assemble_windowed_dataset(train_items, window_size, stride)
@@ -53,21 +54,41 @@ def train_and_evaluate(
     targets = torch.tensor(y_train, dtype=torch.long)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    generator = torch.Generator().manual_seed(seed)
 
+    # Minibatched so peak activation memory is bounded by batch_size rather than
+    # the full window count, which keeps backprop-through-time within reach on a
+    # small-RAM machine no matter how many windows the dataset produces.
     model.train()
+    n_windows = inputs.shape[0]
     for _ in range(epochs):
-        optimizer.zero_grad()
-        criterion(model(inputs), targets).backward()
-        optimizer.step()
+        order = torch.randperm(n_windows, generator=generator)
+        for start in range(0, n_windows, batch_size):
+            batch = order[start : start + batch_size]
+            optimizer.zero_grad()
+            criterion(model(inputs[batch]), targets[batch]).backward()
+            optimizer.step()
 
     model.eval()
-    with torch.no_grad():
-        logits = model(torch.tensor(x_val, dtype=torch.float32))
-        scores = torch.softmax(logits, dim=1).numpy()
-        predictions = logits.argmax(dim=1).numpy()
+    scores = _predict_scores(model, x_val, n_classes, batch_size)
+    predictions = scores.argmax(axis=1)
 
     alarm = alarm_class if alarm_class is not None else n_classes - 1
     return evaluate_predictions(y_val, predictions, scores, n_classes, alarm)
+
+
+def _predict_scores(
+    model: nn.Module, x: np.ndarray, n_classes: int, batch_size: int
+) -> np.ndarray:
+    tensor = torch.tensor(x, dtype=torch.float32)
+    batches: list[np.ndarray] = []
+    with torch.no_grad():
+        for start in range(0, tensor.shape[0], batch_size):
+            logits = model(tensor[start : start + batch_size])
+            batches.append(torch.softmax(logits, dim=1).numpy())
+    if not batches:
+        return np.empty((0, n_classes), dtype=float)
+    return np.concatenate(batches, axis=0)
 
 
 def train_and_evaluate_gbt(
@@ -115,6 +136,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--batch-size", type=int, default=512, help="training and eval minibatch size"
+    )
     args = parser.parse_args(argv)
 
     train_items = _load_items(args.train_manifest, args.feature_root)
@@ -128,7 +152,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         report = train_and_evaluate(
             train_items, val_items, n_classes=3, window_size=args.window_size, stride=args.stride,
-            epochs=args.epochs, lr=args.lr, seed=args.seed,
+            epochs=args.epochs, lr=args.lr, seed=args.seed, batch_size=args.batch_size,
         )
 
     if args.metrics_out:
