@@ -2,7 +2,11 @@ import numpy as np
 import pytest
 
 import safeeyes.temporal.model as model_mod
-from safeeyes.temporal.train_temporal import train_and_evaluate, train_and_evaluate_gbt
+from safeeyes.temporal.train_temporal import (
+    standardize_with_train_stats,
+    train_and_evaluate,
+    train_and_evaluate_gbt,
+)
 
 
 def _constant_sequences(value: float, label: int, count: int, length: int = 8, feats: int = 3):
@@ -26,6 +30,25 @@ def test_train_and_evaluate_learns_separable_classes() -> None:
         train, val, n_classes=2, window_size=4, stride=4, epochs=80, lr=0.05, seed=0
     )
     assert report["overall_accuracy"] >= 0.75
+
+
+def test_standardize_centers_train_and_uses_train_stats_on_val() -> None:
+    # two windows, one timestep, two features on very different scales
+    x_train = np.array([[[0.0, 10.0]], [[2.0, 30.0]]])
+    x_val = np.array([[[1.0, 20.0]]])  # equals the per-feature train mean
+    xt, xv = standardize_with_train_stats(x_train, x_val)
+    assert np.allclose(xt.mean(axis=(0, 1)), [0.0, 0.0], atol=1e-6)
+    assert np.allclose(xt.std(axis=(0, 1)), [1.0, 1.0], atol=1e-6)
+    # val is transformed with train statistics, so a val sample at the train mean maps to 0
+    assert np.allclose(xv[0, 0], [0.0, 0.0], atol=1e-6)
+
+
+def test_standardize_handles_a_constant_feature_without_dividing_by_zero() -> None:
+    x_train = np.array([[[5.0]], [[5.0]]])
+    x_val = np.array([[[5.0]]])
+    xt, xv = standardize_with_train_stats(x_train, x_val)
+    assert np.all(np.isfinite(xt))
+    assert np.all(np.isfinite(xv))
 
 
 def test_train_and_evaluate_never_forwards_more_than_batch_size(

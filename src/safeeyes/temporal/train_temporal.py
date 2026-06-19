@@ -33,6 +33,23 @@ LabeledSequence = tuple[np.ndarray, int]
 UTA_CLASS_TO_INDEX = {"alert": 0, "low_vigilance": 1, "drowsy": 2}
 
 
+def standardize_with_train_stats(
+    x_train: np.ndarray, x_val: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Standardize each feature using training statistics only.
+
+    Head pose angles dwarf the eye and mouth ratios in raw magnitude, which a
+    scale sensitive recurrent model cannot learn through. Centering and scaling
+    each feature by the training mean and standard deviation fixes that. The
+    statistics come from the training windows alone, so no validation or test
+    information leaks into the transform. A constant feature is left unscaled.
+    """
+    mean = x_train.mean(axis=(0, 1), keepdims=True)
+    std = x_train.std(axis=(0, 1), keepdims=True)
+    std = np.where(std < 1e-6, 1.0, std)
+    return (x_train - mean) / std, (x_val - mean) / std
+
+
 def train_and_evaluate(
     train_items: Sequence[LabeledSequence],
     val_items: Sequence[LabeledSequence],
@@ -48,6 +65,7 @@ def train_and_evaluate(
     torch.manual_seed(seed)
     x_train, y_train = assemble_windowed_dataset(train_items, window_size, stride)
     x_val, y_val = assemble_windowed_dataset(val_items, window_size, stride)
+    x_train, x_val = standardize_with_train_stats(x_train, x_val)
 
     model = TemporalGRU(n_features=x_train.shape[2], num_classes=n_classes)
     inputs = torch.tensor(x_train, dtype=torch.float32)
@@ -103,6 +121,7 @@ def train_and_evaluate_gbt(
     """Gradient boosted trees baseline over flattened window features."""
     x_train, y_train = assemble_windowed_dataset(train_items, window_size, stride)
     x_val, y_val = assemble_windowed_dataset(val_items, window_size, stride)
+    x_train, x_val = standardize_with_train_stats(x_train, x_val)
     flat_train = x_train.reshape(x_train.shape[0], -1)
     flat_val = x_val.reshape(x_val.shape[0], -1)
 
