@@ -102,12 +102,12 @@ subjects of the folds 1 to 4 split:
 
 | Metric | GRU (primary) | GBT (baseline) |
 |--------|---------------|----------------|
-| Overall accuracy | 52.4% | 46.5% |
+| Overall accuracy | 52.1% | 46.5% |
 | Macro AUROC | 0.693 | 0.618 |
-| False alarm rate | 0.141 | 0.258 |
-| Recall, alert | 76.8% | 64.0% |
+| False alarm rate | 0.152 | 0.258 |
+| Recall, alert | 74.7% | 64.0% |
 | Recall, low vigilance | 31.1% | 21.5% |
-| Recall, drowsy | 50.2% | 55.4% |
+| Recall, drowsy | 51.5% | 55.4% |
 
 The GRU leads the gradient boosted baseline on overall accuracy, macro AUROC, and
 the false alarm rate, so the sequence model earns its place as the primary model
@@ -119,7 +119,7 @@ Read honestly:
 
 - Low vigilance is the hardest class for both models, the expected pattern for
   the fuzzy intermediate state between alert and drowsy. The baseline edges the
-  GRU on drowsy recall (55.4% against 50.2%) while losing on every aggregate.
+  GRU on drowsy recall (55.4% against 51.5%) while losing on every aggregate.
 - Drowsy recall around one half means this is an assistive signal, not a reliable
   detector of every drowsy moment, consistent with the prototype framing.
 - These are a single subject independent split over 48 subjects (folds 1 to 4).
