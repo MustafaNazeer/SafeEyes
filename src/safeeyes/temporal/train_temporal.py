@@ -25,6 +25,7 @@ import torch
 from torch import nn
 
 from safeeyes.data.manifest import read_manifest
+from safeeyes.data.splits import Sample
 from safeeyes.temporal.evaluation import evaluate_predictions
 from safeeyes.temporal.model import GBTBaseline, TemporalGRU
 from safeeyes.temporal.window import assemble_windowed_dataset
@@ -145,14 +146,19 @@ def train_and_evaluate_gbt(
     return evaluate_predictions(y_val, predictions, scores, n_classes, alarm)
 
 
-def _load_items(manifest_path: str, feature_root: str) -> list[LabeledSequence]:
+def items_from_samples(
+    samples: Sequence[Sample], feature_root: str | Path
+) -> list[LabeledSequence]:
     root = Path(feature_root)
     items: list[LabeledSequence] = []
-    for sample in read_manifest(manifest_path):
+    for sample in samples:
         feature_path = (root / sample.sample_id).with_suffix(".npy")
-        sequence = np.load(feature_path)
-        items.append((sequence, UTA_CLASS_TO_INDEX[sample.label]))
+        items.append((np.load(feature_path), UTA_CLASS_TO_INDEX[sample.label]))
     return items
+
+
+def _load_items(manifest_path: str, feature_root: str) -> list[LabeledSequence]:
+    return items_from_samples(read_manifest(manifest_path), feature_root)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
