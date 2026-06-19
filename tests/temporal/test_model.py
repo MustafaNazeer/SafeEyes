@@ -30,6 +30,34 @@ def test_gru_training_reduces_loss_on_fixed_batch() -> None:
     assert criterion(model(x), y).item() < first
 
 
+def test_gru_default_normalization_is_identity() -> None:
+    model = TemporalGRU(n_features=3, num_classes=3)
+    assert torch.allclose(model.feature_mean, torch.zeros(3))
+    assert torch.allclose(model.feature_std, torch.ones(3))
+
+
+def test_gru_normalization_matches_prestandardized_input() -> None:
+    torch.manual_seed(0)
+    model = TemporalGRU(n_features=2, num_classes=3)
+    mean = torch.tensor([1.0, 10.0])
+    std = torch.tensor([2.0, 5.0])
+    raw = torch.randn(4, 6, 2) * std + mean
+    standardized = (raw - mean) / std
+    model.eval()
+    with torch.no_grad():
+        out_identity = model(standardized)  # default identity normalization
+        model.set_normalization(mean, std)
+        out_normalized = model(raw)  # normalizes internally to the same values
+    assert torch.allclose(out_identity, out_normalized, atol=1e-5)
+
+
+def test_gru_set_normalization_survives_zero_std() -> None:
+    model = TemporalGRU(n_features=2, num_classes=3)
+    model.set_normalization(mean=[0.0, 0.0], std=[0.0, 1.0])
+    out = model(torch.randn(1, 4, 2))
+    assert torch.all(torch.isfinite(out))
+
+
 def test_gbt_baseline_overfits_separable_data() -> None:
     rng = np.random.default_rng(0)
     x0 = rng.normal(-2.0, 0.1, size=(20, 3))

@@ -50,6 +50,11 @@ def standardize_with_train_stats(
     return (x_train - mean) / std, (x_val - mean) / std
 
 
+def _feature_mean_std(x_train: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Per feature mean and standard deviation over the training windows."""
+    return x_train.mean(axis=(0, 1)), x_train.std(axis=(0, 1))
+
+
 def train_and_evaluate(
     train_items: Sequence[LabeledSequence],
     val_items: Sequence[LabeledSequence],
@@ -61,13 +66,16 @@ def train_and_evaluate(
     seed: int = 0,
     alarm_class: int | None = None,
     batch_size: int = 512,
+    save_path: str | Path | None = None,
 ) -> dict[str, object]:
     torch.manual_seed(seed)
     x_train, y_train = assemble_windowed_dataset(train_items, window_size, stride)
     x_val, y_val = assemble_windowed_dataset(val_items, window_size, stride)
-    x_train, x_val = standardize_with_train_stats(x_train, x_val)
 
     model = TemporalGRU(n_features=x_train.shape[2], num_classes=n_classes)
+    # Normalization lives in the model, so it trains and evaluates on raw features
+    # and the saved checkpoint carries the standardization to the edge runtime.
+    model.set_normalization(*_feature_mean_std(x_train))
     inputs = torch.tensor(x_train, dtype=torch.float32)
     targets = torch.tensor(y_train, dtype=torch.long)
     criterion = nn.CrossEntropyLoss()
@@ -90,6 +98,10 @@ def train_and_evaluate(
     model.eval()
     scores = _predict_scores(model, x_val, n_classes, batch_size)
     predictions = scores.argmax(axis=1)
+    if save_path is not None:
+        out = Path(save_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(model.state_dict(), out)
 
     alarm = alarm_class if alarm_class is not None else n_classes - 1
     return evaluate_predictions(y_val, predictions, scores, n_classes, alarm)
@@ -158,6 +170,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--batch-size", type=int, default=512, help="training and eval minibatch size"
     )
+    parser.add_argument(
+        "--out", default=None, help="save the trained GRU checkpoint to this path (gru only)"
+    )
     args = parser.parse_args(argv)
 
     train_items = _load_items(args.train_manifest, args.feature_root)
@@ -172,6 +187,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = train_and_evaluate(
             train_items, val_items, n_classes=3, window_size=args.window_size, stride=args.stride,
             epochs=args.epochs, lr=args.lr, seed=args.seed, batch_size=args.batch_size,
+            save_path=args.out,
         )
 
     if args.metrics_out:

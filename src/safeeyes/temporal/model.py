@@ -27,6 +27,12 @@ class TemporalGRU(nn.Module):
         dropout: float = 0.0,
     ) -> None:
         super().__init__()
+        # Feature normalization is part of the model so the exported graph takes
+        # raw per frame features and standardizes them internally. The buffers are
+        # saved in the checkpoint and travel to the edge runtime, keeping training
+        # and inference consistent. They default to the identity transform.
+        self.register_buffer("feature_mean", torch.zeros(n_features))
+        self.register_buffer("feature_std", torch.ones(n_features))
         self.gru = nn.GRU(
             n_features,
             hidden_size,
@@ -36,7 +42,15 @@ class TemporalGRU(nn.Module):
         )
         self.head = nn.Linear(hidden_size, num_classes)
 
+    def set_normalization(self, mean: object, std: object) -> None:
+        mean_t = torch.as_tensor(mean, dtype=torch.float32)
+        std_t = torch.as_tensor(std, dtype=torch.float32)
+        std_t = torch.where(std_t < 1e-6, torch.ones_like(std_t), std_t)
+        self.feature_mean = mean_t
+        self.feature_std = std_t
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = (x - self.feature_mean) / self.feature_std
         _, hidden = self.gru(x)
         logits: torch.Tensor = self.head(hidden[-1])
         return logits

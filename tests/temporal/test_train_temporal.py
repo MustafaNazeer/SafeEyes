@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
+import torch
 
 import safeeyes.temporal.model as model_mod
 from safeeyes.temporal.train_temporal import (
@@ -81,6 +84,19 @@ def test_train_and_evaluate_minibatches_and_still_learns() -> None:
         train, val, n_classes=2, window_size=4, stride=4, epochs=80, lr=0.05, seed=0, batch_size=4
     )
     assert report["overall_accuracy"] >= 0.75
+
+
+def test_train_and_evaluate_saves_loadable_checkpoint(tmp_path: Path) -> None:
+    train = _constant_sequences(0.0, 0, 6) + _constant_sequences(5.0, 1, 6)
+    val = _constant_sequences(0.0, 0, 3) + _constant_sequences(5.0, 1, 3)
+    out = tmp_path / "edge" / "temporal.pt"
+    train_and_evaluate(
+        train, val, n_classes=2, window_size=4, stride=4, epochs=2, lr=0.05, seed=0, save_path=out
+    )
+    assert out.is_file()
+    # the checkpoint loads back into a model of the same shape, normalization buffers included
+    model = model_mod.TemporalGRU(n_features=3, num_classes=2)
+    model.load_state_dict(torch.load(out, weights_only=True))
 
 
 def test_gbt_baseline_harness_learns_separable_classes() -> None:
