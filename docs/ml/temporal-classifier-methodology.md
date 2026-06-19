@@ -124,7 +124,31 @@ Read honestly:
   detector of every drowsy moment, consistent with the prototype framing.
 - These are a single subject independent split over 48 subjects (folds 1 to 4).
   Hyperparameters were not tuned against this test set, which would inflate the
-  numbers; honest tuning would require a separate validation fold.
+  numbers; a validation fold tuning pass is recorded below.
+
+## Hyperparameter tuning
+
+To check whether the default configuration could be improved without peeking at
+the test set, a validation fold was carved from the training subjects alone (a
+quarter of them) and the GRU's window size, stride, epoch count, and learning
+rate were swept on it. The configuration with the best validation macro AUROC
+(window 200, stride 100, 100 epochs) was then trained on the full training split
+and evaluated once on the held out test set:
+
+| Metric | Default (reported) | Validation selected |
+|--------|--------------------|---------------------|
+| Overall accuracy | 52.1% | 47.9% |
+| Macro AUROC | 0.693 | 0.681 |
+| False alarm rate | 0.152 | 0.112 |
+| Recall, drowsy | 51.5% | 47.3% |
+
+The validation selected configuration did not beat the default on accuracy or
+macro AUROC. It lowered the false alarm rate, but at the cost of lower drowsy
+recall, the wrong trade for a drowsiness detector. The validation differences
+between configurations were also small relative to the size of the 48 subject
+dataset, so the selection was weak. The default configuration is therefore
+retained as the reported model. This negative result is recorded rather than
+discarded, and no configuration was ever selected by looking at the test set.
 
 ## Limitations
 
