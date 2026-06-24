@@ -16,7 +16,9 @@ bundle; point it at ``face_landmarker.task`` via the constructor or the
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -60,8 +62,17 @@ class FaceMeshDetector:
         result = self._landmarker.detect(image)
         if not result.face_landmarks:
             return None
-        face = result.face_landmarks[0]
-        return np.array([(lm.x * width, lm.y * height) for lm in face], dtype=float)
+        return _to_pixel_array(result.face_landmarks[0], width, height)
 
     def close(self) -> None:
         self._landmarker.close()
+
+
+def _to_pixel_array(landmarks: Iterable[Any], width: int, height: int) -> np.ndarray:
+    """Map normalized FaceMesh landmarks to an (N, 2) pixel coordinate array.
+
+    Each landmark carries ``x`` and ``y`` in the 0..1 range relative to the
+    frame; the geometry functions downstream expect pixel coordinates, so the
+    scaling happens here in one place.
+    """
+    return np.array([(lm.x * width, lm.y * height) for lm in landmarks], dtype=float)
