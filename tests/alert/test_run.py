@@ -32,14 +32,34 @@ def test_main_wires_arguments_into_run(monkeypatch) -> None:
         calls.update(kwargs)
 
     monkeypatch.setattr(run_module, "run", fake_run)
-    exit_code = main(["--checkpoint", "models/temporal.pt", "--camera", "2", "--window", "99"])
+    exit_code = main(
+        [
+            "--checkpoint", "models/temporal.pt",
+            "--camera", "2",
+            "--window", "99",
+            "--log-file", "run.jsonl",
+            "--metrics-interval", "2.5",
+        ]
+    )
 
     assert exit_code == 0
     assert calls == {
         "checkpoint": "models/temporal.pt",
         "camera_index": 2,
         "window_capacity": 99,
+        "log_file": "run.jsonl",
+        "metrics_interval": 2.5,
     }
+
+
+def test_main_logging_arguments_default_to_stderr_and_five_seconds(monkeypatch) -> None:
+    calls = {}
+    monkeypatch.setattr(run_module, "run", lambda **kwargs: calls.update(kwargs))
+
+    main(["--checkpoint", "models/temporal.pt"])
+
+    assert calls["log_file"] is None
+    assert calls["metrics_interval"] == 5.0
 
 
 def test_main_requires_a_checkpoint() -> None:
