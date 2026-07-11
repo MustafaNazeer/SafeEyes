@@ -17,7 +17,9 @@ authors = [{ name = "Mustafa Nazeer" }]
 # the temporal fatigue classifier. The lighter on device runtime for the Raspberry Pi
 # is defined separately in requirements-pi.txt.
 dependencies = [
-    "numpy>=1.26",
+    # numpy is capped below 2.5 because the 2.5 stubs use Python 3.12 type syntax,
+    # which breaks mypy while python_version pins checking to the 3.11 minimum.
+    "numpy>=1.26,<2.5",
     "opencv-python>=4.9",
     "mediapipe>=0.10",
     "torch>=2.2",
