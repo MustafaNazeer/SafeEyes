@@ -9,6 +9,7 @@ from safeeyes.perception.extract import (
     FEATURE_DIM,
     extract_clip_features,
     extract_dataset_features,
+    extract_video_features,
 )
 
 
@@ -74,6 +75,23 @@ def test_extract_clip_frame_step_subsamples() -> None:
     assert out.shape == (2, FEATURE_DIM)
     assert out[0, 0] == 0.0
     assert out[1, 0] == 1.0
+
+
+def test_extract_video_raises_on_missing_video(tmp_path: Path) -> None:
+    # A vanished video (wrong root, unmounted drive) must fail loudly instead of
+    # being recorded as a clip with zero usable frames.
+    missing = tmp_path / "vids/Fold1/s01/0.mp4"
+    detector = _StubDetector([])
+    with pytest.raises(FileNotFoundError):
+        extract_video_features(missing, detector)
+
+
+def test_extract_video_raises_on_undecodable_video(tmp_path: Path) -> None:
+    bogus = tmp_path / "0.mp4"
+    bogus.write_bytes(b"this is not a video container")
+    detector = _StubDetector([])
+    with pytest.raises(ValueError, match="0.mp4"):
+        extract_video_features(bogus, detector)
 
 
 def _uta_manifest(tmp_path: Path) -> Path:

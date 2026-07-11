@@ -70,15 +70,26 @@ def extract_clip_features(
 
 
 def iter_video_frames(path: str | Path) -> Iterable[np.ndarray]:
+    """Yield decoded frames; a video that yields none is an error, not an empty clip.
+
+    OpenCV reports an unreadable path as an immediate end of stream, which would
+    otherwise be indistinguishable from a real clip with no usable frames.
+    """
     import cv2
 
+    if not Path(path).exists():
+        raise FileNotFoundError(f"video not found: {path}")
     capture = cv2.VideoCapture(str(path))
     try:
+        decoded_any = False
         while True:
             ok, frame = capture.read()
             if not ok:
                 break
+            decoded_any = True
             yield frame
+        if not decoded_any:
+            raise ValueError(f"no frames decoded from video: {path}")
     finally:
         capture.release()
 
