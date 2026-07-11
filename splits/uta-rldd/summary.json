@@ -1,0 +1,28 @@
+{
+  "counts": {
+    "test": {
+      "class_distribution": {
+        "alert": 10,
+        "drowsy": 9,
+        "low_vigilance": 10
+      },
+      "samples": 29,
+      "subjects": 10
+    },
+    "train": {
+      "class_distribution": {
+        "alert": 37,
+        "drowsy": 38,
+        "low_vigilance": 37
+      },
+      "samples": 112,
+      "subjects": 38
+    },
+    "val": {
+      "class_distribution": {},
+      "samples": 0,
+      "subjects": 0
+    }
+  },
+  "seed": 0
+}
