@@ -3,7 +3,9 @@
 # and training environment defined in pyproject.toml. It excludes PyTorch and the
 # development tooling, and instead carries a quantized inference runtime plus the
 # perception stage dependencies. Pin or adjust these against the wheels actually
-# available for the target Pi OS and architecture.
+# available for the target Pi OS and architecture. Note for 64 bit ARM: mediapipe
+# ships no aarch64 wheels after 0.10.18, and that release needs Python <= 3.12,
+# so build the Pi environment on Python 3.10 to 3.12 (see docs/setup-guide.md).
 
 numpy>=1.26
 opencv-python>=4.9

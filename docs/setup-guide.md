@@ -49,7 +49,11 @@ the measured on device latency and frame rate are recorded separately in
 
 ### Prerequisites
 
-- A Raspberry Pi 4B with a 64 bit Pi OS and Python 3.11 or newer.
+- A Raspberry Pi 4B with a 64 bit Pi OS and a Python between 3.10 and 3.12 for
+  the runtime environment. MediaPipe's newest wheels for 64 bit ARM stop at
+  Python 3.12, so on an OS whose system Python is newer, create the virtual
+  environment from a separately installed 3.12 (a standalone build via `uv venv
+  --python 3.12` works well and avoids compiling anything on the Pi).
 - A cabin facing camera the Pi exposes through V4L2, so OpenCV can open it by
   index.
 - The exported int8 ONNX models, produced on the laptop (next step).
@@ -83,9 +87,14 @@ python -m pip install --upgrade pip
 pip install -r requirements-pi.txt
 ```
 
-The perception stage uses MediaPipe FaceMesh, so confirm a MediaPipe wheel
-installs on the Pi's architecture; this is the dependency most likely to need
-attention on ARM, and is worth verifying before relying on the rest.
+The perception stage uses MediaPipe FaceMesh, and MediaPipe is the dependency
+that needs attention on ARM. As of mid 2026 its last release with aarch64
+wheels is 0.10.18 (Python 3.10 to 3.12); newer versions install only on x86.
+Within that range there is a numpy split: 0.10.15 through 0.10.18 require
+numpy below 2, while 0.10.14 accepts modern numpy, so a default resolve lands
+on 0.10.14 with numpy 2.x. Both combinations load and run the FaceMesh graph
+on a Pi 4B under 64 bit Raspberry Pi OS; pick whichever numpy line the rest of
+your environment prefers.
 
 ### 4. Launch the live loop
 
