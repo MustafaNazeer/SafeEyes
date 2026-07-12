@@ -57,9 +57,20 @@ benchmark is run on the device. No numbers are entered until they are measured.
 
 | Stage | Model | Input shape | Mean (ms) | p50 (ms) | p95 (ms) | Throughput (fps) |
 |-------|-------|-------------|-----------|----------|----------|------------------|
-| Perception eye state | eye_state.int8.onnx | (2, 1, 24, 24) | _to measure_ | | | |
+| Perception eye state | eye_state.onnx (float) | (2, 1, 24, 24) | 0.522 | 0.513 | 0.567 | 1915.9 |
+| Perception eye state | eye_state.int8.onnx | (2, 1, 24, 24) | 0.753 | 0.745 | 0.784 | 1327.9 |
 | Temporal fatigue | temporal.int8.onnx | (1, window, features) | _to measure_ | | | |
 | End to end per frame | full pipeline | one camera frame | _to measure_ | | | |
+
+The eye state rows were measured on a Raspberry Pi 4B running 64 bit Raspberry
+Pi OS with ONNX Runtime 1.27.0 under Python 3.12 (100 timed runs after warmup;
+throughput counts batches per second at the shape shown). The int8 model is
+slower than the float export on this device, consistent with the export time
+observation on x86: for a network this small, the overhead of dynamic
+quantization outweighs the int8 compute savings. The deployed eye state model is
+therefore the float export. The board read 44.3 C during these runs with no
+throttling; both figures are short burst measurements, and the sustained
+thermal picture will be recorded with the end to end pipeline run.
 
 Thermal behavior over a sustained run is noted alongside the table when measured.
 If the end to end frame rate on the Pi is below real time, the documented
