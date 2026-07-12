@@ -51,4 +51,15 @@ def test_main_wires_logging_arguments_into_run(monkeypatch) -> None:
         "window_capacity": 120,
         "log_file": "edge.jsonl",
         "metrics_interval": 10.0,
+        "show_display": True,
     }
+
+
+def test_main_wires_no_display_into_run(monkeypatch) -> None:
+    calls = {}
+    monkeypatch.setattr(run_module, "run", lambda **kwargs: calls.update(kwargs))
+
+    exit_code = main(["--model", "models/edge/temporal.int8.onnx", "--no-display"])
+
+    assert exit_code == 0
+    assert calls["show_display"] is False

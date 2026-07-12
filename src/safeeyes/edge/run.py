@@ -43,6 +43,7 @@ def run(
     alarm_after: int = 45,
     log_file: str | None = None,
     metrics_interval: float = 5.0,
+    show_display: bool = True,
 ) -> None:
     import cv2
 
@@ -94,17 +95,19 @@ def run(
             if tier != last_tier and tier in (AlertTier.AUDIBLE, AlertTier.ALARM):
                 print("\a", end="", flush=True)  # terminal bell as a placeholder chime
             last_tier = tier
-            overlay = draw_hud(frame, tier, ear=ear, fatigue_level=pipeline.fatigue_level)
-            cv2.imshow("SafeEyes", overlay)
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+            if show_display:
+                overlay = draw_hud(frame, tier, ear=ear, fatigue_level=pipeline.fatigue_level)
+                cv2.imshow("SafeEyes", overlay)
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
     finally:
         observer.stop()
         if log_closer is not None:
             log_closer.close()
         capture.release()
         detector.close()
-        cv2.destroyAllWindows()
+        if show_display:
+            cv2.destroyAllWindows()
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -122,6 +125,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--metrics-interval", type=float, default=5.0, help="seconds between metrics summaries"
     )
+    parser.add_argument(
+        "--no-display",
+        action="store_true",
+        help="run without the HUD window, for headless or benchmark runs",
+    )
     args = parser.parse_args(argv)
     run(
         model_path=args.model,
@@ -129,6 +137,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         window_capacity=args.window,
         log_file=args.log_file,
         metrics_interval=args.metrics_interval,
+        show_display=not args.no_display,
     )
     return 0
 
