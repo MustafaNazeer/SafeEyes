@@ -17,7 +17,7 @@ metrics see
 
 ## False alarm rate
 
-The temporal classifier's false alarm rate is 0.152: about one in seven windows
+The temporal classifier's false alarm rate is 0.139: about one in seven windows
 that are genuinely not drowsy (alert or low vigilance) are classified as drowsy.
 It is reported beside accuracy in the methodology and recorded in the metrics
 file, never hidden. That visibility is correct and is the first thing this review
@@ -29,11 +29,11 @@ Two honest qualifications:
   actually raises a nuisance alarm. The alert stage commits a state only after a
   minimum duration and applies hysteresis, so isolated false positive windows do
   not fire an alarm. The effective nuisance rate at the alert level is therefore
-  lower than 0.152.
+  lower than 0.139.
 - That effective alert level rate has not yet been measured on labeled
   sequences. The debounce and hysteresis thresholds are the knobs that set it,
   and they have not been tuned against real footage. Until that measurement
-  exists, 0.152 is the honest number to quote and the lower alert level rate is a
+  exists, 0.139 is the honest number to quote and the lower alert level rate is a
   design expectation, not a measured result. This is recorded here as an open
   item, not a claim.
 
@@ -44,7 +44,7 @@ not be acceptable for anything presented as reliable.
 
 ## Cost of a missed detection
 
-Drowsy recall is 0.515: the classifier catches about half of genuinely drowsy
+Drowsy recall is 0.532: the classifier catches about half of genuinely drowsy
 windows, per window. A missed drowsy driver is a more dangerous error than a
 false alarm, and the alert stage's hysteresis, quick to warn and slow to stand
 down, leans the right way on that asymmetry. Sustained drowsiness, which is what
@@ -83,6 +83,10 @@ review.
   alarm rate.
 
 ## Verdict
+
+The figures quoted in this review were refreshed when the deployed checkpoint
+was retrained from re-extracted features; every conclusion below was re-checked
+against the new numbers and stands unchanged.
 
 Signed off on honesty and framing. The false alarm rate and the missed detection
 cost are both reported and visible, the framing is consistently that of an

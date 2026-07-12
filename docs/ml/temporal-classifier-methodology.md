@@ -102,12 +102,12 @@ subjects of the folds 1 to 4 split:
 
 | Metric | GRU (primary) | GBT (baseline) |
 |--------|---------------|----------------|
-| Overall accuracy | 52.1% | 46.5% |
-| Macro AUROC | 0.693 | 0.618 |
-| False alarm rate | 0.152 | 0.258 |
-| Recall, alert | 74.7% | 64.0% |
-| Recall, low vigilance | 31.1% | 21.5% |
-| Recall, drowsy | 51.5% | 55.4% |
+| Overall accuracy | 54.5% | 45.8% |
+| Macro AUROC | 0.706 | 0.631 |
+| False alarm rate | 0.139 | 0.253 |
+| Recall, alert | 84.5% | 61.1% |
+| Recall, low vigilance | 26.9% | 24.0% |
+| Recall, drowsy | 53.2% | 53.4% |
 
 The GRU leads the gradient boosted baseline on overall accuracy, macro AUROC, and
 the false alarm rate, so the sequence model earns its place as the primary model
@@ -119,7 +119,8 @@ Read honestly:
 
 - Low vigilance is the hardest class for both models, the expected pattern for
   the fuzzy intermediate state between alert and drowsy. The baseline edges the
-  GRU on drowsy recall (55.4% against 51.5%) while losing on every aggregate.
+  GRU on drowsy recall by a hair (53.4% against 53.2%) while losing on every
+  aggregate.
 - Drowsy recall around one half means this is an assistive signal, not a reliable
   detector of every drowsy moment, consistent with the prototype framing.
 - These are a single subject independent split over 48 subjects (folds 1 to 4).
@@ -135,12 +136,18 @@ rate were swept on it. The configuration with the best validation macro AUROC
 (window 200, stride 100, 100 epochs) was then trained on the full training split
 and evaluated once on the held out test set:
 
-| Metric | Default (reported) | Validation selected |
-|--------|--------------------|---------------------|
+| Metric | Default (at the time of the sweep) | Validation selected |
+|--------|------------------------------------|---------------------|
 | Overall accuracy | 52.1% | 47.9% |
 | Macro AUROC | 0.693 | 0.681 |
 | False alarm rate | 0.152 | 0.112 |
 | Recall, drowsy | 51.5% | 47.3% |
+
+This comparison is a historical record of the sweep: both columns were measured
+against the checkpoint current when it ran. The default configuration it
+retained is unchanged and is the configuration of the deployed model reported in
+Results above, which was later retrained from re-extracted features (training is
+not bit reproducible, so its numbers differ slightly).
 
 The validation selected configuration did not beat the default on accuracy or
 macro AUROC. It lowered the false alarm rate, but at the cost of lower drowsy

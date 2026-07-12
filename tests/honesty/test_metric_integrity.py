@@ -23,8 +23,8 @@ CLAIMS = [
     ("temporal-metrics-gbt.json", ("false_alarm_rate",), TEMPORAL_METHODOLOGY, "ratio", 3),
 ]
 
-TEMPORAL_ACCURACY = "52.1%"
-TEMPORAL_FALSE_ALARM_RATE = "0.152"
+TEMPORAL_ACCURACY = "54.5%"
+TEMPORAL_FALSE_ALARM_RATE = "0.139"
 
 
 def _render(value: float, kind: str, decimals: int) -> str:
