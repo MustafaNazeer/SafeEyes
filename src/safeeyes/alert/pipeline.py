@@ -10,19 +10,27 @@ live in the runtime loop module; this is the decision core they drive.
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
-import torch
-from torch import nn
 
 from safeeyes.alert.state_machine import AlertStateMachine, AlertTier
 from safeeyes.temporal.window import FeatureWindow
+
+if TYPE_CHECKING:
+    from torch import nn
 
 Classifier = Callable[[np.ndarray], int]
 
 
 def make_gru_classifier(model: nn.Module) -> Classifier:
-    """Wrap a trained sequence model as a window to fatigue level classifier."""
+    """Wrap a trained sequence model as a window to fatigue level classifier.
+
+    torch is imported inside the factory rather than at module level so the
+    pipeline core stays importable on the torch free edge runtime; only the
+    development runner calls this.
+    """
+    import torch
 
     def classify(window: np.ndarray) -> int:
         model.eval()
