@@ -15,7 +15,7 @@ quantizes them to int8 before they are copied across.
 
    ```bash
    python -m safeeyes.edge.export_models \
-       --temporal-checkpoint models/temporal.pt --n-features 8 \
+       --temporal-checkpoint models/temporal.pt --n-features 5 \
        --eye-checkpoint models/eye_state.pt \
        --out-dir models/edge
    ```
@@ -34,7 +34,7 @@ quantizes them to int8 before they are copied across.
 
    ```bash
    python -m safeeyes.edge.bench \
-       --model models/edge/temporal.int8.onnx --input-shape 1,150,8
+       --model models/edge/temporal.int8.onnx --input-shape 1,150,5
    ```
 
    The harness warms the session, then times single sample inferences and reports
@@ -59,7 +59,8 @@ benchmark is run on the device. No numbers are entered until they are measured.
 |-------|-------|-------------|-----------|----------|----------|------------------|
 | Perception eye state | eye_state.onnx (float) | (2, 1, 24, 24) | 0.522 | 0.513 | 0.567 | 1915.9 |
 | Perception eye state | eye_state.int8.onnx | (2, 1, 24, 24) | 0.753 | 0.745 | 0.784 | 1327.9 |
-| Temporal fatigue | temporal.int8.onnx | (1, window, features) | _to measure_ | | | |
+| Temporal fatigue | temporal.onnx (float) | (1, 150, 5) | 0.503 | 0.499 | 0.520 | 1988.4 |
+| Temporal fatigue | temporal.int8.onnx | (1, 150, 5) | 0.478 | 0.474 | 0.496 | 2092.2 |
 | End to end per frame | full pipeline | one camera frame | _to measure_ | | | |
 
 The eye state rows were measured on a Raspberry Pi 4B running 64 bit Raspberry
@@ -71,6 +72,16 @@ quantization outweighs the int8 compute savings. The deployed eye state model is
 therefore the float export. The board read 44.3 C during these runs with no
 throttling; both figures are short burst measurements, and the sustained
 thermal picture will be recorded with the end to end pipeline run.
+
+The temporal rows were measured on the same board, runtime, and procedure (100
+timed runs after warmup, ONNX Runtime 1.27.0, Python 3.12, board at 37.0 C, no
+throttling). Here the int8 export is slightly faster than the float one, the
+opposite of the eye state result: the GRU is dominated by matrix products large
+enough for the int8 compute path to pay for its overhead. The deployed temporal
+model is therefore the int8 export, as the setup guide assumes. Both variants
+are sub millisecond, and the temporal model runs once per window step rather
+than once per frame, so its cost is negligible in the frame budget; the end to
+end number will be dominated by the perception stage.
 
 Thermal behavior over a sustained run is noted alongside the table when measured.
 If the end to end frame rate on the Pi is below real time, the documented
