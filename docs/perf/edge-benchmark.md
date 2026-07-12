@@ -61,7 +61,7 @@ benchmark is run on the device. No numbers are entered until they are measured.
 | Perception eye state | eye_state.int8.onnx | (2, 1, 24, 24) | 0.753 | 0.745 | 0.784 | 1327.9 |
 | Temporal fatigue | temporal.onnx (float) | (1, 150, 5) | 0.503 | 0.499 | 0.520 | 1988.4 |
 | Temporal fatigue | temporal.int8.onnx | (1, 150, 5) | 0.478 | 0.474 | 0.496 | 2092.2 |
-| End to end per frame | full pipeline | one camera frame | _to measure_ | | | |
+| End to end per frame | full pipeline, HUD on | one camera frame | n/a | 81.9 | 85.5 | 11.1 |
 
 The eye state rows were measured on a Raspberry Pi 4B running 64 bit Raspberry
 Pi OS with ONNX Runtime 1.27.0 under Python 3.12 (100 timed runs after warmup;
@@ -83,7 +83,27 @@ are sub millisecond, and the temporal model runs once per window step rather
 than once per frame, so its cost is negligible in the frame budget; the end to
 end number will be dominated by the perception stage.
 
-Thermal behavior over a sustained run is noted alongside the table when measured.
-If the end to end frame rate on the Pi is below real time, the documented
-fallback is a Coral USB accelerator; that decision is made on the measured
-numbers, not in advance.
+The end to end row is a sustained 5 minute live run (297 s, 3295 frames) on the
+same board, with a person in frame (97.8% face detection rate), a USB webcam,
+and the HUD rendered to the Pi's local display, the production demo
+configuration. The latency figures are the medians of the 10 second interval
+p50 and p95 values from the run's structured metrics log and cover landmark
+detection through the alert update; frame capture and HUD drawing are excluded
+from the latency but included in the throughput, which counts whole loop
+iterations. A separately recorded per frame mean was not logged, which is why
+that cell is n/a; the loop period (about 90 ms at 11.1 fps) is its upper bound.
+Perception dominates the budget: the temporal and eye state models measure
+under a millisecond each above, and the rest of the frame is MediaPipe landmark
+detection. Thermal, sustained: the board went from 37.9 C at launch to 52.1 C
+after 5 minutes with the throttle flags clear (0x0), far from the 80 C
+throttling threshold.
+
+On the real time question that gates the Coral fallback: the temporal
+classifier was trained on features sampled at every fifth frame of 30 fps
+source video, an effective 6 feature updates per second, and the live loop
+sustains 11.1, so the deployed pipeline delivers features faster than the rate
+the model was trained at, and the drowsiness signals it aggregates (eye
+closure proportion, blinks, yawns, nods) evolve over seconds, not frames. The
+measured rate is therefore treated as meeting real time for this application,
+and the Coral USB accelerator is not needed. That verdict is tied to these
+numbers; it would be revisited if the pipeline grew heavier stages.
