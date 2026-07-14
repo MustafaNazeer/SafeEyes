@@ -1,10 +1,11 @@
 # Datasets
 
-Public reference for the datasets SafeEyes trains and evaluates on. All three are
-freely obtainable without an institutional agreement. The raw data itself is never
-committed (it is large and gitignored under `data/`); this file records where to get
-it, how it is laid out on disk, and how the tooling turns it into fixed, subject
-independent splits.
+Public reference for the datasets SafeEyes trains and evaluates on. Every dataset
+here is obtainable by any developer without institutional sign off; no reported
+claim depends on access a reader could not themselves obtain. The raw data itself
+is never committed (it is large and gitignored under `data/`); this file records
+where to get each dataset, how it is laid out on disk, and how the tooling turns
+it into fixed, subject independent splits.
 
 ## Conventions used here
 
@@ -67,12 +68,35 @@ independent splits.
 
 ## YawDD (Yawning Detection Dataset)
 
-- **Use:** development and validation of the yawn signal.
-- **Contents:** roughly 351 driver videos in real, varying illumination, from frontal
-  and mirror camera positions.
+- **Use:** held out validation of the mouth aspect ratio yawn signal (second
+  version work in development; no reported number uses YawDD yet).
+- **Contents:** roughly 351 driver videos in real, varying illumination, from
+  frontal and mirror camera positions, covering yawning, talking, and normal
+  driving.
 - **Source:** IEEE DataPort at
-  https://ieee-dataport.org/open-access/yawdd-yawning-detection-dataset. Open access on
-  a free account login.
+  https://ieee-dataport.org/open-access/yawdd-yawning-detection-dataset. Open
+  access on a free account login; access is registered and held by the author.
+  Before any YawDD derived number is published, the working copy's file inventory
+  is checked against the official distribution listing and re downloaded from the
+  official source if they differ.
+
+## DMD (Driver Monitoring Dataset)
+
+- **Use:** second version work in development: distraction activity classification
+  (distraction bundle), gaze zone estimation (gaze bundle), and cross dataset
+  evaluation of the temporal fatigue classifier (drowsiness bundle). No reported
+  number uses DMD yet; this entry records provenance and terms ahead of that work.
+- **Contents:** RGB video bundles from the Driver Monitoring Dataset by Vicomtech:
+  distraction (drivers performing activities such as texting, operating the radio,
+  and drinking), gaze (gaze zone material), and drowsiness. Each bundle ships with
+  its own README and a SHA256 checksum manifest; verify after download.
+- **Source:** https://dmd.vicomtech.org/, distributed through per bundle request
+  forms that grant download links to any requester. Only RGB material is currently
+  distributed by the authors.
+- **License:** Creative Commons Attribution NonCommercial NoDerivatives 4.0
+  (CC BY-NC-ND 4.0), copyright Vicomtech. Use here is noncommercial research with
+  attribution. No frames, clips, or transformed copies of the material are ever
+  redistributed or committed; raw data lives only under `data/dmd/` (gitignored).
 
 ## Integrity verification
 
@@ -123,5 +147,8 @@ Class balance differs by dataset and is reported, never hidden:
 
 ## Datasets deliberately not used
 
-Gated datasets such as NTHU-DDD and DMD require institutional data use agreements an
-unaffiliated developer cannot readily obtain. No headline claim depends on them.
+Institution gated datasets (for example NTHU-DDD and DGW) require signed data use
+agreements scoped to a specific institution and team. They are permanently
+excluded: no claim in this project may depend on access an unaffiliated developer
+cannot obtain, and material obtained under an institution scoped agreement never
+flows into this project.
