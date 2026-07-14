@@ -12,7 +12,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-from safeeyes.data.splits import Sample, Split, class_distribution
+from safeeyes.data.manifest import _bucket_summary
+from safeeyes.data.splits import Sample, Split
 
 _HEADER = ("sample_id", "subject_id", "label", "start_frame", "end_frame")
 
@@ -51,14 +52,6 @@ def read_interval_manifest(path: str | Path) -> list[IntervalSample]:
         ]
 
 
-def _bucket_counts(samples: Sequence[Sample]) -> dict[str, object]:
-    return {
-        "class_distribution": class_distribution(samples),
-        "samples": len(samples),
-        "subjects": len({s.subject_id for s in samples}),
-    }
-
-
 def write_interval_split(split: Split, out_dir: str | Path, seed: int) -> None:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -68,7 +61,7 @@ def write_interval_split(split: Split, out_dir: str | Path, seed: int) -> None:
             [s for s in samples if isinstance(s, IntervalSample)], out_dir / f"{name}.csv"
         )
     summary = {
-        "counts": {name: _bucket_counts(samples) for name, samples in buckets.items()},
+        "counts": {name: _bucket_summary(samples) for name, samples in buckets.items()},
         "seed": seed,
     }
     with open(out_dir / "summary.json", "w", encoding="utf-8") as f:
