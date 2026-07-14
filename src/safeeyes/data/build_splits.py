@@ -15,7 +15,10 @@ from __future__ import annotations
 import argparse
 from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import cast
 
+from safeeyes.data.dmd_distraction import build_dmd_distraction_manifest
+from safeeyes.data.intervals import write_interval_split
 from safeeyes.data.manifest import write_split
 from safeeyes.data.mrl import build_mrl_manifest
 from safeeyes.data.splits import (
@@ -29,6 +32,11 @@ from safeeyes.data.uta_rldd import build_uta_manifest
 DATASET_BUILDERS: dict[str, Callable[[Path], list[Sample]]] = {
     "uta-rldd": build_uta_manifest,
     "mrl": build_mrl_manifest,
+    "dmd-distraction": cast(Callable[[Path], list[Sample]], build_dmd_distraction_manifest),
+}
+
+SPLIT_WRITERS: dict[str, Callable[[Split, Path, int], None]] = {
+    "dmd-distraction": write_interval_split,
 }
 
 
@@ -50,7 +58,8 @@ def build_dataset_splits(
         raise ValueError(f"no samples found under {root!r}; check the dataset path and layout")
     split = subject_independent_split(manifest, ratios=ratios, seed=seed)
     assert_subject_independent(split)
-    write_split(split, out_dir, seed=seed)
+    writer = SPLIT_WRITERS.get(dataset, write_split)
+    writer(split, Path(out_dir), seed)
     return split
 
 

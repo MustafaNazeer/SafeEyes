@@ -56,3 +56,50 @@ def test_cli_main_builds_split(tmp_path: Path) -> None:
     )
     assert exit_code == 0
     assert (out / "summary.json").exists()
+
+
+def test_dmd_distraction_splits_end_to_end(tmp_path: Path) -> None:
+    import json as _json
+
+    root = tmp_path / "dmd"
+    for group, subject in [("gA", "1"), ("gA", "5"), ("gB", "6"), ("gB", "7"), ("gC", "13")]:
+        d = root / group / subject / "s1"
+        d.mkdir(parents=True)
+        stem = f"{group}_{subject}_s1_2019-01-01T00;00;00+01;00_rgb"
+        (d / f"{stem}_ann_distraction.json").write_text(
+            _json.dumps(
+                {
+                    "openlabel": {
+                        "actions": {
+                            "0": {
+                                "type": "driver_actions/drinking",
+                                "frame_intervals": [{"frame_start": 0, "frame_end": 50}],
+                            },
+                            "1": {
+                                "type": "driver_actions/safe_drive",
+                                "frame_intervals": [{"frame_start": 51, "frame_end": 200}],
+                            },
+                        }
+                    }
+                }
+            )
+        )
+        (d / f"{stem}_body.mp4").write_bytes(b"")
+    out = tmp_path / "splits"
+    exit_code = main(
+        [
+            "--dataset", "dmd-distraction",
+            "--root", str(root),
+            "--out", str(out),
+            "--ratios", "0.7", "0.0", "0.3",
+        ]
+    )
+    assert exit_code == 0
+    train_header = (out / "train.csv").read_text().splitlines()[0]
+    assert train_header == "sample_id,subject_id,label,start_frame,end_frame"
+    from safeeyes.data.intervals import read_interval_manifest
+
+    train_subjects = {s.subject_id for s in read_interval_manifest(out / "train.csv")}
+    test_subjects = {s.subject_id for s in read_interval_manifest(out / "test.csv")}
+    assert train_subjects and test_subjects
+    assert train_subjects.isdisjoint(test_subjects)
