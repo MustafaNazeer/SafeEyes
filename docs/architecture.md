@@ -19,3 +19,10 @@ Models are trained and evaluated offline on public datasets using subject indepe
 ## Evaluation
 
 Reported metrics include per class accuracy and AUROC on subject independent splits, false alarm rate, and measured on device latency and frame rate. Methodology and model cards live under `docs/ml/`.
+
+## Roadmap
+
+A second version, in development, extends the perception stage with a distraction
+activity classifier and a gaze zone estimator, and widens the alert state machine
+to parallel tracks (fatigue, distraction, eyes off road). Those sections are added
+here as the work lands, with the same evaluation discipline as the first version.

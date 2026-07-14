@@ -12,11 +12,18 @@ Models are trained and evaluated offline on public driver drowsiness datasets us
 
 ## Status
 
-Early development. The architecture and evaluation methodology are documented in [docs/architecture.md](docs/architecture.md). Setup instructions will land in [docs/setup-guide.md](docs/setup-guide.md) as the pipeline comes together.
+The first version is complete: trained eye state and temporal fatigue models with
+subject independent evaluation, a tiered alert state machine, and a quantized
+deployment running at sustained real time frame rates on a Raspberry Pi 4B. The
+measured numbers live in [docs/perf/edge-benchmark.md](docs/perf/edge-benchmark.md)
+and the model documentation under [docs/ml/](docs/ml/). A second version is in
+development. Setup instructions are in [docs/setup-guide.md](docs/setup-guide.md).
 
 ## Scope
 
-This first version focuses on drowsiness detection done thoroughly. Distraction detection, trip logging, and a companion app are tracked as future work.
+The first version focused on drowsiness detection done thoroughly. The second
+version, in development, adds distraction detection and eyes off road gaze
+estimation. Trip logging and a companion app remain future work.
 
 ## A note on intent
 
