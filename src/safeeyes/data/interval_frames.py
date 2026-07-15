@@ -17,10 +17,14 @@ def interval_frame_indices(
         raise ValueError(f"invalid interval: [{start_frame}, {end_frame}]")
     if stride < 1:
         raise ValueError(f"stride must be positive, got {stride}")
+    if max_frames is not None and max_frames < 1:
+        raise ValueError(f"max_frames must be positive, got {max_frames}")
     indices = list(range(start_frame, end_frame + 1, stride))
     if indices[-1] != end_frame:
         indices.append(end_frame)
     if max_frames is not None and len(indices) > max_frames:
+        if max_frames == 1:
+            return [indices[len(indices) // 2]]
         span = len(indices) - 1
         picks = [round(i * span / (max_frames - 1)) for i in range(max_frames)]
         indices = [indices[p] for p in picks]
@@ -47,6 +51,11 @@ def extract_manifest_frames(
     samples: list[IntervalSample] = []
     for manifest_path in manifest_paths:
         samples.extend(read_interval_manifest(manifest_path))
+    seen: set[str] = set()
+    for s in samples:
+        if s.sample_id in seen:
+            raise ValueError(f"duplicate sample id across manifests: {s.sample_id}")
+        seen.add(s.sample_id)
     by_video: dict[str, list[IntervalSample]] = defaultdict(list)
     for s in samples:
         by_video[s.sample_id.split("#", 1)[0]].append(s)
@@ -83,6 +92,12 @@ def extract_manifest_frames(
                 index += 1
             if decoded == 0:
                 raise ValueError(f"no frames decoded from video: {video_path}")
+            if remaining:
+                unwritten = sum(len(dests) for dests in remaining.values())
+                raise ValueError(
+                    f"video ended after {decoded} frames with {unwritten} requested "
+                    f"frames unwritten (first missing index {min(remaining)}): {video_path}"
+                )
         finally:
             capture.release()
         if progress is not None:

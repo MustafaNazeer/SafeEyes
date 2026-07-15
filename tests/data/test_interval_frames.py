@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
-from safeeyes.data.interval_frames import interval_frame_indices, sanitize_sample_id
+from safeeyes.data.interval_frames import (
+    extract_manifest_frames,
+    interval_frame_indices,
+    sanitize_sample_id,
+)
+from safeeyes.data.intervals import IntervalSample, write_interval_manifest
 
 
 def test_indices_cover_interval_at_stride() -> None:
@@ -31,8 +38,89 @@ def test_invalid_stride_raises() -> None:
         interval_frame_indices(0, 10, stride=0, max_frames=None)
 
 
+def test_max_frames_one_returns_single_index_within_interval() -> None:
+    indices = interval_frame_indices(0, 10, stride=1, max_frames=1)
+    assert len(indices) == 1
+    assert 0 <= indices[0] <= 10
+
+
+def test_invalid_max_frames_raises() -> None:
+    with pytest.raises(ValueError, match="max_frames"):
+        interval_frame_indices(0, 10, stride=1, max_frames=0)
+
+
 def test_sanitized_sample_id_is_a_safe_relative_path() -> None:
     sid = "gA/1/s1/gA_1_s1_2019-01-01T00;00;00+01;00_rgb_body.mp4#10-40"
     out = sanitize_sample_id(sid)
     assert "#" not in out
     assert out == "gA/1/s1/gA_1_s1_2019-01-01T00;00;00+01;00_rgb_body.mp4_10-40"
+
+
+def _write_synthetic_video(path: Path, frame_count: int) -> None:
+    import cv2
+    import numpy as np
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    writer = cv2.VideoWriter(
+        str(path), cv2.VideoWriter_fourcc(*"mp4v"), 30.0, (32, 32)
+    )
+    try:
+        for i in range(frame_count):
+            writer.write(np.full((32, 32, 3), i % 256, dtype=np.uint8))
+    finally:
+        writer.release()
+
+
+def _write_manifest(path: Path, samples: list[IntervalSample]) -> None:
+    write_interval_manifest(samples, path)
+
+
+def test_video_ending_before_requested_frames_raises(tmp_path: Path) -> None:
+    _write_synthetic_video(tmp_path / "videos" / "clip.mp4", frame_count=10)
+    manifest = tmp_path / "train.csv"
+    _write_manifest(
+        manifest,
+        [IntervalSample("clip.mp4#0-19", "s1", "drinking", 0, 19)],
+    )
+    with pytest.raises(ValueError, match="unwritten"):
+        extract_manifest_frames(
+            [manifest], tmp_path / "videos", tmp_path / "out", stride=1, max_frames=None
+        )
+
+
+def test_duplicate_sample_id_raises(tmp_path: Path) -> None:
+    manifest = tmp_path / "train.csv"
+    _write_manifest(
+        manifest,
+        [
+            IntervalSample("clip.mp4#0-5", "s1", "drinking", 0, 5),
+            IntervalSample("clip.mp4#0-5", "s1", "radio", 0, 5),
+        ],
+    )
+    with pytest.raises(ValueError, match="duplicate sample id"):
+        extract_manifest_frames([manifest], tmp_path / "videos", tmp_path / "out")
+
+
+def test_extracts_requested_frames_and_resumes(tmp_path: Path) -> None:
+    _write_synthetic_video(tmp_path / "videos" / "clip.mp4", frame_count=30)
+    manifest = tmp_path / "train.csv"
+    _write_manifest(
+        manifest,
+        [
+            IntervalSample("clip.mp4#0-9", "s1", "drinking", 0, 9),
+            IntervalSample("clip.mp4#20-29", "s1", "radio", 20, 29),
+        ],
+    )
+    written = extract_manifest_frames(
+        [manifest], tmp_path / "videos", tmp_path / "out", stride=5, max_frames=None
+    )
+    assert sorted(p.name for p in written if "0-9" in str(p.parent)) == [
+        "frame_000000.jpg",
+        "frame_000005.jpg",
+        "frame_000009.jpg",
+    ]
+    assert len(written) == 6
+    rerun = extract_manifest_frames(
+        [manifest], tmp_path / "videos", tmp_path / "out", stride=5, max_frames=None
+    )
+    assert rerun == []

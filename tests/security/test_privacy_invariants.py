@@ -112,14 +112,43 @@ def test_no_raw_frame_persistence_in_source() -> None:
     assert offenders == {}, f"raw frame writes found in source: {offenders}"
 
 
+def _imported_module_names(source: str) -> set[str]:
+    """Every module name a source string imports, in dotted form."""
+    tree = ast.parse(source)
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module is not None:
+            names.add(node.module)
+            names.update(f"{node.module}.{alias.name}" for alias in node.names)
+    return names
+
+
 def test_frame_write_allowlist_is_exact() -> None:
-    # The allowlist must not accumulate stale entries or cover runtime modules.
+    # The allowlist must not accumulate stale entries, must stay confined to
+    # offline dataset tooling, and must only name import leaves: a module the
+    # rest of the package imports is reachable from the runtime import graph
+    # and may never write frames.
     existing = {str(p.relative_to(SRC_ROOT)) for p in _source_files()}
     assert FRAME_WRITE_ALLOWLIST <= existing, "allowlist names a missing module"
-    runtime_prefixes = ("alert/", "edge/", "observability/")
-    assert not {
-        entry for entry in FRAME_WRITE_ALLOWLIST if entry.startswith(runtime_prefixes)
-    }, "allowlist must never cover runtime modules"
+    assert all(entry.startswith("data/") for entry in FRAME_WRITE_ALLOWLIST), (
+        "allowlist may only cover offline dataset tooling under data/"
+    )
+    allowlisted_modules = {
+        "safeeyes." + entry.removesuffix(".py").replace("/", "."): entry
+        for entry in FRAME_WRITE_ALLOWLIST
+    }
+    importers: dict[str, list[str]] = {}
+    for path in _source_files():
+        rel = str(path.relative_to(SRC_ROOT))
+        if rel in FRAME_WRITE_ALLOWLIST:
+            continue
+        imported = _imported_module_names(path.read_text(encoding="utf-8"))
+        for module in allowlisted_modules:
+            if module in imported:
+                importers.setdefault(module, []).append(rel)
+    assert importers == {}, f"allowlisted frame writers must be import leaves: {importers}"
 
 
 def test_network_scanner_flags_a_violation() -> None:
