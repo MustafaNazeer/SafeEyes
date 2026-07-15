@@ -93,10 +93,17 @@ def test_tail_overshoot_is_clamped_to_video_end(tmp_path: Path) -> None:
     )
     assert len(written) == 10
     assert truncated == [("clip.mp4#0-19", 10)]
+    rerun_truncated: list[tuple[str, int]] = []
     rerun = extract_manifest_frames(
-        [manifest], tmp_path / "videos", tmp_path / "out", stride=1, max_frames=None
+        [manifest],
+        tmp_path / "videos",
+        tmp_path / "out",
+        stride=1,
+        max_frames=None,
+        on_truncated=lambda sid, dropped: rerun_truncated.append((sid, dropped)),
     )
     assert rerun == []
+    assert rerun_truncated == [("clip.mp4#0-19", 10)]
 
 
 def test_sample_entirely_past_video_end_raises(tmp_path: Path) -> None:
