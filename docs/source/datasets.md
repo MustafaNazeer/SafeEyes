@@ -12,8 +12,9 @@ it into fixed, subject independent splits.
 - Raw datasets live under `data/` (gitignored). Nothing large or raw is tracked.
 - Split manifests are written to `splits/` (tracked). A manifest is a small CSV of
   (sample_id, subject_id, label) plus a `summary.json` recording the seed and the
-  class distribution. These manifests are the fixed record every reported metric
-  traces back to.
+  class distribution; datasets annotated with frame intervals extend the row with
+  (start_frame, end_frame). These manifests are the fixed record every reported
+  metric traces back to.
 - Subject independence is mandatory: no subject may appear in more than one split.
   The split tooling enforces this and fails loudly if it is ever violated.
 
@@ -97,6 +98,73 @@ it into fixed, subject independent splits.
   (CC BY-NC-ND 4.0), copyright Vicomtech. Use here is noncommercial research with
   attribution. No frames, clips, or transformed copies of the material are ever
   redistributed or committed; raw data lives only under `data/dmd/` (gitignored).
+- **Distraction bundle, on disk layout:** only the annotations and the body camera
+  videos are extracted from the bundle archives, into the gitignored data tree:
+
+  ```
+  data/dmd/distraction/
+    <group>/<subject>/<session>/
+      <stem>_rgb_body.mp4
+      <stem>_rgb_ann_distraction.json
+  ```
+
+  Each session pairs one body camera video (the wide cabin view, the right choice
+  for activity classification) with one OpenLABEL annotation file that labels
+  driver actions as frame intervals. The working copy holds 14 subjects across 49
+  sessions.
+- **Interval samples:** temporally annotated video is modeled as one sample per
+  labeled action interval rather than one sample per clip. A sample id is the video
+  path relative to the dataset root plus the frame range, for example
+  `gA/1/s1/<stem>_rgb_body.mp4#123-456`, and manifest rows carry the interval
+  columns described under the conventions above. The rationale is recorded in
+  [ADR 0005](../adr/0005-interval-samples-for-temporally-annotated-video.md).
+- **Verified action taxonomy:** the manifest builder recognizes exactly the
+  thirteen `driver_actions` types found by scanning every annotation file in the
+  working copy. `unclassified` intervals are skipped, and an action type outside
+  the pinned set fails the build loudly instead of passing silently, so a future
+  bundle revision cannot slip new classes in unnoticed.
+- **Split:** subject level, seed 0, ratios 0.7 train, 0.0 validation, 0.3 test:
+  10 train and 4 test subjects out of 14, no subject overlap, 1,500 train and 496
+  test interval samples. Per class interval counts from
+  `splits/dmd-distraction/summary.json`:
+
+  | Class | Train | Test |
+  |---|---|---|
+  | change_gear | 5 | 0 |
+  | drinking | 62 | 18 |
+  | hair_and_makeup | 58 | 13 |
+  | phonecall_left | 24 | 8 |
+  | phonecall_right | 25 | 8 |
+  | radio | 64 | 16 |
+  | reach_backseat | 24 | 8 |
+  | reach_side | 394 | 128 |
+  | safe_drive | 587 | 192 |
+  | standstill_or_waiting | 4 | 0 |
+  | talking_to_passenger | 186 | 81 |
+  | texting_left | 34 | 10 |
+  | texting_right | 33 | 14 |
+
+  Honest caveats, stated up front: 14 subjects is a small population, so any future
+  accuracy on this split must always be shown beside these per class counts. The
+  two rare classes, `change_gear` and `standstill_or_waiting`, appear in only three
+  sessions each and landed entirely in train, so the test split covers 11 of the 13
+  classes. Class imbalance is heavy (`safe_drive` and `reach_side` dominate). No
+  reported model number exists for this dataset yet.
+- **Frame extraction:** training images are produced from the tracked manifests
+  with the split and extraction tools:
+
+  ```
+  safeeyes-build-splits --dataset dmd-distraction --root data/dmd/distraction \
+    --out splits/dmd-distraction --ratios 0.7 0.0 0.3
+  safeeyes-extract-interval-frames --manifest splits/dmd-distraction/train.csv \
+    splits/dmd-distraction/test.csv --video-root data/dmd/distraction \
+    --out-root data/dmd/distraction-frames
+  ```
+
+  The extractor decodes each video once no matter how many intervals it carries,
+  writes frames only under the gitignored data tree, is resumable, and fails
+  loudly on a missing video, a duplicate sample id, or a video that ends before
+  yielding every requested frame.
 
 ## Integrity verification
 
