@@ -7,7 +7,13 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-from safeeyes.data.intervals import IntervalSample, read_interval_manifest
+from safeeyes.data.intervals import (
+    IntervalSample,
+    read_interval_manifest,
+    sanitize_sample_id,
+)
+
+__all__ = ["extract_manifest_frames", "interval_frame_indices", "sanitize_sample_id"]
 
 
 def interval_frame_indices(
@@ -29,10 +35,6 @@ def interval_frame_indices(
         picks = [round(i * span / (max_frames - 1)) for i in range(max_frames)]
         indices = [indices[p] for p in picks]
     return indices
-
-
-def sanitize_sample_id(sample_id: str) -> str:
-    return sample_id.replace("#", "_")
 
 
 def extract_manifest_frames(

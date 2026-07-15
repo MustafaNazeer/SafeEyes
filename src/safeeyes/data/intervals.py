@@ -18,6 +18,10 @@ from safeeyes.data.splits import Sample, Split
 _HEADER = ("sample_id", "subject_id", "label", "start_frame", "end_frame")
 
 
+def sanitize_sample_id(sample_id: str) -> str:
+    return sample_id.replace("#", "_")
+
+
 @dataclass(frozen=True)
 class IntervalSample(Sample):
     start_frame: int
