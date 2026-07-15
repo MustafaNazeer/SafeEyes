@@ -13,11 +13,19 @@ _PREFIX = "driver_actions/"
 
 DMD_DISTRACTION_ACTIONS = frozenset(
     {
+        "driver_actions/change_gear",
         "driver_actions/drinking",
+        "driver_actions/hair_and_makeup",
+        "driver_actions/phonecall_left",
+        "driver_actions/phonecall_right",
         "driver_actions/radio",
+        "driver_actions/reach_backseat",
         "driver_actions/reach_side",
         "driver_actions/safe_drive",
+        "driver_actions/standstill_or_waiting",
         "driver_actions/talking_to_passenger",
+        "driver_actions/texting_left",
+        "driver_actions/texting_right",
     }
 )
 SKIPPED_ACTIONS = frozenset({"driver_actions/unclassified"})
