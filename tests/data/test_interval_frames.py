@@ -75,12 +75,72 @@ def _write_manifest(path: Path, samples: list[IntervalSample]) -> None:
     write_interval_manifest(samples, path)
 
 
-def test_video_ending_before_requested_frames_raises(tmp_path: Path) -> None:
+def test_tail_overshoot_is_clamped_to_video_end(tmp_path: Path) -> None:
     _write_synthetic_video(tmp_path / "videos" / "clip.mp4", frame_count=10)
     manifest = tmp_path / "train.csv"
     _write_manifest(
         manifest,
         [IntervalSample("clip.mp4#0-19", "s1", "drinking", 0, 19)],
+    )
+    truncated: list[tuple[str, int]] = []
+    written = extract_manifest_frames(
+        [manifest],
+        tmp_path / "videos",
+        tmp_path / "out",
+        stride=1,
+        max_frames=None,
+        on_truncated=lambda sid, dropped: truncated.append((sid, dropped)),
+    )
+    assert len(written) == 10
+    assert truncated == [("clip.mp4#0-19", 10)]
+    rerun = extract_manifest_frames(
+        [manifest], tmp_path / "videos", tmp_path / "out", stride=1, max_frames=None
+    )
+    assert rerun == []
+
+
+def test_sample_entirely_past_video_end_raises(tmp_path: Path) -> None:
+    _write_synthetic_video(tmp_path / "videos" / "clip.mp4", frame_count=10)
+    manifest = tmp_path / "train.csv"
+    _write_manifest(
+        manifest,
+        [IntervalSample("clip.mp4#15-19", "s1", "drinking", 15, 19)],
+    )
+    with pytest.raises(ValueError, match="past the end"):
+        extract_manifest_frames(
+            [manifest], tmp_path / "videos", tmp_path / "out", stride=1, max_frames=None
+        )
+
+
+def test_decode_falling_short_of_metadata_raises(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import cv2
+
+    _write_synthetic_video(tmp_path / "videos" / "clip.mp4", frame_count=10)
+    real_capture = cv2.VideoCapture
+
+    class InflatedCapture:
+        def __init__(self, path: str) -> None:
+            self._inner = real_capture(path)
+
+        def get(self, prop: int) -> float:
+            value = self._inner.get(prop)
+            if prop == cv2.CAP_PROP_FRAME_COUNT:
+                return value + 5
+            return value
+
+        def read(self):  # type: ignore[no-untyped-def]
+            return self._inner.read()
+
+        def release(self) -> None:
+            self._inner.release()
+
+    monkeypatch.setattr(cv2, "VideoCapture", InflatedCapture)
+    manifest = tmp_path / "train.csv"
+    _write_manifest(
+        manifest,
+        [IntervalSample("clip.mp4#0-14", "s1", "drinking", 0, 14)],
     )
     with pytest.raises(ValueError, match="unwritten"):
         extract_manifest_frames(

@@ -43,6 +43,7 @@ def extract_manifest_frames(
     max_frames: int | None = 32,
     skip_existing: bool = True,
     progress: Callable[[str, int], None] | None = None,
+    on_truncated: Callable[[str, int], None] | None = None,
 ) -> list[Path]:
     import cv2
 
@@ -64,19 +65,32 @@ def extract_manifest_frames(
         video_path = video_root / video_rel
         if not video_path.is_file():
             raise FileNotFoundError(f"video not found: {video_path}")
-        wanted: dict[int, list[Path]] = defaultdict(list)
-        for s in video_samples:
-            out_dir = out_root / sanitize_sample_id(s.sample_id)
-            indices = interval_frame_indices(s.start_frame, s.end_frame, stride, max_frames)
-            if skip_existing and out_dir.is_dir():
-                if len(list(out_dir.glob("frame_*.jpg"))) == len(indices):
-                    continue
-            for index in indices:
-                wanted[index].append(out_dir / f"frame_{index:06d}.jpg")
-        if not wanted:
-            continue
         capture = cv2.VideoCapture(str(video_path))
         try:
+            frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+            wanted: dict[int, list[Path]] = defaultdict(list)
+            for s in video_samples:
+                out_dir = out_root / sanitize_sample_id(s.sample_id)
+                indices = interval_frame_indices(
+                    s.start_frame, s.end_frame, stride, max_frames
+                )
+                # DMD annotations systematically run a few frames past the end of
+                # the exported video; clamp to the frames that actually exist.
+                kept = [i for i in indices if i < frame_count]
+                if not kept:
+                    raise ValueError(
+                        f"sample lies entirely past the end of its video "
+                        f"({frame_count} frames): {s.sample_id}"
+                    )
+                if len(kept) < len(indices) and on_truncated is not None:
+                    on_truncated(s.sample_id, len(indices) - len(kept))
+                if skip_existing and out_dir.is_dir():
+                    if len(list(out_dir.glob("frame_*.jpg"))) == len(kept):
+                        continue
+                for index in kept:
+                    wanted[index].append(out_dir / f"frame_{index:06d}.jpg")
+            if not wanted:
+                continue
             decoded = 0
             index = 0
             remaining = dict(wanted)
@@ -114,6 +128,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--max-frames", type=int, default=32)
     parser.add_argument("--no-skip-existing", action="store_true")
     args = parser.parse_args(argv)
+    truncated: list[str] = []
+
+    def report_truncated(sample_id: str, dropped: int) -> None:
+        truncated.append(sample_id)
+        print(f"truncated {sample_id}: {dropped} requested frames past video end")
+
     written = extract_manifest_frames(
         args.manifest,
         args.video_root,
@@ -122,8 +142,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         max_frames=args.max_frames,
         skip_existing=not args.no_skip_existing,
         progress=lambda video, n: print(f"{video}: {n} intervals"),
+        on_truncated=report_truncated,
     )
-    print(f"wrote {len(written)} frames")
+    print(f"wrote {len(written)} frames, {len(truncated)} samples truncated at video end")
     return 0
 
 

@@ -171,8 +171,13 @@ it into fixed, subject independent splits.
 
   The extractor decodes each video once no matter how many intervals it carries,
   writes frames only under the gitignored data tree, is resumable, and fails
-  loudly on a missing video, a duplicate sample id, or a video that ends before
-  yielding every requested frame.
+  loudly on a missing video, a duplicate sample id, or a video that decodes fewer
+  frames than its own metadata declares. One measured property of the bundle: in
+  every one of the 49 sessions the annotations extend 2 to 42 frames (under 1.5
+  seconds) past the end of the exported body video. Frame requests are therefore
+  clamped to the video's real frame count; each truncated sample is reported in
+  the tool's output, and a sample lying entirely past the video end is an error
+  rather than a silent skip.
 
 ## Integrity verification
 
