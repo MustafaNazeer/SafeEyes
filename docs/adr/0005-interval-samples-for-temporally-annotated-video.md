@@ -50,8 +50,9 @@ extend the pinned set after the new type is verified.
   independence holds for intervals with no parallel implementation to keep
   correct.
 - Class distribution is counted per interval, not per video, which matches how
-  training examples are actually drawn. The committed split summary records
-  these counts, and they must be shown beside any future accuracy.
+  training examples are actually drawn. The split summary, regenerated
+  deterministically from the fixed seed, records these counts, and they must be
+  shown beside any future accuracy.
 - Sample ids embed frame ranges, so a manifest row is auditable back to the
   exact video segment without opening the annotation file.
 - A dataset revision that adds new action types halts the manifest build until

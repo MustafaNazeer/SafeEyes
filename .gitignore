@@ -35,6 +35,9 @@ env/
 /data/
 /datasets/
 /features/
+# DMD is CC BY-NC-ND: annotation derived split manifests are not redistributed.
+# Regenerate them deterministically with the documented build command (seed 0).
+/splits/dmd-distraction/
 *.npy
 *.mp4
 *.avi

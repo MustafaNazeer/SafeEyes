@@ -14,7 +14,11 @@ it into fixed, subject independent splits.
   (sample_id, subject_id, label) plus a `summary.json` recording the seed and the
   class distribution; datasets annotated with frame intervals extend the row with
   (start_frame, end_frame). These manifests are the fixed record every reported
-  metric traces back to.
+  metric traces back to. One exception: manifests derived from a NoDerivatives
+  licensed dataset (currently `splits/dmd-distraction/`) are not tracked, because
+  their rows embed the dataset's annotation content. They regenerate byte for byte
+  from the documented build command and its fixed seed, which serves as the fixed
+  record instead.
 - Subject independence is mandatory: no subject may appear in more than one split.
   The split tooling enforces this and fails loudly if it is ever violated.
 
@@ -125,8 +129,12 @@ it into fixed, subject independent splits.
   bundle revision cannot slip new classes in unnoticed.
 - **Split:** subject level, seed 0, ratios 0.7 train, 0.0 validation, 0.3 test:
   10 train and 4 test subjects out of 14, no subject overlap, 1,500 train and 496
-  test interval samples. Per class interval counts from
-  `splits/dmd-distraction/summary.json`:
+  test interval samples. The manifests themselves are not tracked (the license
+  note above: their rows embed annotation derived intervals and labels, which the
+  NoDerivatives term does not permit redistributing); the split command below
+  regenerates them deterministically, and the regenerated
+  `splits/dmd-distraction/summary.json` reproduces these per class interval
+  counts:
 
   | Class | Train | Test |
   |---|---|---|
