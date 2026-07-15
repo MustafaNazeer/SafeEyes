@@ -9,6 +9,12 @@ so imports inside comments or docstrings do not register.
 The legitimate disk writes in the project (trained model weights, extracted
 feature arrays, exported ONNX graphs) are deliberately not flagged: only raw
 frame writes via OpenCV count as persisted video.
+
+The promise protects the on-device runtime. Offline dataset preparation tools
+that write frames from licensed training datasets on a development machine are
+exempted by name in FRAME_WRITE_ALLOWLIST; any module not listed there still
+fails the scan, so a new frame writer must be deliberately allowlisted here to
+land.
 """
 
 import ast
@@ -40,6 +46,11 @@ BANNED_NETWORK_ROOTS = frozenset(
 
 # OpenCV calls that would write a frame or a video to disk.
 FRAME_WRITE_ATTRS = frozenset({"imwrite", "VideoWriter"})
+
+# Offline dataset preparation modules allowed to write training frames. These
+# never run on the device; they turn licensed dataset video into training
+# images under the gitignored data tree.
+FRAME_WRITE_ALLOWLIST = frozenset({"data/interval_frames.py"})
 
 
 def network_imports(source: str) -> set[str]:
@@ -93,11 +104,22 @@ def test_no_network_imports_in_source() -> None:
 
 def test_no_raw_frame_persistence_in_source() -> None:
     offenders = {
-        str(path.relative_to(SRC_ROOT)): calls
+        rel: calls
         for path in _source_files()
-        if (calls := frame_persistence_calls(path.read_text(encoding="utf-8")))
+        if (rel := str(path.relative_to(SRC_ROOT))) not in FRAME_WRITE_ALLOWLIST
+        and (calls := frame_persistence_calls(path.read_text(encoding="utf-8")))
     }
     assert offenders == {}, f"raw frame writes found in source: {offenders}"
+
+
+def test_frame_write_allowlist_is_exact() -> None:
+    # The allowlist must not accumulate stale entries or cover runtime modules.
+    existing = {str(p.relative_to(SRC_ROOT)) for p in _source_files()}
+    assert FRAME_WRITE_ALLOWLIST <= existing, "allowlist names a missing module"
+    runtime_prefixes = ("alert/", "edge/", "observability/")
+    assert not {
+        entry for entry in FRAME_WRITE_ALLOWLIST if entry.startswith(runtime_prefixes)
+    }, "allowlist must never cover runtime modules"
 
 
 def test_network_scanner_flags_a_violation() -> None:
