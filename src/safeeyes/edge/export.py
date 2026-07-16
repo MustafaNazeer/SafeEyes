@@ -1,11 +1,12 @@
 """Export trained PyTorch models to ONNX for the edge runtime.
 
-The two models take different export paths because of one architectural detail.
+The models take one of two export paths, chosen by one architectural detail.
 The eye state CNN ends in an adaptive average pool whose output size is not an
 integer factor of its input, which the older TorchScript ONNX path rejects, so
-it goes through the graph-capture exporter. The temporal GRU exports cleanly on
-the TorchScript path with dynamic batch and dynamic sequence length. Each model
-uses the exporter that reproduces it faithfully; both are verified against the
+it goes through the graph-capture exporter. The temporal GRU and the distraction
+backbones export cleanly on the TorchScript path, the GRU with dynamic batch and
+dynamic sequence length and the image classifiers with a dynamic batch. Each
+model uses the exporter that reproduces it faithfully, verified against the
 PyTorch forward pass in the tests.
 
 The eye state CNN is exported with a dynamic batch dimension so a frame can
