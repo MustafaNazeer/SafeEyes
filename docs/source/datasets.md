@@ -156,8 +156,11 @@ it into fixed, subject independent splits.
   accuracy on this split must always be shown beside these per class counts. The
   two rare classes, `change_gear` and `standstill_or_waiting`, appear in only three
   sessions each and landed entirely in train, so the test split covers 11 of the 13
-  classes. Class imbalance is heavy (`safe_drive` and `reach_side` dominate). No
-  reported model number exists for this dataset yet.
+  classes. Class imbalance is heavy (`safe_drive` and `reach_side` dominate). The
+  deployed model is `mobilenet_v3_small`, reaching a balanced accuracy of 0.451 on
+  this 11 of 13 class test split; its candidate comparison, per class recall, and
+  the full honesty caveats are in the
+  [distraction model card](../ml/distraction-model-card.md).
 - **Frame extraction:** training images are produced from the tracked manifests
   with the split and extraction tools:
 

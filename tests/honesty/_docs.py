@@ -13,6 +13,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# Path, relative to the repo root, of the public distraction model card. Kept here
+# so the metric-integrity pins and any future honesty guard reference one source.
+DISTRACTION_CARD = "docs/ml/distraction-model-card.md"
+
 
 def public_docs() -> list[Path]:
     """Tracked Markdown that ships publicly: the README and the docs/ tree.

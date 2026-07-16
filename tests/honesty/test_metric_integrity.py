@@ -4,7 +4,14 @@ and the temporal accuracy must never appear without its false alarm rate beside 
 
 import pytest
 
-from ._docs import load_docs, load_metric, metric_value, render_pct, render_ratio
+from ._docs import (
+    DISTRACTION_CARD,
+    load_docs,
+    load_metric,
+    metric_value,
+    render_pct,
+    render_ratio,
+)
 
 EYE_CARD = "docs/ml/eye-state-model-card.md"
 TEMPORAL_METHODOLOGY = "docs/ml/temporal-classifier-methodology.md"
@@ -21,6 +28,35 @@ CLAIMS = [
     ("temporal-metrics-gbt.json", ("overall_accuracy",), TEMPORAL_METHODOLOGY, "pct", 1),
     ("temporal-metrics-gbt.json", ("macro_auroc",), TEMPORAL_METHODOLOGY, "ratio", 3),
     ("temporal-metrics-gbt.json", ("false_alarm_rate",), TEMPORAL_METHODOLOGY, "ratio", 3),
+    (
+        "distraction-mobilenet_v3_small-metrics.json",
+        ("overall_accuracy",),
+        DISTRACTION_CARD,
+        "pct",
+        2,
+    ),
+    (
+        "distraction-mobilenet_v3_small-metrics.json",
+        ("balanced_accuracy",),
+        DISTRACTION_CARD,
+        "pct",
+        2,
+    ),
+    (
+        "distraction-mobilenet_v3_small-metrics.json",
+        ("per_class_recall", "safe_drive"),
+        DISTRACTION_CARD,
+        "pct",
+        2,
+    ),
+    (
+        "distraction-mobilenet_v3_small-metrics.json",
+        ("per_class_recall", "reach_side"),
+        DISTRACTION_CARD,
+        "pct",
+        2,
+    ),
+    ("distraction-majority-metrics.json", ("balanced_accuracy",), DISTRACTION_CARD, "pct", 2),
 ]
 
 TEMPORAL_ACCURACY = "54.5%"
