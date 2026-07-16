@@ -62,6 +62,14 @@ benchmark is run on the device. No numbers are entered until they are measured.
 | Temporal fatigue | temporal.onnx (float) | (1, 150, 5) | 0.503 | 0.499 | 0.520 | 1988.4 |
 | Temporal fatigue | temporal.int8.onnx | (1, 150, 5) | 0.478 | 0.474 | 0.496 | 2092.2 |
 | End to end per frame | full pipeline, HUD on | one camera frame | n/a | 81.9 | 85.5 | 11.1 |
+| Distraction mobilenet_v3_small | float | (1, 3, 224, 224) | 18.321 | 18.132 | 19.540 | 54.6 |
+| Distraction mobilenet_v3_small | int8 | (1, 3, 224, 224) | 62.022 | 61.791 | 63.227 | 16.1 |
+| Distraction mobilenet_v2 | float | (1, 3, 224, 224) | 46.598 | 46.142 | 50.156 | 21.5 |
+| Distraction mobilenet_v2 | int8 | (1, 3, 224, 224) | 219.954 | 219.342 | 223.723 | 4.5 |
+| Distraction efficientnet_b0 | float | (1, 3, 224, 224) | 98.803 | 98.057 | 103.418 | 10.1 |
+| Distraction efficientnet_b0 | int8 | (1, 3, 224, 224) | 304.327 | 303.710 | 307.804 | 3.3 |
+| Distraction shufflenet_v2_x0_5 | float | (1, 3, 224, 224) | 9.811 | 9.734 | 10.158 | 101.9 |
+| Distraction shufflenet_v2_x0_5 | int8 | (1, 3, 224, 224) | 29.917 | 29.690 | 31.534 | 33.4 |
 
 The eye state rows were measured on a Raspberry Pi 4B running 64 bit Raspberry
 Pi OS with ONNX Runtime 1.27.0 under Python 3.12 (100 timed runs after warmup;
@@ -107,3 +115,21 @@ closure proportion, blinks, yawns, nods) evolve over seconds, not frames. The
 measured rate is therefore treated as meeting real time for this application,
 and the Coral USB accelerator is not needed. That verdict is tied to these
 numbers; it would be revisited if the pipeline grew heavier stages.
+
+The distraction rows benchmark the four candidate image backbones at the
+production input shape, on the same board and runtime (100 timed runs after
+warmup, ONNX Runtime 1.27.0, the board reading 37.9 C at the start of the sweep
+and 58.4 C at the end, throttle flags clear at 0x0 throughout). Unlike the
+temporal model, the int8 export is three to five times slower than the float one
+for every backbone, because these are convolution heavy networks and dynamic
+quantization only converts the final linear layer while adding per operator
+overhead across the rest of the graph. The deployed distraction model is
+therefore the float export, the same conclusion the eye state network reached on
+this device. The deployment weighs accuracy against latency: efficientnet_b0 has
+the highest balanced accuracy but runs near 10 fps, while mobilenet_v3_small
+trails it by a small margin at more than five times the speed (54.6 fps). The
+deployed distraction backbone is mobilenet_v3_small (float); its accuracy
+comparison, per class recall, and the honesty caveats of the evaluation split
+are reported in the distraction model card. Every float candidate clears the
+budget the periodic distraction schedule allows, so the Coral accelerator is not
+needed for this track either.
