@@ -23,6 +23,7 @@ dependencies = [
     "opencv-python>=4.9",
     "mediapipe>=0.10",
     "torch>=2.2",
+    "torchvision>=0.17",
     "scikit-learn>=1.4",
     # Edge export toolchain. These run on the laptop to turn trained checkpoints into
     # ONNX and int8 artifacts. The Pi runtime needs only onnxruntime (requirements-pi.txt).
@@ -42,6 +43,8 @@ dev = [
 safeeyes-build-splits = "safeeyes.data.build_splits:main"
 safeeyes-train-eye-state = "safeeyes.models.train_eye_state:main"
 safeeyes-eval-eye-state = "safeeyes.models.eval_eye_state:main"
+safeeyes-train-distraction = "safeeyes.models.train_distraction:main"
+safeeyes-eval-distraction = "safeeyes.models.eval_distraction:main"
 safeeyes-extract-features = "safeeyes.perception.extract:main"
 safeeyes-train-temporal = "safeeyes.temporal.train_temporal:main"
 safeeyes-tune-temporal = "safeeyes.temporal.tune_temporal:main"
@@ -74,7 +77,7 @@ warn_unused_configs = true
 
 # OpenCV, MediaPipe, scikit-learn, and the ONNX toolchain ship without type information.
 [[tool.mypy.overrides]]
-module = ["cv2", "mediapipe", "mediapipe.*", "sklearn.*", "onnx", "onnx.*", "onnxruntime", "onnxruntime.*"]
+module = ["cv2", "mediapipe", "mediapipe.*", "sklearn.*", "onnx", "onnx.*", "onnxruntime", "onnxruntime.*", "torchvision", "torchvision.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

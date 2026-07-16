@@ -16,6 +16,8 @@ the evaluation console script.
 
 from __future__ import annotations
 
+import argparse
+import json
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
@@ -103,3 +105,62 @@ def collect_interval_probs(
         per_interval_probs.append(aggregate_interval_probs(frame_probs))
         per_interval_labels.append(label_index)
     return per_interval_probs, per_interval_labels
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    import cv2
+    import torch
+
+    from safeeyes.models.distraction_data import frame_records
+    from safeeyes.models.train_distraction import (
+        build_model_from_checkpoint,
+        build_transform,
+    )
+
+    parser = argparse.ArgumentParser(description="Evaluate the distraction classifier.")
+    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--test-manifest", nargs="+", required=True)
+    parser.add_argument("--frames-root", required=True)
+    parser.add_argument("--size", type=int, default=224)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--metrics-out", default=None, help="optional metrics JSON path")
+    args = parser.parse_args(argv)
+
+    model, _ = build_model_from_checkpoint(args.checkpoint)
+    transform = build_transform(train=False, size=args.size, normalize=True)
+
+    def predict_frame_probs(frame_paths: Sequence[Path]) -> np.ndarray:
+        chunks: list[np.ndarray] = []
+        for start in range(0, len(frame_paths), args.batch_size):
+            batch_paths = frame_paths[start : start + args.batch_size]
+            tensors = []
+            for path in batch_paths:
+                image = cv2.imread(str(path), cv2.IMREAD_COLOR)
+                if image is None:
+                    raise FileNotFoundError(f"could not read image: {path}")
+                tensors.append(transform(image))
+            batch = torch.stack(tensors)
+            with torch.no_grad():
+                probs = torch.softmax(model(batch), dim=1)
+            chunks.append(probs.numpy())
+        return np.concatenate(chunks, axis=0)
+
+    records = frame_records(args.test_manifest, args.frames_root)
+    per_interval_probs, labels = collect_interval_probs(predict_frame_probs, records)
+    metrics = evaluate_intervals(per_interval_probs, labels)
+
+    if args.metrics_out:
+        Path(args.metrics_out).write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
+
+    absent = metrics["absent_classes"]
+    assert isinstance(absent, list)
+    print(
+        f"overall {metrics['overall_accuracy']:.4f} | "
+        f"balanced {metrics['balanced_accuracy']:.4f} | "
+        f"{len(absent)} classes absent from this split"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
