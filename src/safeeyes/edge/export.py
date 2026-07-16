@@ -20,6 +20,7 @@ import warnings
 from pathlib import Path
 
 import torch
+from torch import nn
 
 from safeeyes.models.eye_state import EyeStateCNN
 from safeeyes.temporal.model import TemporalGRU
@@ -68,6 +69,29 @@ def export_temporal_onnx(
             input_names=["window"],
             output_names=["logits"],
             dynamic_axes={"window": {0: "batch", 1: "frames"}, "logits": {0: "batch"}},
+            opset_version=_OPSET,
+            dynamo=False,
+        )
+    return out
+
+
+def export_distraction_onnx(
+    model: nn.Module,
+    path: str | Path,
+    size: int = 224,
+) -> Path:
+    out = Path(path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    dummy = torch.randn(1, 3, size, size)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        torch.onnx.export(
+            model.eval(),
+            (dummy,),
+            str(out),
+            input_names=["image"],
+            output_names=["logits"],
+            dynamic_axes={"image": {0: "batch"}, "logits": {0: "batch"}},
             opset_version=_OPSET,
             dynamo=False,
         )
