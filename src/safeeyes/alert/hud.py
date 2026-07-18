@@ -27,6 +27,8 @@ def draw_hud(
     tier: AlertTier,
     ear: float | None = None,
     fatigue_level: int | None = None,
+    distraction_activity: str | None = None,
+    distraction_tier: AlertTier | None = None,
 ) -> np.ndarray:
     out = frame.copy()
     height, width = out.shape[:2]
@@ -37,6 +39,19 @@ def draw_hud(
     cv2.putText(
         out, label, (8, banner_height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA
     )
+
+    if distraction_activity is not None:
+        distracted = distraction_tier is not None and distraction_tier > AlertTier.NONE
+        text = (
+            f"DISTRACTED: {distraction_activity}"
+            if distracted
+            else f"attention: {distraction_activity}"
+        )
+        line_color = (0, 140, 255) if distracted else (200, 200, 200)
+        cv2.putText(
+            out, text, (8, height - 26), cv2.FONT_HERSHEY_SIMPLEX,
+            0.5, line_color, 1, cv2.LINE_AA,
+        )
 
     readouts = []
     if ear is not None:

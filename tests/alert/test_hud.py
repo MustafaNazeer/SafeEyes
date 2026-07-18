@@ -23,3 +23,30 @@ def test_draw_hud_actually_draws_something_when_alarming() -> None:
     frame = np.zeros((200, 200, 3), dtype=np.uint8)
     out = draw_hud(frame, AlertTier.ALARM)
     assert out.sum() > 0  # some pixels were written
+
+
+def test_draw_hud_renders_distraction_line() -> None:
+    frame = np.zeros((240, 320, 3), dtype=np.uint8)
+    without = draw_hud(frame, AlertTier.NONE)
+    with_distraction = draw_hud(
+        frame,
+        AlertTier.NONE,
+        distraction_activity="texting_right",
+        distraction_tier=AlertTier.VISUAL,
+    )
+    assert with_distraction.shape == frame.shape
+    assert with_distraction.sum() > without.sum()  # the extra line drew pixels
+
+
+def test_draw_hud_distraction_args_are_optional() -> None:
+    frame = np.zeros((240, 320, 3), dtype=np.uint8)
+    baseline = draw_hud(frame, AlertTier.NONE, ear=0.3, fatigue_level=0)
+    unchanged = draw_hud(
+        frame,
+        AlertTier.NONE,
+        ear=0.3,
+        fatigue_level=0,
+        distraction_activity=None,
+        distraction_tier=None,
+    )
+    assert np.array_equal(baseline, unchanged)
