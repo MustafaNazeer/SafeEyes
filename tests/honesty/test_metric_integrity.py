@@ -62,8 +62,8 @@ CLAIMS = [
     ("temporal-cross-dmd-metrics.json", ("overall_accuracy",), TEMPORAL_METHODOLOGY, "pct", 1),
 ]
 
-TEMPORAL_ACCURACY = "54.5%"
-TEMPORAL_FALSE_ALARM_RATE = "0.139"
+TEMPORAL_ACCURACY = "47.1%"
+TEMPORAL_FALSE_ALARM_RATE = "0.100"
 
 
 def _render(value: float, kind: str, decimals: int) -> str:

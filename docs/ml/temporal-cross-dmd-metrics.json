@@ -1,9 +1,9 @@
 {
-  "n_windows": 211,
-  "n_drowsy_true": 88,
-  "drowsy_recall": 0.9772727272727273,
-  "false_alarm_rate": 0.6341463414634146,
-  "overall_accuracy": 0.6208530805687204,
+  "n_windows": 367,
+  "n_drowsy_true": 146,
+  "drowsy_recall": 0.9178082191780822,
+  "false_alarm_rate": 0.5475113122171946,
+  "overall_accuracy": 0.6376021798365122,
   "recordings": 16,
   "config": {
     "window_size": 150,

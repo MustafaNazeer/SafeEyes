@@ -17,11 +17,12 @@ metrics see
 
 ## False alarm rate
 
-The temporal classifier's false alarm rate is 0.139: about one in seven windows
-that are genuinely not drowsy (alert or low vigilance) are classified as drowsy.
-It is reported beside accuracy in the methodology and recorded in the metrics
-file, never hidden. That visibility is correct and is the first thing this review
-checked.
+The temporal classifier's per window false alarm rate is 0.100 for the deployed
+checkpoint and 0.147 averaged over five training seeds (range 0.100 to 0.211):
+between roughly one in ten and one in seven windows that are genuinely not drowsy
+(alert or low vigilance) are classified as drowsy. It is reported beside accuracy
+in the methodology and recorded in the metrics file, never hidden. That visibility
+is correct and is the first thing this review checked.
 
 Two honest qualifications:
 
@@ -29,13 +30,13 @@ Two honest qualifications:
   actually raises a nuisance alarm. The alert stage commits a state only after a
   minimum duration and applies hysteresis, so isolated false positive windows do
   not fire an alarm. The effective nuisance rate at the alert level is therefore
-  lower than 0.139.
+  lower than that per window rate.
 - That effective alert level rate has not yet been measured on labeled
   sequences. The debounce and hysteresis thresholds are the knobs that set it,
   and they have not been tuned against real footage. Until that measurement
-  exists, 0.139 is the honest number to quote and the lower alert level rate is a
-  design expectation, not a measured result. This is recorded here as an open
-  item, not a claim.
+  exists, the per window rate is the honest number to quote and the lower alert
+  level rate is a design expectation, not a measured result. This is recorded here
+  as an open item, not a claim.
 
 A per window false alarm rate of one in seven is high in absolute terms. It is
 acceptable only because the system is presented as an assistive prototype and the
@@ -44,8 +45,8 @@ not be acceptable for anything presented as reliable.
 
 ## Cost of a missed detection
 
-Drowsy recall is 0.532: the classifier catches about half of genuinely drowsy
-windows, per window. A missed drowsy driver is a more dangerous error than a
+Drowsy recall is 0.489 for the deployed checkpoint and 0.485 averaged over seeds:
+the classifier catches about half of genuinely drowsy windows, per window. A missed drowsy driver is a more dangerous error than a
 false alarm, and the alert stage's hysteresis, quick to warn and slow to stand
 down, leans the right way on that asymmetry. Sustained drowsiness, which is what
 matters, is more likely to be caught than any single window suggests. Even so,
@@ -77,16 +78,23 @@ review.
   restated as a guarantee. No change is required now, but it is the sentence to
   watch.
 - Claim blocked: nothing in the public surface may describe SafeEyes as a
-  reliable drowsiness detector. The defensible claim is narrower, a two stage
-  pipeline with its own trained models, evaluated on subject independent splits,
-  with modest and honestly reported per class accuracy, macro AUROC, and false
-  alarm rate.
+  reliable drowsiness detector. Also blocked is any claim that the trained sequence
+  model is decisively better than a simple baseline. Once features are extracted at
+  the live cadence and the head pose feature is corrected, the GRU no longer
+  robustly beats a gradient boosted baseline on accuracy or macro AUROC and is
+  retained only for its lower false alarm rate. The defensible claim is narrower, a
+  two stage pipeline with its own trained models, evaluated on subject independent
+  splits, with modest and honestly reported per class accuracy, macro AUROC, and
+  false alarm rate.
 
 ## Verdict
 
-The figures quoted in this review were refreshed when the deployed checkpoint
-was retrained from re-extracted features; every conclusion below was re-checked
-against the new numbers and stands unchanged.
+The figures quoted in this review were refreshed when the deployed checkpoint was
+retrained on features extracted at the live cadence with the corrected head pose
+feature. The false alarm and missed detection conclusions were re-checked against
+the new numbers and stand. One finding is new and is recorded above: the trained
+model no longer clearly beats its baseline, which strengthens rather than weakens
+the case against any reliability claim.
 
 Signed off on honesty and framing. The false alarm rate and the missed detection
 cost are both reported and visible, the framing is consistently that of an
