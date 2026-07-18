@@ -69,10 +69,44 @@ def train_and_evaluate(
     batch_size: int = 512,
     save_path: str | Path | None = None,
 ) -> dict[str, object]:
-    torch.manual_seed(seed)
     x_train, y_train = assemble_windowed_dataset(train_items, window_size, stride)
     x_val, y_val = assemble_windowed_dataset(val_items, window_size, stride)
+    return train_and_evaluate_windows(
+        x_train,
+        y_train,
+        x_val,
+        y_val,
+        n_classes=n_classes,
+        epochs=epochs,
+        lr=lr,
+        seed=seed,
+        alarm_class=alarm_class,
+        batch_size=batch_size,
+        save_path=save_path,
+    )
 
+
+def train_and_evaluate_windows(
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_val: np.ndarray,
+    y_val: np.ndarray,
+    n_classes: int,
+    epochs: int,
+    lr: float,
+    seed: int = 0,
+    alarm_class: int | None = None,
+    batch_size: int = 512,
+    save_path: str | Path | None = None,
+) -> dict[str, object]:
+    """Train the GRU on already assembled windows and evaluate on held out windows.
+
+    Windowing is done by the caller, so training sets from different sources (for
+    example UTA clips and per-window labeled DMD recordings) can be concatenated at
+    the window level before training. Normalization uses the combined training
+    windows.
+    """
+    torch.manual_seed(seed)
     model = TemporalGRU(n_features=x_train.shape[2], num_classes=n_classes)
     # Normalization lives in the model, so it trains and evaluates on raw features
     # and the saved checkpoint carries the standardization to the edge runtime.
