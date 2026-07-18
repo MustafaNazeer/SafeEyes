@@ -2,9 +2,12 @@ import numpy as np
 
 from safeeyes.alert.pipeline import DrowsinessPipeline
 from safeeyes.alert.state_machine import AlertTier
+from safeeyes.distraction.labels import DISTRACTION_LABELS
+from safeeyes.distraction.scheduler import DistractionScheduler
 from safeeyes.edge import run as run_module
-from safeeyes.edge.export import export_temporal_onnx
-from safeeyes.edge.run import build_onnx_classifier, main
+from safeeyes.edge.export import export_distraction_onnx, export_temporal_onnx
+from safeeyes.edge.run import build_distraction_scheduler, build_onnx_classifier, main
+from safeeyes.models.train_distraction import BACKBONES
 from safeeyes.temporal.model import TemporalGRU
 
 
@@ -30,6 +33,18 @@ def test_build_onnx_classifier_returns_class_index(tmp_path) -> None:
     assert 0 <= level < 3
 
 
+def test_build_distraction_scheduler_runs_from_file(tmp_path) -> None:
+    model = BACKBONES["mobilenet_v3_small"](len(DISTRACTION_LABELS), False).eval()
+    path = export_distraction_onnx(model, tmp_path / "d.onnx", size=64)
+
+    scheduler = build_distraction_scheduler(path, every_n=1, size=64)
+    assert isinstance(scheduler, DistractionScheduler)
+    frame = np.zeros((80, 100, 3), dtype=np.uint8)
+    state = scheduler.update(frame)
+    assert state.ran is True
+    assert state.activity in DISTRACTION_LABELS
+
+
 def test_main_wires_logging_arguments_into_run(monkeypatch) -> None:
     calls = {}
     monkeypatch.setattr(run_module, "run", lambda **kwargs: calls.update(kwargs))
@@ -49,10 +64,32 @@ def test_main_wires_logging_arguments_into_run(monkeypatch) -> None:
         "model_path": "models/edge/temporal.int8.onnx",
         "camera_index": 1,
         "window_capacity": 120,
+        "distraction_model": None,
+        "distraction_every_n": 5,
+        "distraction_alpha": 0.5,
         "log_file": "edge.jsonl",
         "metrics_interval": 10.0,
         "show_display": True,
     }
+
+
+def test_main_wires_distraction_arguments_into_run(monkeypatch) -> None:
+    calls = {}
+    monkeypatch.setattr(run_module, "run", lambda **kwargs: calls.update(kwargs))
+
+    exit_code = main(
+        [
+            "--model", "models/edge/temporal.int8.onnx",
+            "--distraction-model", "models/edge/distraction.onnx",
+            "--distraction-every-n", "3",
+            "--distraction-alpha", "0.25",
+        ]
+    )
+
+    assert exit_code == 0
+    assert calls["distraction_model"] == "models/edge/distraction.onnx"
+    assert calls["distraction_every_n"] == 3
+    assert calls["distraction_alpha"] == 0.25
 
 
 def test_main_wires_no_display_into_run(monkeypatch) -> None:

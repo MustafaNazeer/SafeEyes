@@ -24,6 +24,9 @@ class _Drowsiness(Protocol):
     def process(self, features: Sequence[float] | np.ndarray) -> AlertTier: ...
 
     @property
+    def current_tier(self) -> AlertTier: ...
+
+    @property
     def fatigue_level(self) -> int: ...
 
 
@@ -53,10 +56,16 @@ class DriverMonitorPipeline:
 
     def process(
         self,
-        features: Sequence[float] | np.ndarray,
+        features: Sequence[float] | np.ndarray | None,
         frame: np.ndarray | None,
     ) -> MonitorState:
-        fatigue_tier = self._drowsiness.process(features)
+        # Fatigue only advances on frames with a detected face (features present);
+        # distraction advances every frame, since a distracted driver may have
+        # turned away from the camera.
+        if features is not None:
+            fatigue_tier = self._drowsiness.process(features)
+        else:
+            fatigue_tier = self._drowsiness.current_tier
         distraction = self._scheduler.update(frame)
         distraction_tier = self._track.update(distraction.distracted)
         tier = fuse_tiers(fatigue_tier, distraction_tier)

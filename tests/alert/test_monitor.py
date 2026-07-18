@@ -19,8 +19,14 @@ class _StubDrowsiness:
     def __init__(self, tier: AlertTier, level: int) -> None:
         self._tier = tier
         self._level = level
+        self.process_calls = 0
 
     def process(self, features: np.ndarray) -> AlertTier:
+        self.process_calls += 1
+        return self._tier
+
+    @property
+    def current_tier(self) -> AlertTier:
         return self._tier
 
     @property
@@ -67,3 +73,18 @@ def test_distraction_can_raise_the_overall_tier_above_fatigue() -> None:
     assert result.fatigue_tier == AlertTier.NONE
     assert result.distraction_tier == AlertTier.VISUAL
     assert result.tier == AlertTier.VISUAL
+
+
+def test_no_face_holds_fatigue_but_still_advances_distraction() -> None:
+    drowsiness = _StubDrowsiness(AlertTier.AUDIBLE, 2)
+    monitor = DriverMonitorPipeline(
+        drowsiness,
+        _StubScheduler(_distracted_state()),
+        DistractionAlertTrack(escalate_steps=1),
+    )
+    result = monitor.process(None, frame="f")
+
+    assert drowsiness.process_calls == 0  # fatigue did not advance without features
+    assert result.fatigue_tier == AlertTier.AUDIBLE  # held at its current tier
+    assert result.distraction_tier == AlertTier.VISUAL  # distraction still advanced
+    assert result.tier == AlertTier.AUDIBLE
