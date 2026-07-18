@@ -62,6 +62,8 @@ benchmark is run on the device. No numbers are entered until they are measured.
 | Temporal fatigue | temporal.onnx (float) | (1, 150, 5) | 0.503 | 0.499 | 0.520 | 1988.4 |
 | Temporal fatigue | temporal.int8.onnx | (1, 150, 5) | 0.478 | 0.474 | 0.496 | 2092.2 |
 | End to end per frame | full pipeline, HUD on | one camera frame | n/a | 81.9 | 85.5 | 11.1 |
+| Integrated loop, no driver in frame | drowsiness only, headless | one camera frame | n/a | 13.4 | 24.5 | 15.0 |
+| Integrated loop, no driver in frame | plus distraction every 5th frame, headless | one camera frame | n/a | 13.6 | 50.6 | 14.9 |
 | Distraction mobilenet_v3_small | float | (1, 3, 224, 224) | 18.321 | 18.132 | 19.540 | 54.6 |
 | Distraction mobilenet_v3_small | int8 | (1, 3, 224, 224) | 62.022 | 61.791 | 63.227 | 16.1 |
 | Distraction mobilenet_v2 | float | (1, 3, 224, 224) | 46.598 | 46.142 | 50.156 | 21.5 |
@@ -133,3 +135,27 @@ comparison, per class recall, and the honesty caveats of the evaluation split
 are reported in the distraction model card. Every float candidate clears the
 budget the periodic distraction schedule allows, so the Coral accelerator is not
 needed for this track either.
+
+The two integrated loop rows measure the whole live loop with the distraction
+track wired in, running the distraction backbone on every fifth frame with
+exponential moving average smoothing, against a same conditions baseline that runs
+the drowsiness track alone. Both were 75 second headless runs on the same board
+(no display, ONNX Runtime 1.27.0, board reading 42.8 C afterward, throttle flags
+clear at 0x0), and the figures are the mean of the five second interval throughput
+and the median of the interval p50 and p95 latencies after dropping the first
+interval as warmup. Adding the distraction track leaves sustained throughput
+unchanged, 14.9 against 15.0 fps, because the backbone runs on only one frame in
+five; its cost shows up in the tail, where p95 rises from 24.5 to 50.6 ms on the
+frames that do run it, consistent with the 18.3 ms standalone distraction latency
+plus preprocessing. Real time is preserved, so the Coral verdict stands for the
+integrated loop as well.
+
+One honesty caveat bounds these two rows: they were recorded with no driver in
+the camera frame, so the face detection rate was zero. Without a face the temporal
+model is not exercised (its window is fed only when landmarks are present) and
+MediaPipe follows its no face path, which is why these throughputs sit above the
+11.1 fps of the with driver end to end row rather than beside it. They therefore
+measure the added cost of the distraction schedule cleanly, by holding every other
+condition equal between the two runs, but they are not a with driver number. A
+sustained integrated run with a driver in frame, comparable to the v1 end to end
+row, is left for a session at the hardware and will be recorded here when taken.
