@@ -210,6 +210,35 @@ reinforces the safety review's standing concern about the false alarm rate, and 
 this evidence the model is not ready to be trusted on DMD-like data, so no claim of
 dependable cross-dataset detection is made.
 
+## DMD-inclusive training (recorded, not adopted)
+
+Since the model over-fires on DMD, a natural question is whether adding DMD
+drowsiness data to the training set improves generalization. This was tested,
+measured, and then not adopted.
+
+DMD frame-level drowsy labels were mapped onto the three UTA classes: a window is
+drowsy when at least ten percent of its frames fall in a sustained eye closure,
+otherwise alert, since DMD has no low vigilance state. The 13 DMD subjects were
+split subject independently into 9 for training and 4 held out. A model trained on
+UTA plus the 9 DMD subjects was compared against the UTA-only model, both evaluated
+on the UTA test set and on the 4 held-out DMD subjects, across five seeds.
+
+| Metric | UTA-only | UTA plus DMD |
+|--------|----------|--------------|
+| UTA test accuracy (seed mean) | 44.5% | 44.1% |
+| UTA test macro AUROC (seed mean) | 0.624 | 0.623 |
+| Held-out DMD false alarm rate (seed mean) | 0.662 | 0.600 |
+
+Adding DMD left the UTA numbers unchanged within seed noise and lowered the
+held-out DMD false alarm rate on average, from 0.662 to 0.600. But the gain was
+small and inconsistent: across five seeds one improved sharply, three improved
+modestly, and one regressed, and the model still over-fired on DMD, with a false
+alarm rate near 0.6. Because a deployed system ships one checkpoint rather than the
+seed average, and the checkpoint chosen by the fixed seed convention showed almost
+no improvement, the trade was not worth giving up DMD as a fully independent
+cross-dataset test. The UTA-only model is retained, and this experiment is recorded
+rather than discarded, consistent with the hyperparameter tuning result below.
+
 ## Hyperparameter tuning
 
 To check whether the default configuration could be improved without peeking at
