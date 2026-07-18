@@ -16,15 +16,19 @@ from safeeyes.perception.geometry import rotation_matrix_to_euler
 
 # Generic 3D face model in millimetres, ordered to match HEAD_POSE_INDICES:
 # nose tip, chin, left eye outer corner, right eye outer corner, left and right
-# mouth corners.
+# mouth corners. Coordinates follow the OpenCV camera convention (x right, y down,
+# z into the scene), so the chin sits at +y (below the nose) and the eyes at -y
+# (above it). A y-up model instead makes solvePnP recover a 180-degree rotation
+# about x for an upright face, parking the Euler pitch near +/-180 where it wraps;
+# this convention keeps an upright frontal face near a zero rotation.
 CANONICAL_FACE_MODEL: np.ndarray = np.array(
     [
         (0.0, 0.0, 0.0),
-        (0.0, -330.0, -65.0),
-        (-225.0, 170.0, -135.0),
-        (225.0, 170.0, -135.0),
-        (-150.0, -150.0, -125.0),
-        (150.0, -150.0, -125.0),
+        (0.0, 330.0, 65.0),
+        (-225.0, -170.0, 135.0),
+        (225.0, -170.0, 135.0),
+        (-150.0, 150.0, 125.0),
+        (150.0, 150.0, 125.0),
     ],
     dtype=np.float64,
 )

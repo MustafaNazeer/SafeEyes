@@ -46,6 +46,38 @@ def test_yaw_rotation_is_isolated_to_yaw() -> None:
     assert abs(roll) < 2.0
 
 
+def test_upright_real_face_recovers_near_zero_pitch() -> None:
+    # A real face seen by the camera has the eyes above the nose in the image and
+    # the chin below it. Image coordinates are y-down, so an anatomical model with
+    # y-up (eyes at +y, chin at -y) must be oriented into the camera frame before it
+    # looks like a real face. This constructs such upright face points independently
+    # of the module's canonical model, so a 180-degree pitch flip is caught here.
+    cm = default_camera_matrix(640, 480)
+    anatomical_y_up = np.array(
+        [
+            (0.0, 0.0, 0.0),
+            (0.0, -330.0, -65.0),
+            (-225.0, 170.0, -135.0),
+            (225.0, 170.0, -135.0),
+            (-150.0, -150.0, -125.0),
+            (150.0, -150.0, -125.0),
+        ],
+        dtype=np.float64,
+    )
+    upright_in_camera_frame = np.radians(180.0) * np.array([[1.0], [0.0], [0.0]])
+    image_points, _ = cv2.projectPoints(
+        anatomical_y_up,
+        upright_in_camera_frame,
+        np.array([[0.0], [0.0], [1000.0]]),
+        cm,
+        np.zeros((4, 1)),
+    )
+    pitch, yaw, roll = estimate_head_pose(image_points.reshape(-1, 2), cm)
+    assert abs(pitch) < 10.0
+    assert abs(yaw) < 10.0
+    assert abs(roll) < 10.0
+
+
 def test_wrong_point_count_raises() -> None:
     cm = default_camera_matrix(640, 480)
     with pytest.raises(ValueError):
