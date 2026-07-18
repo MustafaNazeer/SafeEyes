@@ -34,6 +34,12 @@ def test_pipeline_core_imports_without_torch() -> None:
     assert "imported" in result.stdout
 
 
+def test_distraction_preprocess_imports_without_torch() -> None:
+    result = _import_in_subprocess("import safeeyes.edge.preprocess")
+    assert result.returncode == 0, result.stderr
+    assert "imported" in result.stdout
+
+
 def test_torch_block_actually_blocks() -> None:
     # Positive control: the guard would be vacuous if the block did not work.
     result = _import_in_subprocess("import torch")
