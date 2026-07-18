@@ -37,6 +37,27 @@ def make_onnx_window_classifier(model: OnnxModel) -> Callable[[np.ndarray], int]
     return classify
 
 
+def _softmax(logits: np.ndarray) -> np.ndarray:
+    shifted = logits - logits.max()
+    exp = np.exp(shifted)
+    return np.asarray(exp / exp.sum(), dtype=np.float32)
+
+
+def make_onnx_distraction_classifier(model: OnnxModel) -> Callable[[np.ndarray], np.ndarray]:
+    """Wrap an exported distraction CNN as a preprocessed image to probability vector.
+
+    The image is already the preprocessed ``(1, 3, H, W)`` tensor. The adapter runs
+    the ONNX model and returns the softmax over its logits as a 1-D probability
+    vector, which the scheduler smooths over time.
+    """
+
+    def classify(image: np.ndarray) -> np.ndarray:
+        logits = model.run(np.asarray(image, dtype=np.float32))
+        return _softmax(np.asarray(logits)[0])
+
+    return classify
+
+
 def make_onnx_eye_classifier(model: OnnxModel) -> Callable[[np.ndarray], int]:
     def classify(crop: np.ndarray) -> int:
         array = np.asarray(crop, dtype=np.float32)

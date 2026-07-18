@@ -3,9 +3,20 @@ import torch
 
 from safeeyes.alert.pipeline import DrowsinessPipeline, make_gru_classifier
 from safeeyes.alert.state_machine import AlertTier
-from safeeyes.edge.export import export_eye_state_onnx, export_temporal_onnx
-from safeeyes.edge.runtime import OnnxModel, make_onnx_eye_classifier, make_onnx_window_classifier
+from safeeyes.edge.export import (
+    export_distraction_onnx,
+    export_eye_state_onnx,
+    export_temporal_onnx,
+)
+from safeeyes.edge.runtime import (
+    OnnxModel,
+    make_onnx_distraction_classifier,
+    make_onnx_eye_classifier,
+    make_onnx_window_classifier,
+)
+from safeeyes.models.distraction_data import DISTRACTION_LABELS
 from safeeyes.models.eye_state import EyeStateCNN
+from safeeyes.models.train_distraction import BACKBONES
 from safeeyes.temporal.model import TemporalGRU
 
 
@@ -38,6 +49,26 @@ def test_onnx_window_classifier_drops_into_pipeline(tmp_path) -> None:
     for _ in range(12):
         tier = pipeline.process(np.zeros(5, dtype=np.float32))
     assert isinstance(tier, AlertTier)
+
+
+def test_onnx_distraction_classifier_matches_torch_softmax(tmp_path) -> None:
+    torch.manual_seed(5)
+    num_classes = len(DISTRACTION_LABELS)
+    torch_model = BACKBONES["mobilenet_v3_small"](num_classes, False).eval()
+    path = export_distraction_onnx(torch_model, tmp_path / "d.onnx", size=64)
+    onnx_clf = make_onnx_distraction_classifier(OnnxModel(path))
+
+    rng = np.random.default_rng(2)
+    image = rng.standard_normal((1, 3, 64, 64)).astype(np.float32)
+    probs = onnx_clf(image)
+
+    with torch.no_grad():
+        expected = torch.softmax(torch_model(torch.from_numpy(image)), dim=1).numpy()[0]
+
+    assert probs.shape == (num_classes,)
+    np.testing.assert_allclose(float(probs.sum()), 1.0, atol=1e-5)
+    np.testing.assert_allclose(probs, expected, atol=1e-4)
+    assert int(probs.argmax()) == int(expected.argmax())
 
 
 def test_onnx_eye_classifier_matches_torch_decisions(tmp_path) -> None:
