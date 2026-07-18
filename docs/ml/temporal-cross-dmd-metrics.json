@@ -1,0 +1,15 @@
+{
+  "n_windows": 211,
+  "n_drowsy_true": 88,
+  "drowsy_recall": 0.9772727272727273,
+  "false_alarm_rate": 0.6341463414634146,
+  "overall_accuracy": 0.6208530805687204,
+  "recordings": 16,
+  "config": {
+    "window_size": 150,
+    "stride": 75,
+    "positive_fraction": 0.1,
+    "fps": 29.76,
+    "min_closed_seconds": 0.5
+  }
+}

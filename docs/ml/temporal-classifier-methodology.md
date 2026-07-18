@@ -127,6 +127,50 @@ Read honestly:
   Hyperparameters were not tuned against this test set, which would inflate the
   numbers; a validation fold tuning pass is recorded below.
 
+## Cross-dataset evaluation on DMD drowsiness
+
+The deployed model was evaluated, with no retraining, on the DMD drowsiness bundle
+(16 face-camera recordings from 13 subjects, session s5). None of these subjects
+or frames were seen in training, so this is a genuine cross-dataset generalization
+test. DMD ships no alert, low vigilance, or drowsy labels, so the model's three
+class output is collapsed to drowsy versus not, and the ground truth is a frame
+level drowsy label derived from the annotations: a frame is drowsy when it lies
+inside a sustained eye closure (an eyes closed interval lasting at least 0.5
+seconds, a microsleep proxy), with ordinary blinks and yawning excluded. Features
+are extracted with the same perception pipeline and windowed at size 150, stride
+75; a window counts as drowsy when at least a set fraction of its frames carry the
+drowsy label.
+
+Two limitations bound every number here. The DMD drowsiness was acted, not genuine
+fatigue, so this does not measure detection of real drowsiness. And the drowsy
+label is a sustained eye closure proxy from the annotations, not an independent
+drowsiness ground truth.
+
+At the primary 10 percent window threshold (211 windows, 88 of them drowsy), the
+model reaches 97.7% drowsy recall but a false alarm rate of 0.634, for 62.1%
+overall accuracy. The full metric file is
+[temporal-cross-dmd-metrics.json](temporal-cross-dmd-metrics.json). Because the
+window threshold changes how many windows count as drowsy, the table sweeps it:
+
+| Window drowsy threshold | Drowsy windows | Recall | False alarm rate | Accuracy |
+|-------------------------|----------------|--------|------------------|----------|
+| 5 percent | 129 | 0.953 | 0.500 | 0.777 |
+| 10 percent | 88 | 0.977 | 0.634 | 0.621 |
+| 20 percent | 18 | 1.000 | 0.756 | 0.308 |
+| 50 percent | 0 | n/a | 0.777 | 0.223 |
+
+Read honestly: the drowsy window count is threshold sensitive, but the model's
+behavior is not. Across every threshold it predicts drowsy on roughly three
+quarters of all windows, so recall stays near total while the false alarm rate
+climbs as the true negative pool grows. The v1 model does not generalize cleanly
+to DMD; on this different distribution, with acted closures and a different camera
+and lighting, it over triggers, firing drowsy far more often than the ground truth
+warrants. This reinforces the safety review's standing concern about the per
+window false alarm rate, and it is consistent with the planned retrain at the live
+feature cadence and the option of DMD-inclusive training or recalibration. On this
+evidence the model is not ready to be trusted on DMD-like data without that work,
+and no claim of dependable cross-dataset detection is made.
+
 ## Hyperparameter tuning
 
 To check whether the default configuration could be improved without peeking at

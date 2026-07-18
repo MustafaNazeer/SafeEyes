@@ -57,6 +57,9 @@ CLAIMS = [
         2,
     ),
     ("distraction-majority-metrics.json", ("balanced_accuracy",), DISTRACTION_CARD, "pct", 2),
+    ("temporal-cross-dmd-metrics.json", ("drowsy_recall",), TEMPORAL_METHODOLOGY, "pct", 1),
+    ("temporal-cross-dmd-metrics.json", ("false_alarm_rate",), TEMPORAL_METHODOLOGY, "ratio", 3),
+    ("temporal-cross-dmd-metrics.json", ("overall_accuracy",), TEMPORAL_METHODOLOGY, "pct", 1),
 ]
 
 TEMPORAL_ACCURACY = "54.5%"
