@@ -23,6 +23,16 @@ class AlertTier(IntEnum):
     ALARM = 3
 
 
+def fuse_tiers(*tiers: AlertTier) -> AlertTier:
+    """Combine parallel track tiers into one overall tier by taking the max.
+
+    The driver monitor runs independent tracks (fatigue, distraction). The
+    overall alert is the most severe of them, so a distraction cue and a
+    drowsiness cue never mask each other.
+    """
+    return max(tiers, default=AlertTier.NONE)
+
+
 _VALID_LEVELS = (0, 1, 2)
 
 
@@ -79,3 +89,62 @@ class AlertStateMachine:
         if self._committed == 1:
             return AlertTier.VISUAL
         return AlertTier.ALARM if self._drowsy_steps >= self._alarm_after else AlertTier.AUDIBLE
+
+
+class DistractionAlertTrack:
+    """Binary debounced alert track for the distraction signal.
+
+    Mirrors the fatigue machine's philosophy on a boolean input: quick to warn
+    (a short streak of committed distraction commits to VISUAL) and slow to stand
+    down (a longer clear streak is needed), with sustained committed distraction
+    escalating to AUDIBLE. It never reaches ALARM; distraction is a lesser cue
+    than sustained drowsiness.
+    """
+
+    def __init__(
+        self,
+        escalate_steps: int = 3,
+        de_escalate_steps: int = 8,
+        audible_after: int = 15,
+    ) -> None:
+        if escalate_steps <= 0 or de_escalate_steps <= 0 or audible_after <= 0:
+            raise ValueError("step thresholds must be positive")
+        self._escalate_steps = escalate_steps
+        self._de_escalate_steps = de_escalate_steps
+        self._audible_after = audible_after
+        self.reset()
+
+    def reset(self) -> None:
+        self._committed = False
+        self._candidate: bool | None = None
+        self._candidate_count = 0
+        self._distracted_steps = 0
+
+    def update(self, distracted: bool) -> AlertTier:
+        if distracted == self._committed:
+            self._candidate = None
+            self._candidate_count = 0
+        else:
+            if distracted == self._candidate:
+                self._candidate_count += 1
+            else:
+                self._candidate = distracted
+                self._candidate_count = 1
+            threshold = self._escalate_steps if distracted else self._de_escalate_steps
+            if self._candidate_count >= threshold:
+                self._committed = distracted
+                self._candidate = None
+                self._candidate_count = 0
+
+        self._distracted_steps = self._distracted_steps + 1 if self._committed else 0
+        return self.current_tier
+
+    @property
+    def current_tier(self) -> AlertTier:
+        if not self._committed:
+            return AlertTier.NONE
+        return (
+            AlertTier.AUDIBLE
+            if self._distracted_steps >= self._audible_after
+            else AlertTier.VISUAL
+        )
