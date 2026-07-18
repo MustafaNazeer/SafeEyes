@@ -100,6 +100,22 @@ def test_export_and_quantize_distraction_writes_int8_companion(tmp_path) -> None
     assert artifacts.quantized.exists()
 
 
+def test_distraction_int8_onnx_loads_and_runs(tmp_path) -> None:
+    # Float parity is asserted above; int8 is dynamic-quantized (approximate), so
+    # we only require that it loads and produces the right output shape, matching
+    # the v1 policy of not asserting exact int8 parity.
+    backbone = "mobilenet_v3_small"
+    ckpt = tmp_path / "distraction.pt"
+    _save_distraction_checkpoint(ckpt, backbone)
+
+    artifacts = export_and_quantize_distraction(ckpt, tmp_path, quantize=True)
+
+    assert artifacts.quantized is not None
+    x = np.random.randn(1, 3, 224, 224).astype(np.float32)
+    out = OnnxModel(artifacts.quantized).run(x)
+    assert out.shape == (1, len(DISTRACTION_LABELS))
+
+
 def test_main_exports_distraction_checkpoint(tmp_path) -> None:
     backbone = "mobilenet_v3_small"
     ckpt = tmp_path / "distraction.pt"
