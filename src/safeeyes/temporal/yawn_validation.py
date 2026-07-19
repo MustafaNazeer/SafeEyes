@@ -1,6 +1,6 @@
 """Video level validation of the geometric MAR yawn signal.
 
-The detection threshold is pre-registered: derived from UTA train subject MAR
+The detection threshold is preregistered: derived from UTA train subject MAR
 statistics only (the 99th percentile of all per frame MAR values across the
 train split features), fixed before any YawDD data was listed, extracted, or
 scored, and never revised after. YawDD is therefore a purely held out test set.

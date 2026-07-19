@@ -135,7 +135,7 @@ def sweep_parameters(
 def select_parameters(
     rows: Sequence[dict[str, object]], default: tuple[int, int, int] = DEFAULT_PARAMS
 ) -> dict[str, object]:
-    """The pre-registered rule: among rows whose drowsy detection rate is at
+    """The preregistered rule: among rows whose drowsy detection rate is at
     least the default parameters' rate, lowest false alarms per hour wins; ties
     break on faster median time to first alert. Fixed before any
     sweep ran, so the choice cannot be fished post hoc.
