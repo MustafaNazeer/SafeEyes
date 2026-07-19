@@ -1,0 +1,71 @@
+{
+  "fps": 10.0,
+  "checkpoint": "temporal.pt",
+  "params": [
+    8,
+    40,
+    15
+  ],
+  "thresholds": {
+    "VISUAL": {
+      "params": [
+        8,
+        40,
+        15
+      ],
+      "n_clips": 29,
+      "n_not_drowsy_clips": 20,
+      "n_drowsy_clips": 9,
+      "false_alarms_per_hour": 28.92140490869538,
+      "fraction_not_drowsy_clips_with_alarm": 0.9,
+      "false_alarms_per_hour_alert_clips_only": 23.88763962104177,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 15.6
+    },
+    "AUDIBLE": {
+      "params": [
+        8,
+        40,
+        15
+      ],
+      "n_clips": 29,
+      "n_not_drowsy_clips": 20,
+      "n_drowsy_clips": 9,
+      "false_alarms_per_hour": 15.923020680068243,
+      "fraction_not_drowsy_clips_with_alarm": 0.65,
+      "false_alarms_per_hour_alert_clips_only": 8.626092085376195,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 24.2
+    },
+    "ALARM": {
+      "params": [
+        8,
+        40,
+        15
+      ],
+      "n_clips": 29,
+      "n_not_drowsy_clips": 20,
+      "n_drowsy_clips": 9,
+      "false_alarms_per_hour": 15.923020680068243,
+      "fraction_not_drowsy_clips_with_alarm": 0.65,
+      "false_alarms_per_hour_alert_clips_only": 8.626092085376195,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 25.6
+    }
+  },
+  "headline": {
+    "params": [
+      8,
+      40,
+      15
+    ],
+    "n_clips": 29,
+    "n_not_drowsy_clips": 20,
+    "n_drowsy_clips": 9,
+    "false_alarms_per_hour": 15.923020680068243,
+    "fraction_not_drowsy_clips_with_alarm": 0.65,
+    "false_alarms_per_hour_alert_clips_only": 8.626092085376195,
+    "drowsy_detection_rate": 1.0,
+    "median_time_to_first_alert_s": 24.2
+  }
+}

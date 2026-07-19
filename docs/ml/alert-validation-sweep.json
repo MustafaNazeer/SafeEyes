@@ -1,0 +1,982 @@
+{
+  "fps": 10.0,
+  "checkpoint": "temporal.pt",
+  "threshold": "AUDIBLE",
+  "rows": [
+    {
+      "params": [
+        3,
+        8,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 88.5194229066747,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 48.00713775189596,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        8,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 88.5194229066747,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 48.00713775189596,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        8,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 88.5194229066747,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 48.00713775189596,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        8,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 88.5194229066747,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 48.00713775189596,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        15,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 75.73620258582949,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 40.40888573361027,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        15,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 75.73620258582949,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 40.40888573361027,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        15,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 75.73620258582949,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 40.40888573361027,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        15,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 75.73620258582949,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 40.40888573361027,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        25,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 61.727194015040226,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 33.32869635293497,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        25,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 61.727194015040226,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 33.32869635293497,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        25,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 61.727194015040226,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 33.32869635293497,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        25,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 61.727194015040226,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 33.32869635293497,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        40,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 49.03152999776245,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 28.148069976831085,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        40,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 49.03152999776245,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 28.148069976831085,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        40,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 49.03152999776245,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 28.148069976831085,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        3,
+        40,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 49.03152999776245,
+      "fraction_not_drowsy_clips_with_alarm": 0.8243243243243243,
+      "false_alarms_per_hour_alert_clips_only": 28.148069976831085,
+      "drowsy_detection_rate": 1.0,
+      "median_time_to_first_alert_s": 17.75
+    },
+    {
+      "params": [
+        5,
+        8,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 59.100504908017236,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 31.601820894233672,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        8,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 59.100504908017236,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 31.601820894233672,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        8,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 59.100504908017236,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 31.601820894233672,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        8,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 59.100504908017236,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 31.601820894233672,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        15,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 51.74577540835287,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 27.457319793350567,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        15,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 51.74577540835287,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 27.457319793350567,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        15,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 51.74577540835287,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 27.457319793350567,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        15,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 51.74577540835287,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 27.457319793350567,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        25,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 43.6030391765816,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 23.485506238337592,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        25,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 43.6030391765816,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 23.485506238337592,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        25,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 43.6030391765816,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 23.485506238337592,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        25,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 43.6030391765816,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 23.485506238337592,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        40,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 36.24830967691724,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 20.031755320935005,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        40,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 36.24830967691724,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 20.031755320935005,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        40,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 36.24830967691724,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 20.031755320935005,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        5,
+        40,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 36.24830967691724,
+      "fraction_not_drowsy_clips_with_alarm": 0.7702702702702703,
+      "false_alarms_per_hour_alert_clips_only": 20.031755320935005,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 19.3
+    },
+    {
+      "params": [
+        8,
+        8,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 38.87499878394023,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 17.786817224623324,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        8,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 38.87499878394023,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 17.786817224623324,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        8,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 38.87499878394023,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 17.786817224623324,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        8,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 38.87499878394023,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 17.786817224623324,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        15,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 35.02252142697318,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 15.8872542200519,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        15,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 35.02252142697318,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 15.8872542200519,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        15,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 35.02252142697318,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 15.8872542200519,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        15,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 35.02252142697318,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 15.8872542200519,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        25,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 30.38203733789923,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 13.815003669610348,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        25,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 30.38203733789923,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 13.815003669610348,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        25,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 30.38203733789923,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 13.815003669610348,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        25,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 30.38203733789923,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 13.815003669610348,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        40,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.26689107022988,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 12.260815756779184,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        40,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.26689107022988,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 12.260815756779184,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        40,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.26689107022988,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 12.260815756779184,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        8,
+        40,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.26689107022988,
+      "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+      "false_alarms_per_hour_alert_clips_only": 12.260815756779184,
+      "drowsy_detection_rate": 0.9736842105263158,
+      "median_time_to_first_alert_s": 21.8
+    },
+    {
+      "params": [
+        12,
+        8,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 28.630911266550573,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.915440665038926,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        8,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 28.630911266550573,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.915440665038926,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        8,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 28.630911266550573,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.915440665038926,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        8,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 28.630911266550573,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.915440665038926,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        15,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.091778463095014,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.052002935688279,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        15,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.091778463095014,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.052002935688279,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        15,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.091778463095014,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.052002935688279,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        15,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 26.091778463095014,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 11.052002935688279,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        25,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 22.852195231099998,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 10.015877660467503,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        25,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 22.852195231099998,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 10.015877660467503,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        25,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 22.852195231099998,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 10.015877660467503,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        25,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 22.852195231099998,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 10.015877660467503,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        40,
+        15
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 20.400618731211875,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 8.979752385246726,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        40,
+        30
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 20.400618731211875,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 8.979752385246726,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        40,
+        45
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 20.400618731211875,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 8.979752385246726,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    },
+    {
+      "params": [
+        12,
+        40,
+        90
+      ],
+      "n_clips": 112,
+      "n_not_drowsy_clips": 74,
+      "n_drowsy_clips": 38,
+      "false_alarms_per_hour": 20.400618731211875,
+      "fraction_not_drowsy_clips_with_alarm": 0.6756756756756757,
+      "false_alarms_per_hour_alert_clips_only": 8.979752385246726,
+      "drowsy_detection_rate": 0.9473684210526315,
+      "median_time_to_first_alert_s": 23.6
+    }
+  ],
+  "selected": {
+    "params": [
+      8,
+      40,
+      15
+    ],
+    "n_clips": 112,
+    "n_not_drowsy_clips": 74,
+    "n_drowsy_clips": 38,
+    "false_alarms_per_hour": 26.26689107022988,
+    "fraction_not_drowsy_clips_with_alarm": 0.7027027027027027,
+    "false_alarms_per_hour_alert_clips_only": 12.260815756779184,
+    "drowsy_detection_rate": 0.9736842105263158,
+    "median_time_to_first_alert_s": 21.8
+  }
+}
