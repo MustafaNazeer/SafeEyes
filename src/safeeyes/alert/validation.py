@@ -10,15 +10,22 @@ labeled clips is reported alongside.
 
 from __future__ import annotations
 
+import argparse
 import itertools
+import json
 import math
 import statistics
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import cast
 
+import numpy as np
+
+from safeeyes.alert.pipeline import Classifier
 from safeeyes.alert.replay import TierEvent, replay_levels
 from safeeyes.alert.state_machine import AlertStateMachine, AlertTier
+from safeeyes.data.manifest import read_manifest
 
 NOT_DROWSY_LABELS = ("alert", "low_vigilance")
 DROWSY_LABEL = "drowsy"
@@ -156,3 +163,81 @@ def select_parameters(
         )
 
     return min(eligible, key=sort_key)
+
+
+def load_classifier(checkpoint: str, n_features: int = 5, n_classes: int = 3) -> Classifier:
+    import torch
+
+    from safeeyes.alert.pipeline import make_gru_classifier
+    from safeeyes.temporal.model import TemporalGRU
+
+    model = TemporalGRU(n_features=n_features, num_classes=n_classes)
+    model.load_state_dict(torch.load(checkpoint, map_location="cpu", weights_only=True))
+    return make_gru_classifier(model)
+
+
+def _load_level_sequences(
+    manifest_paths: Sequence[str], feature_root: str, classifier: Classifier, window_size: int
+) -> list[tuple[str, str, list[int]]]:
+    from safeeyes.alert.replay import classify_sequence
+
+    sequences = []
+    for manifest_path in manifest_paths:
+        for sample in read_manifest(manifest_path):
+            path = (Path(feature_root) / sample.sample_id).with_suffix(".npy")
+            features = np.load(path)
+            levels = classify_sequence(features, classifier, window_size)
+            sequences.append((sample.sample_id, sample.label, levels.tolist()))
+    return sequences
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Measure alert level behavior on labeled feature sequences."
+    )
+    parser.add_argument("--mode", choices=("sweep", "evaluate"), required=True)
+    parser.add_argument("--manifest", nargs="+", required=True)
+    parser.add_argument("--feature-root", required=True)
+    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--window", type=int, default=150)
+    parser.add_argument("--fps", type=float, required=True)
+    parser.add_argument(
+        "--params", type=int, nargs=3, default=None,
+        help="escalate, de_escalate, alarm_after (evaluate mode)",
+    )
+    parser.add_argument("--out", required=True)
+    args = parser.parse_args(argv)
+
+    classifier = load_classifier(args.checkpoint)
+    sequences = _load_level_sequences(
+        args.manifest, args.feature_root, classifier, args.window
+    )
+    if args.mode == "sweep":
+        rows = sweep_parameters(sequences, SWEEP_GRID, AlertTier.AUDIBLE, args.fps)
+        payload = {
+            "fps": args.fps,
+            "checkpoint": Path(args.checkpoint).name,
+            "threshold": "AUDIBLE",
+            "rows": rows,
+            "selected": select_parameters(rows),
+        }
+    else:
+        params = tuple(args.params if args.params else DEFAULT_PARAMS)
+        machine_rows = sweep_parameters(sequences, [params], AlertTier.AUDIBLE, args.fps)
+        thresholds = {}
+        for tier in (AlertTier.VISUAL, AlertTier.AUDIBLE, AlertTier.ALARM):
+            thresholds[tier.name] = sweep_parameters(
+                sequences, [params], tier, args.fps
+            )[0]
+        payload = {
+            "fps": args.fps,
+            "checkpoint": Path(args.checkpoint).name,
+            "params": list(params),
+            "thresholds": thresholds,
+            "headline": machine_rows[0],
+        }
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2) + "\n")
+    print(f"wrote {out}")
+    return 0

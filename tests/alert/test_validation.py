@@ -1,3 +1,6 @@
+import json
+
+import numpy as np
 import pytest
 
 from safeeyes.alert.replay import TierEvent
@@ -121,3 +124,33 @@ def test_select_parameters_rejects_baseline_without_drowsy_clips():
     rows = [_row(DEFAULT_PARAMS, None, 1.0, None)]
     with pytest.raises(ValueError):
         select_parameters(rows)
+
+
+def test_cli_evaluate_writes_metrics_json(tmp_path, monkeypatch):
+    from safeeyes.alert import validation
+
+    feature_root = tmp_path / "features"
+    (feature_root / "s1").mkdir(parents=True)
+    np.save(feature_root / "s1" / "clip.npy", np.zeros((10, 5)))
+    manifest = tmp_path / "test.csv"
+    manifest.write_text(
+        "sample_id,subject_id,label\ns1/clip.mov,s1,alert\n"
+    )
+    out = tmp_path / "metrics.json"
+    monkeypatch.setattr(
+        validation, "load_classifier", lambda checkpoint, **kw: (lambda w: 0)
+    )
+    validation.main(
+        [
+            "--mode", "evaluate",
+            "--manifest", str(manifest),
+            "--feature-root", str(feature_root),
+            "--checkpoint", "unused.pt",
+            "--params", "5", "15", "45",
+            "--fps", "10.0",
+            "--out", str(out),
+        ]
+    )
+    payload = json.loads(out.read_text())
+    assert payload["params"] == [5, 15, 45]
+    assert "AUDIBLE" in payload["thresholds"]
