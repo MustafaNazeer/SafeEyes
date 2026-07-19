@@ -115,3 +115,9 @@ def test_select_parameters_tie_breaks_on_faster_first_alert():
 def test_select_parameters_requires_baseline_row():
     with pytest.raises(ValueError):
         select_parameters([_row((3, 8, 15), 0.9, 1.0, 5.0)])
+
+
+def test_select_parameters_rejects_baseline_without_drowsy_clips():
+    rows = [_row(DEFAULT_PARAMS, None, 1.0, None)]
+    with pytest.raises(ValueError):
+        select_parameters(rows)

@@ -138,6 +138,8 @@ def select_parameters(
     )
     if baseline is None:
         raise ValueError("sweep rows must include the default parameters as baseline")
+    if baseline["drowsy_detection_rate"] is None:
+        raise ValueError("baseline row has no drowsy clips to anchor the detection rate")
     baseline_detection = cast(float, baseline["drowsy_detection_rate"])
     eligible: list[dict[str, object]] = [
         r
