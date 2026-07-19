@@ -4,8 +4,8 @@ A false alarm is an excursion of the alert tier to at or above a threshold tier
 during a clip whose label says the driver was not drowsy. Metrics are reported
 per threshold tier so the headline (AUDIBLE or above) sits beside the stricter
 and looser definitions. Low vigilance clips count as not drowsy, mirroring the
-committed window level false alarm definition; the alert-only variant is
-reported alongside.
+committed window level false alarm definition; the variant restricted to alert
+labeled clips is reported alongside.
 """
 
 from __future__ import annotations
