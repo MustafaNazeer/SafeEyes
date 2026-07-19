@@ -1,4 +1,3 @@
-"""tests/alert/test_replay.py"""
 import numpy as np
 
 from safeeyes.alert.replay import TierEvent, classify_sequence, replay_levels
