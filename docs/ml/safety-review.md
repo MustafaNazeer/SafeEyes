@@ -31,12 +31,16 @@ Two honest qualifications:
   minimum duration and applies hysteresis, so isolated false positive windows do
   not fire an alarm. The effective nuisance rate at the alert level is therefore
   lower than that per window rate.
-- That effective alert level rate has not yet been measured on labeled
-  sequences. The debounce and hysteresis thresholds are the knobs that set it,
-  and they have not been tuned against real footage. Until that measurement
-  exists, the per window rate is the honest number to quote and the lower alert
-  level rate is a design expectation, not a measured result. This is recorded here
-  as an open item, not a claim.
+- That effective alert level rate has now been measured on labeled sequences
+  and is reported in [alert-validation.md](alert-validation.md): after tuning
+  the debounce and hysteresis on the train subjects under a rule fixed in
+  advance, the frozen parameters produced 15.92 false audible alarms per hour on
+  the held out not drowsy test footage, beside a 100.0% drowsy clip detection
+  rate (9 of 9) with a median 24.2 s to first audible alert. The design
+  expectation held in direction (the alert stage absorbs isolated false windows)
+  but not in magnitude: the measured rate is orders beyond what a driver would
+  tolerate, so the measurement strengthens the case against any reliability
+  claim rather than weakening it.
 
 A per window false alarm rate of one in seven is high in absolute terms. It is
 acceptable only because the system is presented as an assistive prototype and the
@@ -59,10 +63,14 @@ The four tier escalation, the minimum duration debounce, and the asymmetric
 hysteresis are the right structure for keeping nuisance alarms low without
 silencing genuine warnings. The honest tension, that suppressing false alarms
 also slows the response to real drowsiness, is stated in the alert behavior
-document rather than hidden. The thresholds are parameters meant to be tuned
-against real footage, which has not happened yet; that tuning, and the measured
-alert level false alarm rate it would produce, is the main open item from this
-review.
+document rather than hidden. The thresholds have now been tuned against labeled
+footage under a preregistered selection rule, and the resulting alert level
+false alarm rate is measured and reported in
+[alert-validation.md](alert-validation.md). Tuning halved the train side rate at
+an unchanged detection rate, which is real but nowhere near sufficient: debounce
+cannot rescue a per window false alarm rate of 0.100 into a usable alert level
+rate. The shipped runtime defaults are deliberately unchanged until the tuned
+values are reviewed.
 
 ## Framing and claims
 
@@ -107,7 +115,12 @@ a real driver.
 
 Open items for a future pass:
 
-- Measure the effective alert level false alarm rate on labeled sequences, after
-  tuning the debounce and hysteresis thresholds against real footage.
+- Decide whether the tuned state machine parameters replace the shipped runtime
+  defaults; the measured comparison is in
+  [alert-validation.md](alert-validation.md). Either way the alert level false
+  alarm rate remains far too high for reliance, and the blocked claims above
+  stand on the measured evidence.
 - Treat the current figures as a single subject independent split over 48
-  subjects (folds 1 to 4 of UTA-RLDD), not a cross validated estimate.
+  subjects (folds 1 to 4 of UTA-RLDD), not a cross validated estimate. The
+  alert level test set is 29 clips from 10 subjects; its 100.0% detection rate
+  is a small sample statement, not a general claim.

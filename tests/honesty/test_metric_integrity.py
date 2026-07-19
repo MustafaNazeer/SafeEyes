@@ -5,6 +5,7 @@ and the temporal accuracy must never appear without its false alarm rate beside 
 import pytest
 
 from ._docs import (
+    ALERT_VALIDATION,
     DISTRACTION_CARD,
     load_docs,
     load_metric,
@@ -60,10 +61,59 @@ CLAIMS = [
     ("temporal-cross-dmd-metrics.json", ("drowsy_recall",), TEMPORAL_METHODOLOGY, "pct", 1),
     ("temporal-cross-dmd-metrics.json", ("false_alarm_rate",), TEMPORAL_METHODOLOGY, "ratio", 3),
     ("temporal-cross-dmd-metrics.json", ("overall_accuracy",), TEMPORAL_METHODOLOGY, "pct", 1),
+    (
+        "alert-validation-metrics.json",
+        ("thresholds", "AUDIBLE", "false_alarms_per_hour"),
+        ALERT_VALIDATION,
+        "ratio",
+        2,
+    ),
+    (
+        "alert-validation-metrics.json",
+        ("thresholds", "AUDIBLE", "false_alarms_per_hour_alert_clips_only"),
+        ALERT_VALIDATION,
+        "ratio",
+        2,
+    ),
+    (
+        "alert-validation-metrics.json",
+        ("thresholds", "AUDIBLE", "fraction_not_drowsy_clips_with_alarm"),
+        ALERT_VALIDATION,
+        "pct",
+        1,
+    ),
+    (
+        "alert-validation-metrics.json",
+        ("thresholds", "AUDIBLE", "drowsy_detection_rate"),
+        ALERT_VALIDATION,
+        "pct",
+        1,
+    ),
+    (
+        "alert-validation-metrics.json",
+        ("thresholds", "VISUAL", "false_alarms_per_hour"),
+        ALERT_VALIDATION,
+        "ratio",
+        2,
+    ),
+    ("yawdd-yawn-metrics.json", ("threshold",), ALERT_VALIDATION, "ratio", 3),
+    ("yawdd-yawn-metrics.json", ("mirror", "precision"), ALERT_VALIDATION, "pct", 1),
+    ("yawdd-yawn-metrics.json", ("mirror", "recall"), ALERT_VALIDATION, "pct", 1),
+    (
+        "yawdd-yawn-metrics.json",
+        ("mirror", "talking_false_positive_rate"),
+        ALERT_VALIDATION,
+        "pct",
+        1,
+    ),
+    ("yawdd-yawn-metrics.json", ("dash_recall_only", "recall"), ALERT_VALIDATION, "pct", 1),
 ]
 
 TEMPORAL_ACCURACY = "47.1%"
 TEMPORAL_FALSE_ALARM_RATE = "0.100"
+
+ALERT_DETECTION_RATE = "100.0%"
+ALERT_FALSE_ALARMS_PER_HOUR = "15.92"
 
 
 def _render(value: float, kind: str, decimals: int) -> str:
@@ -98,6 +148,19 @@ def test_temporal_accuracy_is_never_reported_without_false_alarm_rate() -> None:
     ]
     assert offenders == [], (
         f"these public docs state the temporal accuracy without its false alarm rate: {offenders}"
+    )
+
+
+def test_alert_detection_is_never_reported_without_false_alarms_per_hour() -> None:
+    # Honesty rule: the alert level detection rate never appears without the
+    # alert level false alarm rate beside it in the same document.
+    offenders = [
+        name
+        for name, text in load_docs()
+        if ALERT_DETECTION_RATE in text and ALERT_FALSE_ALARMS_PER_HOUR not in text
+    ]
+    assert offenders == [], (
+        f"docs stating the alert detection rate without its false alarm rate: {offenders}"
     )
 
 

@@ -17,6 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # so the metric-integrity pins and any future honesty guard reference one source.
 DISTRACTION_CARD = "docs/ml/distraction-model-card.md"
 
+# The alert level validation and YawDD results doc, pinned the same way.
+ALERT_VALIDATION = "docs/ml/alert-validation.md"
+
 
 def public_docs() -> list[Path]:
     """Tracked Markdown that ships publicly: the README and the docs/ tree.

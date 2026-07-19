@@ -73,11 +73,19 @@ it into fixed, subject independent splits.
 
 ## YawDD (Yawning Detection Dataset)
 
-- **Use:** held out validation of the mouth aspect ratio yawn signal (second
-  version work in development; no reported number uses YawDD yet).
-- **Contents:** roughly 351 driver videos in real, varying illumination, from
-  frontal and mirror camera positions, covering yawning, talking, and normal
-  driving.
+- **Use:** held out validation of the mouth aspect ratio yawn signal. The first
+  reported YawDD numbers are in
+  [alert-validation.md](../ml/alert-validation.md), scored at a detection
+  threshold fixed from UTA train statistics before any YawDD data was read.
+- **Contents:** 349 driver videos in real, varying illumination: 320 mirror
+  camera videos labeled by activity in the filename (normal, talking, yawning,
+  and combined talking and yawning), and 29 dash camera videos that each contain
+  all activities in one recording. The working copy's inventory was verified
+  against the official distribution before any number was published.
+- **Citation (required by the license whenever the dataset is used):**
+  S. Abtahi, M. Omidyeganeh, S. Shirmohammadi, and B. Hariri, "YawDD: A Yawning
+  Detection Dataset", Proc. ACM Multimedia Systems, Singapore, March 19 to 21,
+  2014, pp. 337 to 342.
 - **Source:** IEEE DataPort at
   https://ieee-dataport.org/open-access/yawdd-yawning-detection-dataset. Open
   access on a free account login; access is registered and held by the author.
