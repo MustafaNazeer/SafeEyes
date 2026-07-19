@@ -69,8 +69,9 @@ false alarm rate is measured and reported in
 [alert-validation.md](alert-validation.md). Tuning halved the train side rate at
 an unchanged detection rate, which is real but nowhere near sufficient: debounce
 cannot rescue a per window false alarm rate of 0.100 into a usable alert level
-rate. The shipped runtime defaults are deliberately unchanged until the tuned
-values are reviewed.
+rate. The runtime defaults now adopt the tuned escalation and de escalation
+values with the conservative alarm persistence retained, as recorded in
+[alert-validation.md](alert-validation.md).
 
 ## Framing and claims
 
@@ -115,11 +116,11 @@ a real driver.
 
 Open items for a future pass:
 
-- Decide whether the tuned state machine parameters replace the shipped runtime
-  defaults; the measured comparison is in
-  [alert-validation.md](alert-validation.md). Either way the alert level false
-  alarm rate remains far too high for reliance, and the blocked claims above
-  stand on the measured evidence.
+- The tuned state machine parameters were adopted as the runtime defaults
+  (escalation 8, de escalation 40, alarm persistence kept at 45); the measured
+  comparison is in [alert-validation.md](alert-validation.md). The alert level
+  false alarm rate remains far too high for reliance, and the blocked claims
+  above stand on the measured evidence.
 - Treat the current figures as a single subject independent split over 48
   subjects (folds 1 to 4 of UTA-RLDD), not a cross validated estimate. The
   alert level test set is 29 clips from 10 subjects; its 100.0% detection rate

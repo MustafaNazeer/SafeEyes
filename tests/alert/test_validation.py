@@ -71,7 +71,10 @@ def test_summarize_replays_rejects_unknown_label():
         summarize_replays([ClipReplay("x", "sleepy", 10, [])], AlertTier.AUDIBLE, fps=10.0)
 
 
-def test_default_params_match_live_loop_and_are_in_grid():
+def test_sweep_baseline_is_the_pretuning_live_defaults_and_in_grid():
+    # DEFAULT_PARAMS anchors the preregistered selection rule to the live loop
+    # defaults as they stood when the sweep ran; the runtime later adopted the
+    # tuned values, but the baseline is a historical constant and never moves.
     assert DEFAULT_PARAMS == (5, 15, 45)
     assert DEFAULT_PARAMS in SWEEP_GRID
 

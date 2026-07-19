@@ -68,8 +68,12 @@ They confirm the safety review's expectation in one direction (the alert stage
 does absorb isolated false windows: 15.92 per hour is well below the raw window
 false alarm rate would imply) and refute any hope in the other: debounce tuning
 alone cannot rescue a per window false alarm rate of 0.100 into a usable alert
-level rate. The tuned parameters are recorded here and in the sweep JSON; the
-shipped runtime defaults are unchanged pending that discussion.
+level rate. Following this measurement the runtime defaults adopt the tuned
+escalation and de escalation values (8 and 40) while keeping the alarm
+persistence of 45; the swept value of 15 is excluded as the tie resolution
+artifact described above, so the AUDIBLE tier behavior of the deployed loop
+matches the measured rows exactly and the ALARM tier keeps its conservative
+timing.
 
 ## Method: YawDD yawn signal validation
 
