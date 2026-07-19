@@ -10,12 +10,15 @@ labeled clips is reported alongside.
 
 from __future__ import annotations
 
+import itertools
+import math
 import statistics
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import cast
 
-from safeeyes.alert.replay import TierEvent
-from safeeyes.alert.state_machine import AlertTier
+from safeeyes.alert.replay import TierEvent, replay_levels
+from safeeyes.alert.state_machine import AlertStateMachine, AlertTier
 
 NOT_DROWSY_LABELS = ("alert", "low_vigilance")
 DROWSY_LABEL = "drowsy"
@@ -90,3 +93,64 @@ def summarize_replays(
             statistics.median(f / fps for f in detections) if detections else None
         ),
     }
+
+
+DEFAULT_PARAMS = (5, 15, 45)
+
+SWEEP_GRID = [
+    (e, d, a)
+    for e, d, a in itertools.product((3, 5, 8, 12), (8, 15, 25, 40), (15, 30, 45, 90))
+]
+
+
+def sweep_parameters(
+    level_sequences: Sequence[tuple[str, str, Sequence[int]]],
+    grid: Sequence[tuple[int, int, int]],
+    threshold: AlertTier,
+    fps: float,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for escalate, de_escalate, alarm_after in grid:
+        machine = AlertStateMachine(
+            escalate_steps=escalate,
+            de_escalate_steps=de_escalate,
+            alarm_after=alarm_after,
+        )
+        clips = [
+            ClipReplay(sample_id, label, len(levels), replay_levels(levels, machine))
+            for sample_id, label, levels in level_sequences
+        ]
+        summary = summarize_replays(clips, threshold, fps)
+        rows.append({"params": [escalate, de_escalate, alarm_after], **summary})
+    return rows
+
+
+def select_parameters(
+    rows: Sequence[dict[str, object]], default: tuple[int, int, int] = DEFAULT_PARAMS
+) -> dict[str, object]:
+    """The pre-registered rule: among rows whose drowsy detection rate is at
+    least the default parameters' rate, lowest false alarms per hour wins; ties
+    break on faster median time to first alert. Fixed before any
+    sweep ran, so the choice cannot be fished post hoc.
+    """
+    baseline = next(
+        (r for r in rows if tuple(cast(list[int], r["params"])) == tuple(default)), None
+    )
+    if baseline is None:
+        raise ValueError("sweep rows must include the default parameters as baseline")
+    baseline_detection = cast(float, baseline["drowsy_detection_rate"])
+    eligible: list[dict[str, object]] = [
+        r
+        for r in rows
+        if r["drowsy_detection_rate"] is not None
+        and cast(float, r["drowsy_detection_rate"]) >= baseline_detection
+    ]
+
+    def sort_key(row: dict[str, object]) -> tuple[float, float]:
+        median = cast(float | None, row["median_time_to_first_alert_s"])
+        return (
+            cast(float, row["false_alarms_per_hour"]),
+            median if median is not None else math.inf,
+        )
+
+    return min(eligible, key=sort_key)
