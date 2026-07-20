@@ -1,0 +1,33 @@
+{
+  "baseline_mar": {
+    "precision": 0.5283018867924528,
+    "recall": 1.0,
+    "tp": 28,
+    "fp": 25,
+    "fn": 0,
+    "talking_false_positive_rate": 0.7272727272727273
+  },
+  "baseline_duration": {
+    "precision": 0.896551724137931,
+    "recall": 0.9285714285714286,
+    "tp": 26,
+    "fp": 3,
+    "fn": 2,
+    "talking_false_positive_rate": 0.13636363636363635
+  },
+  "cnn": {
+    "precision": 0.875,
+    "recall": 1.0,
+    "tp": 28,
+    "fp": 4,
+    "fn": 0,
+    "talking_false_positive_rate": 0.18181818181818182
+  },
+  "n_videos": 75,
+  "n_subjects": 20,
+  "threshold": 0.616703,
+  "min_duration": 14,
+  "tau": 0.26,
+  "deploy_decision": "blocked_baseline",
+  "test_manifest": "splits/yawdd/mirror-test.csv"
+}
