@@ -3,14 +3,27 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import safeeyes.models.eval_yawn as eval_yawn_module
+from safeeyes.data.splits import Sample
 from safeeyes.models.eval_yawn import (
     PRECISION_BAR,
     RECALL_DROP_ALLOWANCE,
     RECALL_FLOOR,
     deploy_decision,
+    evaluate_yawn,
     score_detector,
 )
-from safeeyes.models.yawn_events import proposal_events
+from safeeyes.models.yawn_events import proposal_events, training_events
+
+
+def test_preregistered_bars_are_pinned_to_their_exact_values():
+    # These are not self referential: they are literal values, written down
+    # before the test subjects were scored. A test that imported the
+    # constants and compared them to themselves would pass even if the
+    # constants drifted, so the bar is spelled out here instead.
+    assert PRECISION_BAR == 0.70
+    assert RECALL_FLOOR == 0.90
+    assert RECALL_DROP_ALLOWANCE == 0.05
 
 
 def test_deploy_requires_both_conditions():
@@ -139,3 +152,70 @@ def test_proposal_events_ignores_the_video_label():
     # yield the same two events.
     assert [(e.start, e.end) for e in labelled] == [(0, 1), (3, 5)]
     assert [(e.start, e.end) for e in labelled] == [(e.start, e.end) for e in unlabelled]
+
+
+def _stub_build_event_features(captured):
+    def fake(samples, crop_root, backbone, transform, *, n_frames, events_builder):
+        captured["events_builder"] = events_builder
+        return (
+            np.empty((0, 0), dtype=np.float32),
+            np.empty((0,), dtype=np.int64),
+            [],
+        )
+
+    return fake
+
+
+def _stub_evaluate_yawn_dependencies(monkeypatch, captured):
+    monkeypatch.setattr(
+        eval_yawn_module, "build_event_features", _stub_build_event_features(captured)
+    )
+    monkeypatch.setattr(
+        eval_yawn_module,
+        "load_yawn_checkpoint",
+        lambda checkpoint: (None, {"tau": 0.5, "n_frames": 5}),
+    )
+    monkeypatch.setattr(eval_yawn_module, "_frozen_backbone", lambda name: (None, 0))
+
+
+def test_evaluate_yawn_pins_the_leak_free_proposal_events_builder(monkeypatch):
+    # Finding: the evaluation must reach build_event_features with the label
+    # blind proposal_events builder, never the label aware training_events
+    # one, because at test time no label exists to pick events with. This
+    # test pins the call site itself, so it fails if evaluate_yawn is ever
+    # edited to pass the label aware builder, even though every other yawn
+    # test in this repo would keep passing.
+    captured: dict[str, object] = {}
+    _stub_evaluate_yawn_dependencies(monkeypatch, captured)
+
+    test_videos = [("n1.avi", "Normal", np.array([0.0]))]
+    samples = [Sample(sample_id="n1.avi", subject_id="Female1", label="Normal")]
+
+    evaluate_yawn(
+        test_videos, samples, crop_root="unused", checkpoint="unused", baseline_min_duration=1
+    )
+
+    assert captured["events_builder"] is proposal_events
+    assert captured["events_builder"] is not training_events
+
+
+def test_evaluate_yawn_derives_n_subjects_from_the_samples_argument(monkeypatch):
+    captured: dict[str, object] = {}
+    _stub_evaluate_yawn_dependencies(monkeypatch, captured)
+
+    test_videos = [
+        ("a.avi", "Normal", np.array([0.0])),
+        ("b.avi", "Normal", np.array([0.0])),
+        ("c.avi", "Normal", np.array([0.0])),
+    ]
+    samples = [
+        Sample(sample_id="a.avi", subject_id="Female1", label="Normal"),
+        Sample(sample_id="b.avi", subject_id="Female1", label="Normal"),
+        Sample(sample_id="c.avi", subject_id="Male2", label="Normal"),
+    ]
+
+    metrics = evaluate_yawn(
+        test_videos, samples, crop_root="unused", checkpoint="unused", baseline_min_duration=1
+    )
+
+    assert metrics["n_subjects"] == 2

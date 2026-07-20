@@ -117,6 +117,7 @@ def score_detector(
 
 def evaluate_yawn(
     test_videos: Sequence[Video],
+    samples: Sequence[Sample],
     crop_root: str | Path,
     checkpoint: str | Path,
     baseline_min_duration: int,
@@ -129,6 +130,10 @@ def evaluate_yawn(
     whose mouth aspect ratio never crosses the threshold proposes no event,
     scores 0.0, and counts as a video that did not fire, never as a video that
     was dropped.
+
+    ``samples`` is the same manifest population read with subject ids intact,
+    used only to derive ``n_subjects`` so a library caller of this function
+    gets a fully populated result, not a key it must fill in itself.
     """
     head, metadata = load_yawn_checkpoint(checkpoint)
     tau = float(metadata["tau"])
@@ -140,13 +145,15 @@ def evaluate_yawn(
     # subject_id is a placeholder here. build_event_features only forwards it
     # onto YawnEvent, and nothing in this evaluation reads it: precision and
     # recall come from the manifest label, and subject level aggregation is not
-    # part of the video level bar.
-    samples = [
+    # part of the video level bar. Named apart from the real ``samples``
+    # parameter above, which carries the actual subject ids ``n_subjects``
+    # needs and must not be shadowed by this placeholder.
+    event_samples = [
         Sample(sample_id=sample_id, subject_id="", label=label)
         for sample_id, label, _mar in test_videos
     ]
     features, _labels, events = build_event_features(
-        samples,
+        event_samples,
         crop_root,
         backbone,
         transform,
@@ -180,10 +187,7 @@ def evaluate_yawn(
         "baseline_duration": baseline_duration,
         "cnn": cnn,
         "n_videos": len(test_videos),
-        # Video tuples carry no subject id, so the caller that read the
-        # manifest fills this in. It is declared here so the key order of the
-        # published metrics file does not depend on who sets it.
-        "n_subjects": None,
+        "n_subjects": len({sample.subject_id for sample in samples}),
         "threshold": MAR_YAWN_THRESHOLD,
         "min_duration": baseline_min_duration,
         "tau": tau,
@@ -207,9 +211,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     test_videos = load_mirror_mar(args.test_manifest, args.feature_root)
 
     metrics = evaluate_yawn(
-        test_videos, args.crop_root, args.checkpoint, baseline_min_duration=args.min_duration
+        test_videos,
+        samples,
+        args.crop_root,
+        args.checkpoint,
+        baseline_min_duration=args.min_duration,
     )
-    metrics["n_subjects"] = len({sample.subject_id for sample in samples})
     metrics["test_manifest"] = str(args.test_manifest)
 
     out = Path(args.out)

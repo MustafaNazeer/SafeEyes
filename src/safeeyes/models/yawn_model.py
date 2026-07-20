@@ -41,7 +41,7 @@ from safeeyes.data.yawdd import is_yawning
 from safeeyes.data.yawdd_splits import carve_validation
 from safeeyes.models.train_distraction import BACKBONES, build_transform, default_size
 from safeeyes.models.yawn_decision import select_tau, video_scores
-from safeeyes.models.yawn_events import YawnEvent, training_events
+from safeeyes.models.yawn_events import YawnEvent, proposal_events, training_events
 from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.temporal.yawn_validation import CROP_MARGIN_STEPS, MAR_YAWN_THRESHOLD
 
@@ -286,15 +286,19 @@ def build_event_features(
     transform: Callable[[np.ndarray], torch.Tensor],
     *,
     n_frames: int = N_FRAMES,
-    events_builder: EventsBuilder = training_events,
+    events_builder: EventsBuilder = proposal_events,
 ) -> tuple[np.ndarray, np.ndarray, list[YawnEvent]]:
     """Assemble one pooled feature vector and label per candidate event.
 
     ``events_builder`` decides which runs become events. The default,
-    ``training_events``, is the label aware training rule described below.
-    Held out evaluation passes ``proposal_events`` instead, because at
-    inference time no label exists to select events with; the returned label
-    array is then a placeholder the caller ignores.
+    ``proposal_events``, is the label blind rule a held out or live video must
+    use, because at inference time no label exists to select events with; the
+    returned label array is then a placeholder the caller ignores. A caller
+    that trains on labeled videos must opt into the label aware rule
+    explicitly, by passing ``events_builder=training_events``, described
+    below. Defaulting to the label blind rule means an omitted keyword
+    argument here fails safe: it cannot silently reintroduce the label a real
+    detector never sees.
 
     Event labels come from ``training_events``: the longest event in a
     Yawning or Talking&Yawning video is the sole positive from that video,
@@ -359,7 +363,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     inner_train_samples, val_samples = carve_validation(outer_train_samples, seed=args.seed)
 
     train_features, train_labels, _train_events = build_event_features(
-        inner_train_samples, args.crop_root, backbone, transform
+        inner_train_samples,
+        args.crop_root,
+        backbone,
+        transform,
+        events_builder=training_events,
     )
 
     head = train_yawn_head(
@@ -371,7 +379,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     val_features, _val_labels, val_events = build_event_features(
-        val_samples, args.crop_root, backbone, transform
+        val_samples,
+        args.crop_root,
+        backbone,
+        transform,
+        events_builder=training_events,
     )
     val_event_scores = score_events(head, val_features)
     val_video_scores = video_scores(val_events, val_event_scores)
