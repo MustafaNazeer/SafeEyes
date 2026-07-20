@@ -9,12 +9,10 @@ scored, and never revised after. YawDD is therefore a purely held out test set.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import cast
 
 import numpy as np
 
 from safeeyes.data.yawdd import is_yawning
-from safeeyes.temporal.features import count_onsets
 
 
 def derive_mar_threshold(mar_values: np.ndarray, percentile: float = 99.0) -> float:
@@ -27,15 +25,32 @@ def derive_mar_threshold(mar_values: np.ndarray, percentile: float = 99.0) -> fl
 MAR_YAWN_THRESHOLD: float = 0.616703
 
 
-def video_predicts_yawning(mar: np.ndarray, threshold: float) -> bool:
+def event_runs(mar: np.ndarray, threshold: float) -> list[tuple[int, int]]:
+    values = np.asarray(mar, dtype=float)
+    runs: list[tuple[int, int]] = []
+    start: int | None = None
+    for index, value in enumerate(values):
+        if value >= threshold and start is None:
+            start = index
+        elif value < threshold and start is not None:
+            runs.append((start, index - 1))
+            start = None
+    if start is not None:
+        runs.append((start, int(values.size) - 1))
+    return runs
+
+
+def video_predicts_yawning(mar: np.ndarray, threshold: float, min_duration: int = 1) -> bool:
+    if min_duration < 1:
+        raise ValueError(f"min_duration must be positive, got {min_duration}")
     values = np.asarray(mar, dtype=float)
     if values.size == 0:
         return False
-    return count_onsets(cast(Sequence[float], values), threshold, "above") >= 1
+    return any(end - start + 1 >= min_duration for start, end in event_runs(values, threshold))
 
 
 def score_videos(
-    videos: Sequence[tuple[str, np.ndarray]], threshold: float
+    videos: Sequence[tuple[str, np.ndarray]], threshold: float, min_duration: int = 1
 ) -> dict[str, object]:
     per_category: dict[str, dict[str, int]] = {}
     tp = fp = fn = 0
@@ -43,7 +58,7 @@ def score_videos(
     for label, mar in videos:
         actions = label.split("&")
         truth = is_yawning(actions)
-        predicted = video_predicts_yawning(mar, threshold)
+        predicted = video_predicts_yawning(mar, threshold, min_duration)
         entry = per_category.setdefault(label, {"n": 0, "predicted_yawning": 0})
         entry["n"] += 1
         entry["predicted_yawning"] += int(predicted)
@@ -63,6 +78,7 @@ def score_videos(
         "recall": tp / (tp + fn) if (tp + fn) else None,
         "per_category": per_category,
         "talking_false_positive_rate": talking_fp / talking_n if talking_n else None,
+        "min_duration": min_duration,
     }
 
 
