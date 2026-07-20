@@ -24,6 +24,17 @@ def derive_mar_threshold(mar_values: np.ndarray, percentile: float = 99.0) -> fl
 
 MAR_YAWN_THRESHOLD: float = 0.616703
 
+# The number of feature rows on each side of a gated row that
+# safeeyes.data.yawdd_crops guarantees a saved crop for (its margin_steps
+# default), and so the maximum distance safeeyes.models.yawn_model accepts
+# when substituting the nearest available crop for a missing exact row. Named
+# here, in a module both already import for MAR_YAWN_THRESHOLD, because
+# yawdd_crops.py is a privacy allowlisted import leaf that nothing else in the
+# package may import from: the two modules cannot share this value by one
+# importing it from the other, so it lives in the module they both already
+# reach.
+CROP_MARGIN_STEPS: int = 5
+
 
 def event_runs(mar: np.ndarray, threshold: float) -> list[tuple[int, int]]:
     values = np.asarray(mar, dtype=float)

@@ -49,7 +49,7 @@ from safeeyes.perception.extract import (
 )
 from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.perception.mouth_crop import crop_mouth
-from safeeyes.temporal.yawn_validation import MAR_YAWN_THRESHOLD
+from safeeyes.temporal.yawn_validation import CROP_MARGIN_STEPS, MAR_YAWN_THRESHOLD
 
 __all__ = ["extract_clip_crops", "extract_manifest_crops", "extract_video_crops"]
 
@@ -69,7 +69,7 @@ def extract_clip_crops(
     to_features: FeatureFn | None = None,
     frame_step: int = 3,
     gate: float = DEFAULT_GATE,
-    margin_steps: int = 5,
+    margin_steps: int = CROP_MARGIN_STEPS,
     size: int = 96,
 ) -> dict[str, np.ndarray]:
     """Features, their video frame indices, and mouth crops near gated rows.
@@ -161,7 +161,7 @@ def extract_manifest_crops(
     to_features: FeatureFn | None = None,
     frame_step: int = 3,
     gate: float = DEFAULT_GATE,
-    margin_steps: int = 5,
+    margin_steps: int = CROP_MARGIN_STEPS,
     size: int = 96,
     skip_existing: bool = True,
     limit: int | None = None,
@@ -228,7 +228,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
-        "--margin-steps", type=int, default=5, help="rows of crops kept on each side of a gate hit"
+        "--margin-steps",
+        type=int,
+        default=CROP_MARGIN_STEPS,
+        help="rows of crops kept on each side of a gate hit",
     )
     parser.add_argument("--size", type=int, default=96, help="square crop edge in pixels")
     parser.add_argument(

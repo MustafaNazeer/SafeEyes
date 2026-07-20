@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import inspect
+
 import numpy as np
 import pytest
 import torch
 from torch import nn
 
+from safeeyes.data.yawdd_crops import extract_clip_crops, extract_manifest_crops
 from safeeyes.models.yawn_events import YawnEvent
 from safeeyes.models.yawn_model import (
     MAX_SUBSTITUTION_ROWS,
@@ -15,6 +18,7 @@ from safeeyes.models.yawn_model import (
     score_events,
     train_yawn_head,
 )
+from safeeyes.temporal.yawn_validation import CROP_MARGIN_STEPS
 
 
 def test_event_rows_are_evenly_spread():
@@ -91,6 +95,17 @@ def test_event_feature_vector_pools_mean_and_max_across_crops():
     np.testing.assert_allclose(vector[5:], expected_max)
 
 
+def test_substitution_bound_stays_coupled_to_the_crop_extraction_margin():
+    # MAX_SUBSTITUTION_ROWS is meant to track yawdd_crops.py's margin_steps
+    # default exactly, not merely start out equal to it. Reading the real
+    # default off extract_clip_crops and extract_manifest_crops (rather than
+    # repeating the number 5 here) means this fails if either module ever
+    # falls back to a bare literal instead of the shared CROP_MARGIN_STEPS.
+    assert MAX_SUBSTITUTION_ROWS == CROP_MARGIN_STEPS
+    for fn in (extract_clip_crops, extract_manifest_crops):
+        assert inspect.signature(fn).parameters["margin_steps"].default == MAX_SUBSTITUTION_ROWS
+
+
 def test_nearest_available_row_returns_the_exact_row_when_present():
     crop_rows = np.array([3, 7, 12])
     assert _nearest_available_row(7, crop_rows) == 7
@@ -100,6 +115,15 @@ def test_nearest_available_row_substitutes_within_the_bound():
     crop_rows = np.array([5, 20])
     assert _nearest_available_row(7, crop_rows) == 5
     assert abs(5 - 7) <= MAX_SUBSTITUTION_ROWS
+
+
+def test_nearest_available_row_accepts_a_substitution_exactly_at_the_bound():
+    # The bound is a maximum, not a strict upper limit: a substitution exactly
+    # MAX_SUBSTITUTION_ROWS away is still legitimate and must be accepted, not
+    # rejected. This is the boundary the raise below sits one row past.
+    crop_rows = np.array([0, 20])
+    row = MAX_SUBSTITUTION_ROWS
+    assert _nearest_available_row(row, crop_rows) == 0
 
 
 def test_nearest_available_row_raises_past_the_bound():

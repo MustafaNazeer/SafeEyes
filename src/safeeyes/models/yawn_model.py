@@ -33,7 +33,7 @@ from safeeyes.data.splits import Sample
 from safeeyes.models.train_distraction import BACKBONES, build_transform, default_size
 from safeeyes.models.yawn_events import YawnEvent, training_events
 from safeeyes.perception.frame import FEATURE_COLUMNS
-from safeeyes.temporal.yawn_validation import MAR_YAWN_THRESHOLD
+from safeeyes.temporal.yawn_validation import CROP_MARGIN_STEPS, MAR_YAWN_THRESHOLD
 
 BACKBONE_NAME = "mobilenet_v3_small"
 CROP_SIZE = 96
@@ -45,13 +45,18 @@ N_FRAMES = 5
 # requires it to stay an import leaf, so nothing else in the package may
 # import from it, but nothing stops it from importing FEATURE_COLUMNS itself.
 MAR_COLUMN = FEATURE_COLUMNS.index("mar")
-# The extraction keeps crops for every row within this many steps of a row
-# that clears the crop gate (see yawdd_crops.py's margin_steps, default 5), and
-# every row inside a detection event already clears that lower gate directly.
-# A nearest row substitution should therefore never need to reach further than
+# The extraction keeps crops for every row within CROP_MARGIN_STEPS of a row
+# that clears the crop gate (yawdd_crops.py's margin_steps default), and every
+# row inside a detection event already clears that lower gate directly. A
+# nearest row substitution should therefore never need to reach further than
 # that guaranteed radius; anything beyond it signals a real mismatch, not a
-# rare crop_mouth failure on an adjacent frame.
-MAX_SUBSTITUTION_ROWS = 5
+# rare crop_mouth failure on an adjacent frame. Bound to CROP_MARGIN_STEPS
+# rather than a duplicated literal, for the same reason MAR_COLUMN is bound to
+# FEATURE_COLUMNS above: yawdd_crops.py is a privacy allowlisted import leaf,
+# so this module cannot import margin_steps' default from it directly, and
+# instead shares CROP_MARGIN_STEPS through yawn_validation.py, which both
+# modules already import.
+MAX_SUBSTITUTION_ROWS = CROP_MARGIN_STEPS
 
 
 def sample_event_rows(start: int, end: int, n: int = 5) -> list[int]:
