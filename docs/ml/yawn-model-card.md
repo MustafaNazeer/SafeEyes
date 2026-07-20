@@ -165,10 +165,15 @@ threshold was chosen, never as a result.
   in every yawning video, so the ceiling did not bind here, but it exists.
 - **The training crops are not class balanced like the videos.** The extraction
   gate keeps pixels only around frames whose mouth aspect ratio clears a
-  permissive pre filter. In practice it retained roughly 45 percent of a talking
-  clip's rows but only 1 of 212 rows in a normal driving clip, so resting mouths
-  are nearly absent from the crop set. The head was trained on a population of
-  open mouths, which is not the population a live camera sees.
+  permissive pre filter. Measured across the full 320 video Mirror corpus, in
+  [yawdd-crop-coverage.json](yawdd-crop-coverage.json), it retained 73.7% of
+  Talking clips' feature rows against 31.7% of Normal clips' rows (56.2% for
+  Yawning, 63.7% for the small Talking and Yawning category, 56.5% pooled
+  across all four). Talking clips are over represented in the crop set and
+  Normal clips under represented, a real gap worth stating, but resting mouths
+  are not nearly absent: 6,863 of the 21,656 Normal feature rows made it into
+  the crop set. The head was trained on a population that leans more toward
+  open mouths than a live camera sees.
 - **Precision is never reported alone.** Precision, recall, and the talking
   false positive rate appear together in every row above, and a regression guard
   enforces that any document reporting one of these precision figures reports its

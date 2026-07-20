@@ -137,6 +137,49 @@ CLAIMS = [
         "ratio",
         4,
     ),
+    (
+        "yawdd-crop-coverage.json",
+        ("per_category", "Normal", "retained_fraction"),
+        YAWN_CARD,
+        "pct",
+        1,
+    ),
+    (
+        "yawdd-crop-coverage.json",
+        ("per_category", "Talking", "retained_fraction"),
+        YAWN_CARD,
+        "pct",
+        1,
+    ),
+    (
+        "yawdd-crop-coverage.json",
+        ("per_category", "Yawning", "retained_fraction"),
+        YAWN_CARD,
+        "pct",
+        1,
+    ),
+    (
+        "yawdd-crop-coverage.json",
+        ("per_category", "Talking&Yawning", "retained_fraction"),
+        YAWN_CARD,
+        "pct",
+        1,
+    ),
+    ("yawdd-crop-coverage.json", ("all", "retained_fraction"), YAWN_CARD, "pct", 1),
+    (
+        "yawdd-crop-coverage.json",
+        ("per_category", "Normal", "crop_rows"),
+        YAWN_CARD,
+        "count",
+        0,
+    ),
+    (
+        "yawdd-crop-coverage.json",
+        ("per_category", "Normal", "feature_rows"),
+        YAWN_CARD,
+        "count",
+        0,
+    ),
 ]
 
 # Each yawn detector's precision and the recall that must never be separated
@@ -155,7 +198,11 @@ ALERT_FALSE_ALARMS_PER_HOUR = "15.92"
 
 
 def _render(value: float, kind: str, decimals: int) -> str:
-    return render_pct(value, decimals) if kind == "pct" else render_ratio(value, decimals)
+    if kind == "pct":
+        return render_pct(value, decimals)
+    if kind == "count":
+        return f"{int(value):,}"
+    return render_ratio(value, decimals)
 
 
 def _doc_text(doc_file: str) -> str:

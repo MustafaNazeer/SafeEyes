@@ -58,6 +58,7 @@ safeeyes-bench-edge = "safeeyes.edge.bench:main"
 safeeyes-edge-run = "safeeyes.edge.run:main"
 safeeyes-extract-interval-frames = "safeeyes.data.interval_frames:main"
 safeeyes-extract-yawdd-crops = "safeeyes.data.yawdd_crops:main"
+safeeyes-yawdd-crop-coverage = "safeeyes.data.crop_coverage:main"
 safeeyes-train-yawn = "safeeyes.models.yawn_model:main"
 safeeyes-eval-yawn = "safeeyes.models.eval_yawn:main"
 

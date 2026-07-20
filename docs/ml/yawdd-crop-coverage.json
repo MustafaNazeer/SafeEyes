@@ -1,0 +1,36 @@
+{
+  "per_category": {
+    "Normal": {
+      "samples": 105,
+      "feature_rows": 21656,
+      "crop_rows": 6863,
+      "retained_fraction": 0.31690986331732546
+    },
+    "Talking": {
+      "samples": 100,
+      "feature_rows": 30173,
+      "crop_rows": 22246,
+      "retained_fraction": 0.7372816756703012
+    },
+    "Yawning": {
+      "samples": 102,
+      "feature_rows": 19294,
+      "crop_rows": 10844,
+      "retained_fraction": 0.5620400124391003
+    },
+    "Talking&Yawning": {
+      "samples": 13,
+      "feature_rows": 2975,
+      "crop_rows": 1896,
+      "retained_fraction": 0.6373109243697479
+    }
+  },
+  "all": {
+    "samples": 320,
+    "feature_rows": 74098,
+    "crop_rows": 41849,
+    "retained_fraction": 0.5647790763583362
+  },
+  "manifest": "splits/yawdd/mirror.csv",
+  "crop_root": "features/yawdd-crops"
+}
