@@ -1,8 +1,20 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
+import torch
+from torch import nn
 
-from safeeyes.models.yawn_model import sample_event_rows, score_events, train_yawn_head
+from safeeyes.models.yawn_events import YawnEvent
+from safeeyes.models.yawn_model import (
+    MAX_SUBSTITUTION_ROWS,
+    _event_crops,
+    _nearest_available_row,
+    event_feature_vector,
+    sample_event_rows,
+    score_events,
+    train_yawn_head,
+)
 
 
 def test_event_rows_are_evenly_spread():
@@ -47,3 +59,84 @@ def test_training_is_deterministic_under_a_seed():
     first = score_events(train_yawn_head(features, labels, epochs=10, seed=0), features)
     second = score_events(train_yawn_head(features, labels, epochs=10, seed=0), features)
     assert np.allclose(first, second)
+
+
+def test_event_feature_vector_pools_mean_and_max_across_crops():
+    # Each row stands in for one crop's backbone feature vector. The values are
+    # chosen so that pooling across crops (axis 0, the correct axis) and
+    # pooling across the feature dimension (axis 1, the mutated axis) land on
+    # different numbers despite the square shape, so a transposed pooling axis
+    # cannot slip through with a coincidentally matching result.
+    crops = np.array(
+        [
+            [1, 2, 3, 4, 5],
+            [10, 1, 1, 1, 1],
+            [1, 20, 1, 1, 1],
+            [1, 1, 30, 1, 1],
+            [1, 1, 1, 1, 40],
+        ],
+        dtype=np.float32,
+    )
+    backbone = nn.Identity()
+
+    def stub_transform(crop: np.ndarray) -> torch.Tensor:
+        return torch.from_numpy(crop)
+
+    vector = event_feature_vector(crops, backbone, stub_transform)
+
+    expected_mean = crops.mean(axis=0)
+    expected_max = crops.max(axis=0)
+    assert vector.shape == (10,)
+    np.testing.assert_allclose(vector[:5], expected_mean)
+    np.testing.assert_allclose(vector[5:], expected_max)
+
+
+def test_nearest_available_row_returns_the_exact_row_when_present():
+    crop_rows = np.array([3, 7, 12])
+    assert _nearest_available_row(7, crop_rows) == 7
+
+
+def test_nearest_available_row_substitutes_within_the_bound():
+    crop_rows = np.array([5, 20])
+    assert _nearest_available_row(7, crop_rows) == 5
+    assert abs(5 - 7) <= MAX_SUBSTITUTION_ROWS
+
+
+def test_nearest_available_row_raises_past_the_bound():
+    crop_rows = np.array([0, 20])
+    row = MAX_SUBSTITUTION_ROWS + 1
+    with pytest.raises(ValueError, match="exceeding the maximum acceptable substitution"):
+        _nearest_available_row(row, crop_rows)
+
+
+def test_nearest_available_row_raises_with_no_crops_at_all():
+    with pytest.raises(ValueError, match="no crops are available"):
+        _nearest_available_row(0, np.array([], dtype=int))
+
+
+def test_event_crops_uses_the_exact_row_when_available():
+    crop_rows = np.array([0, 1, 2, 3, 4])
+    crops = np.arange(5).reshape(5, 1, 1, 1).astype(np.uint8)
+    event = YawnEvent(sample_id="s", subject_id="p", start=0, end=4, peak_mar=0.9, label=1)
+    result = _event_crops(event, crop_rows, crops, n_frames=5)
+    assert result[:, 0, 0, 0].tolist() == [0, 1, 2, 3, 4]
+
+
+def test_event_crops_substitutes_the_nearest_row_within_the_bound():
+    crop_rows = np.array([0, 4])
+    crops = np.array([[[[0]]], [[[4]]]], dtype=np.uint8)
+    event = YawnEvent(sample_id="s", subject_id="p", start=0, end=4, peak_mar=0.9, label=1)
+    # sample_event_rows(0, 4, n=5) is [0, 1, 2, 3, 4]; rows 1 to 3 fall back to
+    # the nearer of the two available rows (a tie at row 2 breaks toward the
+    # first, lower, candidate), each within MAX_SUBSTITUTION_ROWS.
+    result = _event_crops(event, crop_rows, crops, n_frames=5)
+    assert result[:, 0, 0, 0].tolist() == [0, 0, 0, 4, 4]
+
+
+def test_event_crops_raises_when_the_only_substitution_is_too_far():
+    far = MAX_SUBSTITUTION_ROWS + 1
+    crop_rows = np.array([0])
+    crops = np.array([[[[0]]]], dtype=np.uint8)
+    event = YawnEvent(sample_id="s", subject_id="p", start=far, end=far, peak_mar=0.9, label=1)
+    with pytest.raises(ValueError, match="exceeding the maximum acceptable substitution"):
+        _event_crops(event, crop_rows, crops, n_frames=1)

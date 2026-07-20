@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 
@@ -46,12 +47,18 @@ from safeeyes.perception.extract import (
     _default_to_features,
     iter_video_frames,
 )
+from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.perception.mouth_crop import crop_mouth
 from safeeyes.temporal.yawn_validation import MAR_YAWN_THRESHOLD
 
 __all__ = ["extract_clip_crops", "extract_manifest_crops", "extract_video_crops"]
 
-MAR_COLUMN = 1
+# Bound to FEATURE_COLUMNS, the published source of truth for the feature
+# column order, rather than a bare literal, so this module and the yawn model
+# that reads its archives cannot drift apart on which column mar lives in.
+# This module stays an import leaf: it imports FEATURE_COLUMNS, but nothing
+# else in the package may import from this module.
+MAR_COLUMN = FEATURE_COLUMNS.index("mar")
 DEFAULT_GATE = 0.45
 
 
@@ -120,7 +127,12 @@ def extract_clip_crops(
     crop_rows = np.flatnonzero(keep).astype(int)
     selected = [row_crops[int(row)] for row in crop_rows]
     if selected:
-        crops = np.stack([crop for crop in selected if crop is not None]).astype(np.uint8)
+        # selected holds no None here: any row still marked keep already had
+        # its crop cleared by the loop above when row_crops held None for it.
+        # np.stack is called plainly, with no filtering comprehension, so a
+        # future reordering that let a None slip through raises here instead
+        # of silently shortening the crop stack against crop_rows.
+        crops = np.stack(cast(list[np.ndarray], selected)).astype(np.uint8)
     else:
         crops = np.empty((0, size, size, 3), dtype=np.uint8)
 

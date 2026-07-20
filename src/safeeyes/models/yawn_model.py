@@ -32,15 +32,26 @@ from safeeyes.data.manifest import read_manifest
 from safeeyes.data.splits import Sample
 from safeeyes.models.train_distraction import BACKBONES, build_transform, default_size
 from safeeyes.models.yawn_events import YawnEvent, training_events
+from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.temporal.yawn_validation import MAR_YAWN_THRESHOLD
 
 BACKBONE_NAME = "mobilenet_v3_small"
 CROP_SIZE = 96
 N_FRAMES = 5
-# Duplicated rather than imported from safeeyes.data.yawdd_crops: that module is
-# on the frame write allowlist and the privacy invariant requires it to stay an
-# import leaf, so nothing else in the package may import from it.
-MAR_COLUMN = 1
+# Bound to FEATURE_COLUMNS rather than duplicated as a bare literal: that tuple
+# is the published source of truth for the feature column order, so this stays
+# in lockstep with safeeyes.data.yawdd_crops without importing it directly.
+# yawdd_crops.py is on the frame write allowlist and the privacy invariant
+# requires it to stay an import leaf, so nothing else in the package may
+# import from it, but nothing stops it from importing FEATURE_COLUMNS itself.
+MAR_COLUMN = FEATURE_COLUMNS.index("mar")
+# The extraction keeps crops for every row within this many steps of a row
+# that clears the crop gate (see yawdd_crops.py's margin_steps, default 5), and
+# every row inside a detection event already clears that lower gate directly.
+# A nearest row substitution should therefore never need to reach further than
+# that guaranteed radius; anything beyond it signals a real mismatch, not a
+# rare crop_mouth failure on an adjacent frame.
+MAX_SUBSTITUTION_ROWS = 5
 
 
 def sample_event_rows(start: int, end: int, n: int = 5) -> list[int]:
@@ -181,9 +192,26 @@ def _load_crop_archive(crop_root: str | Path, sample_id: str) -> dict[str, np.nd
 
 
 def _nearest_available_row(row: int, crop_rows: np.ndarray) -> int:
+    """Nearest row with a crop, guarded against a distant, silent substitution.
+
+    A substitution is expected only when crop_mouth failed on the requested
+    row's own frame; the extraction still guarantees a crop within
+    MAX_SUBSTITUTION_ROWS of any row that clears the crop gate, and every row
+    inside a detection event already clears it. A nearest row further away
+    than that means the event and the crop archive do not actually line up,
+    so this raises instead of silently pairing the event with a distant frame.
+    """
     if crop_rows.size == 0:
         raise ValueError("no crops are available for this video")
-    return int(crop_rows[np.argmin(np.abs(crop_rows.astype(int) - row))])
+    nearest = int(crop_rows[np.argmin(np.abs(crop_rows.astype(int) - row))])
+    distance = abs(nearest - row)
+    if distance > MAX_SUBSTITUTION_ROWS:
+        raise ValueError(
+            f"nearest available crop row {nearest} is {distance} rows from requested "
+            f"row {row}, exceeding the maximum acceptable substitution distance of "
+            f"{MAX_SUBSTITUTION_ROWS} rows"
+        )
+    return nearest
 
 
 def _event_crops(
