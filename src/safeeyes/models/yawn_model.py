@@ -10,11 +10,18 @@ is trained on those cached vectors. This is the same freeze and cache pattern
 training run into seconds of work on a four core CPU, at the cost of training
 the head on non augmented, dropout free features.
 
+The validation fold is never a file on disk. ``--train-manifest`` names the
+outer 70 subject train split, and this module carves the inner train and
+validation subjects from it itself with ``carve_validation``, seeded the same
+as ``--seed``, so the 20 held out test subjects are never read here and the
+split is reproducible without a manifest nobody writes. The trained head is
+verified on the carved validation videos, a decision threshold tau is
+selected there, and both the head weights and tau are saved to the checkpoint.
+
     python -m safeeyes.models.yawn_model \\
-        --train-manifest splits/yawdd/mirror-train-inner.csv \\
-        --val-manifest splits/yawdd/mirror-val.csv \\
+        --train-manifest splits/yawdd/mirror-train.csv \\
         --crop-root features/yawdd-crops \\
-        --out models/yawn_head.pt
+        --out models/yawn.pt
 """
 
 from __future__ import annotations
@@ -30,7 +37,10 @@ from torch import nn
 
 from safeeyes.data.manifest import read_manifest
 from safeeyes.data.splits import Sample
+from safeeyes.data.yawdd import is_yawning
+from safeeyes.data.yawdd_splits import carve_validation
 from safeeyes.models.train_distraction import BACKBONES, build_transform, default_size
+from safeeyes.models.yawn_decision import select_tau, video_scores
 from safeeyes.models.yawn_events import YawnEvent, training_events
 from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.temporal.yawn_validation import CROP_MARGIN_STEPS, MAR_YAWN_THRESHOLD
@@ -153,13 +163,19 @@ def score_events(head: nn.Module, features: np.ndarray) -> np.ndarray:
 
 
 def save_yawn_checkpoint(
-    path: str | Path, head: nn.Module, backbone_name: str, crop_size: int, n_frames: int
+    path: str | Path,
+    head: nn.Module,
+    backbone_name: str,
+    crop_size: int,
+    n_frames: int,
+    tau: float,
 ) -> None:
     checkpoint = {
         "state_dict": head.state_dict(),
         "backbone": backbone_name,
         "crop_size": crop_size,
         "n_frames": n_frames,
+        "tau": tau,
     }
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -244,13 +260,16 @@ def build_event_features(
     transform: Callable[[np.ndarray], torch.Tensor],
     *,
     n_frames: int = N_FRAMES,
-) -> tuple[np.ndarray, np.ndarray, list[str]]:
+) -> tuple[np.ndarray, np.ndarray, list[YawnEvent]]:
     """Assemble one pooled feature vector and label per candidate event.
 
     Event labels come from ``training_events``: the longest event in a
     Yawning or Talking&Yawning video is the sole positive from that video,
     every event in a Normal or Talking video is a negative, and a Yawning
-    video's other events are dropped rather than guessed at.
+    video's other events are dropped rather than guessed at. The returned
+    events are in the same order as the feature and label rows, so a caller
+    that also needs per video aggregation (video_scores) can zip them against
+    scores without recomputing anything.
     """
     videos: list[tuple[str, str, str, np.ndarray]] = []
     archives: dict[str, dict[str, np.ndarray]] = {}
@@ -264,26 +283,34 @@ def build_event_features(
 
     rows: list[np.ndarray] = []
     labels: list[int] = []
-    sample_ids: list[str] = []
     for event in events:
         archive = archives[event.sample_id]
         crops = _event_crops(event, archive["crop_rows"], archive["crops"], n_frames)
         rows.append(event_feature_vector(crops, backbone, transform))
         labels.append(event.label)
-        sample_ids.append(event.sample_id)
 
     features = np.stack(rows).astype(np.float32) if rows else np.empty((0, 0), dtype=np.float32)
-    return features, np.array(labels, dtype=np.int64), sample_ids
+    return features, np.array(labels, dtype=np.int64), events
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Train the frozen backbone yawn event classifier.")
-    parser.add_argument("--train-manifest", required=True)
-    parser.add_argument("--val-manifest", default=None)
+    parser.add_argument(
+        "--train-manifest",
+        required=True,
+        help="the outer 70 subject train manifest; the validation fold is carved from it here",
+    )
     parser.add_argument("--crop-root", required=True, help="root of per video crop npz archives")
     parser.add_argument("--out", required=True, help="checkpoint output path")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--min-recall", type=float, default=0.90, help="tau selection recall floor")
+    parser.add_argument(
+        "--tau-steps",
+        type=int,
+        default=101,
+        help="number of tau values swept between 0.0 and 1.0 inclusive",
+    )
     parser.add_argument(
         "--no-class-weighting",
         action="store_true",
@@ -295,9 +322,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     backbone, _dim = _frozen_backbone(BACKBONE_NAME)
     transform = build_transform(train=False, size=size, normalize=True)
 
-    train_samples = read_manifest(args.train_manifest)
-    train_features, train_labels, _ = build_event_features(
-        train_samples, args.crop_root, backbone, transform
+    outer_train_samples = read_manifest(args.train_manifest)
+    inner_train_samples, val_samples = carve_validation(outer_train_samples, seed=args.seed)
+
+    train_features, train_labels, _train_events = build_event_features(
+        inner_train_samples, args.crop_root, backbone, transform
     )
 
     head = train_yawn_head(
@@ -307,24 +336,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         seed=args.seed,
         class_weighted=not args.no_class_weighting,
     )
-    save_yawn_checkpoint(args.out, head, BACKBONE_NAME, CROP_SIZE, N_FRAMES)
+
+    val_features, _val_labels, val_events = build_event_features(
+        val_samples, args.crop_root, backbone, transform
+    )
+    val_event_scores = score_events(head, val_features)
+    val_video_scores = video_scores(val_events, val_event_scores)
+    val_truths = {sample.sample_id: is_yawning(sample.label.split("&")) for sample in val_samples}
+    taus = np.linspace(0.0, 1.0, args.tau_steps).tolist()
+    selection = select_tau(val_video_scores, val_truths, taus, min_recall=args.min_recall)
+    tau = cast(float, selection["selected"])
+    rows = cast("list[dict[str, object]]", selection["rows"])
+
+    save_yawn_checkpoint(args.out, head, BACKBONE_NAME, CROP_SIZE, N_FRAMES, tau=tau)
 
     positives = int(train_labels.sum())
+    val_row = next(r for r in rows if r["tau"] == tau)
     summary = (
-        f"trained on {len(train_labels)} events ({positives} positive) | checkpoint at {args.out}"
+        f"trained on {len(train_labels)} events ({positives} positive) from "
+        f"{len({s.subject_id for s in inner_train_samples})} inner train subjects | "
+        f"selected tau={tau:.4f} on {len(val_samples)} validation videos from "
+        f"{len({s.subject_id for s in val_samples})} subjects "
+        f"(precision={val_row['precision']:.4f} recall={val_row['recall']:.4f} "
+        f"floor_met={selection['floor_met']}) | checkpoint at {args.out}"
     )
-    if args.val_manifest:
-        val_samples = read_manifest(args.val_manifest)
-        val_features, val_labels, _ = build_event_features(
-            val_samples, args.crop_root, backbone, transform
-        )
-        val_scores = score_events(head, val_features)
-        predictions = (val_scores >= 0.5).astype(np.int64)
-        accuracy = float((predictions == val_labels).mean()) if len(val_labels) else 0.0
-        summary += (
-            f" | validation event accuracy {accuracy:.4f} "
-            f"(event level sanity readout, not the reported video level metric)"
-        )
     print(summary)
     return 0
 
