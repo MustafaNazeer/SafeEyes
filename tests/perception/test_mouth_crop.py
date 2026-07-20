@@ -18,6 +18,30 @@ def test_box_is_square_away_from_the_frame_edge():
     assert (x1 - x0) == (y1 - y0)
 
 
+def _landmarks_with_unequal_spread(cx, cy, half_x, half_y, n=478):
+    points = np.zeros((n, 3), dtype=float)
+    from safeeyes.perception.landmarks import MOUTH_MAR_INDICES
+
+    offsets = [
+        (-half_x, 0),
+        (0, -half_y),
+        (half_x, 0),
+        (half_x, 0),
+        (0, half_y),
+        (-half_x, 0),
+    ]
+    for index, (dx, dy) in zip(MOUTH_MAR_INDICES, offsets, strict=True):
+        points[index] = (cx + dx, cy + dy, 0.0)
+    return points
+
+
+def test_box_is_square_with_unequal_horizontal_and_vertical_spread():
+    x0, y0, x1, y1 = mouth_crop_box(
+        _landmarks_with_unequal_spread(320, 240, half_x=30.0, half_y=10.0), 640, 480
+    )
+    assert (x1 - x0) == (y1 - y0)
+
+
 def test_box_is_centered_on_the_mouth():
     x0, y0, x1, y1 = mouth_crop_box(_landmarks_at(320, 240), 640, 480)
     assert abs((x0 + x1) / 2 - 320) <= 1
