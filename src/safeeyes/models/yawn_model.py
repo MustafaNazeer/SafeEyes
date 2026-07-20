@@ -68,6 +68,8 @@ MAR_COLUMN = FEATURE_COLUMNS.index("mar")
 # modules already import.
 MAX_SUBSTITUTION_ROWS = CROP_MARGIN_STEPS
 
+EventsBuilder = Callable[[Sequence[tuple[str, str, str, np.ndarray]], float], list[YawnEvent]]
+
 
 def sample_event_rows(start: int, end: int, n: int = 5) -> list[int]:
     """Pick n feature row indices evenly spread across [start, end].
@@ -127,12 +129,7 @@ def train_yawn_head(
     y = torch.from_numpy(np.asarray(labels, dtype=np.int64))
     dim = int(x.shape[1])
 
-    head = nn.Sequential(
-        nn.Linear(dim, 64),
-        nn.ReLU(),
-        nn.Dropout(0.3),
-        nn.Linear(64, 2),
-    )
+    head = build_yawn_head(dim)
 
     weight: torch.Tensor | None = None
     if class_weighted:
@@ -180,6 +177,35 @@ def save_yawn_checkpoint(
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
     torch.save(checkpoint, out)
+
+
+def build_yawn_head(dim: int) -> nn.Module:
+    """The head architecture, defined once so training and loading cannot drift."""
+    return nn.Sequential(
+        nn.Linear(dim, 64),
+        nn.ReLU(),
+        nn.Dropout(0.3),
+        nn.Linear(64, 2),
+    )
+
+
+def load_yawn_checkpoint(path: str | Path) -> tuple[nn.Module, dict[str, Any]]:
+    """Rebuild the trained head and return it with the frozen metadata.
+
+    The input dimension is read back from the saved weights rather than
+    recomputed from a backbone, so a checkpoint always loads into exactly the
+    shape it was saved from. The head comes back in eval mode, with the
+    checkpoint's own tau in the returned metadata: nothing here may choose or
+    override a decision threshold.
+    """
+    checkpoint = cast(dict[str, Any], torch.load(Path(path), map_location="cpu", weights_only=True))
+    state_dict = checkpoint["state_dict"]
+    dim = int(state_dict["0.weight"].shape[1])
+    head = build_yawn_head(dim)
+    head.load_state_dict(state_dict)
+    head.eval()
+    metadata = {key: value for key, value in checkpoint.items() if key != "state_dict"}
+    return head, metadata
 
 
 def _frozen_backbone(name: str, pretrained: bool = True) -> tuple[nn.Module, int]:
@@ -260,8 +286,15 @@ def build_event_features(
     transform: Callable[[np.ndarray], torch.Tensor],
     *,
     n_frames: int = N_FRAMES,
+    events_builder: EventsBuilder = training_events,
 ) -> tuple[np.ndarray, np.ndarray, list[YawnEvent]]:
     """Assemble one pooled feature vector and label per candidate event.
+
+    ``events_builder`` decides which runs become events. The default,
+    ``training_events``, is the label aware training rule described below.
+    Held out evaluation passes ``proposal_events`` instead, because at
+    inference time no label exists to select events with; the returned label
+    array is then a placeholder the caller ignores.
 
     Event labels come from ``training_events``: the longest event in a
     Yawning or Talking&Yawning video is the sole positive from that video,
@@ -279,7 +312,7 @@ def build_event_features(
         mar = archive["features"][:, MAR_COLUMN]
         videos.append((sample.sample_id, sample.subject_id, sample.label, mar))
 
-    events = training_events(videos, MAR_YAWN_THRESHOLD)
+    events = events_builder(videos, MAR_YAWN_THRESHOLD)
 
     rows: list[np.ndarray] = []
     labels: list[int] = []

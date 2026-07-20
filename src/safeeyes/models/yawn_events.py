@@ -90,3 +90,39 @@ def training_events(
             events_for_video(sample_id, subject_id, video_label, mar, threshold, min_duration)
         )
     return events
+
+
+def proposal_events(
+    videos: Sequence[tuple[str, str, str, np.ndarray]],
+    threshold: float,
+    min_duration: int = 1,
+) -> list[YawnEvent]:
+    """Every detected event in every video, without consulting the video label.
+
+    ``training_events`` reads the video label to decide which of a Yawning
+    video's events becomes the positive and which are dropped. That is the
+    right rule while assembling a training set and the wrong one at inference
+    time, where no label exists: a camera feed offers no hint about which
+    mouth opening is the yawn. This proposes every run instead, so a held out
+    video is scored exactly the way a live stream would be.
+
+    The ``label`` field on each returned event is a placeholder 0 and carries
+    no meaning here. Callers scoring proposals take truth from the manifest,
+    never from these events.
+    """
+    events: list[YawnEvent] = []
+    for sample_id, subject_id, _video_label, mar in videos:
+        values = np.asarray(mar, dtype=float)
+        events.extend(
+            YawnEvent(
+                sample_id=sample_id,
+                subject_id=subject_id,
+                start=start,
+                end=end,
+                peak_mar=float(values[start : end + 1].max()),
+                label=0,
+            )
+            for start, end in event_runs(values, threshold)
+            if end - start + 1 >= min_duration
+        )
+    return events

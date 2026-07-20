@@ -59,6 +59,7 @@ safeeyes-edge-run = "safeeyes.edge.run:main"
 safeeyes-extract-interval-frames = "safeeyes.data.interval_frames:main"
 safeeyes-extract-yawdd-crops = "safeeyes.data.yawdd_crops:main"
 safeeyes-train-yawn = "safeeyes.models.yawn_model:main"
+safeeyes-eval-yawn = "safeeyes.models.eval_yawn:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
