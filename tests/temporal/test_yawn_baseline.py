@@ -4,6 +4,8 @@ from safeeyes.temporal.yawn_baseline import precision_recall, sweep_min_duration
 
 LONG = np.array([0.1] + [0.9] * 10 + [0.1])
 SHORT = np.array([0.1, 0.9, 0.1])
+RUN3 = np.array([0.1] + [0.9] * 3 + [0.1])
+NEVER = np.array([0.1, 0.2, 0.1])
 
 
 def test_precision_recall_counts_video_level():
@@ -38,3 +40,18 @@ def test_sweep_reports_when_no_duration_meets_the_floor():
     videos = [("a", "Yawning", SHORT), ("b", "Yawning", SHORT)]
     result = sweep_min_duration(videos, 0.5, durations=range(4, 8), min_recall=0.9)
     assert result["floor_met"] is False
+
+
+def test_sweep_treats_recall_exactly_at_the_floor_as_met():
+    videos = [(f"y{i}", "Yawning", RUN3) for i in range(9)]
+    videos.append(("y9", "Yawning", SHORT))
+    result = sweep_min_duration(videos, 0.5, durations=[3], min_recall=0.9)
+    assert result["floor_met"] is True
+    assert result["selected"] == 3
+
+
+def test_sweep_breaks_ties_toward_the_smaller_duration_when_floor_not_met():
+    videos = [("a", "Yawning", RUN3), ("b", "Yawning", NEVER)]
+    result = sweep_min_duration(videos, 0.5, durations=range(1, 6), min_recall=0.9)
+    assert result["floor_met"] is False
+    assert result["selected"] == 1

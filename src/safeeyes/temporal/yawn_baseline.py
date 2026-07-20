@@ -101,12 +101,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--feature-root", required=True)
     parser.add_argument("--threshold", type=float, default=MAR_YAWN_THRESHOLD)
     parser.add_argument("--max-duration", type=int, default=20)
+    parser.add_argument("--min-recall", type=float, default=0.90)
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
 
     videos = load_mirror_mar(args.manifest, args.feature_root)
     result = sweep_min_duration(
-        videos, args.threshold, durations=range(1, args.max_duration + 1)
+        videos,
+        args.threshold,
+        durations=range(1, args.max_duration + 1),
+        min_recall=args.min_recall,
     )
 
     out = Path(args.out)
@@ -116,6 +120,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "feature_root": str(args.feature_root),
         "threshold": args.threshold,
         "max_duration": args.max_duration,
+        "min_recall": args.min_recall,
         **result,
     }
     out.write_text(json.dumps(payload, indent=2) + "\n")
