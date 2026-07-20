@@ -7,14 +7,24 @@ promise. They parse each module with the ast module rather than scanning text,
 so imports inside comments or docstrings do not register.
 
 The legitimate disk writes in the project (trained model weights, extracted
-feature arrays, exported ONNX graphs) are deliberately not flagged: only raw
-frame writes via OpenCV count as persisted video.
+feature arrays, exported ONNX graphs) are deliberately not flagged: only pixel
+writes count as persisted video.
+
+Persisting pixels means any route, not only an OpenCV one. The call scanner
+catches cv2.imwrite and cv2.VideoWriter, which is the shape a runtime leak
+would most likely take, but a module that saves a stack of frames or crops
+through a numpy array write persists exactly the same pixels and is covered by
+the same promise. Because an array write is indistinguishable from a legitimate
+feature save at the call site, that half of the rail is enforced by the
+allowlist rather than by the scanner: a module that writes dataset pixels in
+any form must name itself in FRAME_WRITE_ALLOWLIST.
 
 The promise protects the on-device runtime. Offline dataset preparation tools
 that write frames from licensed training datasets on a development machine are
 exempted by name in FRAME_WRITE_ALLOWLIST; any module not listed there still
 fails the scan, so a new frame writer must be deliberately allowlisted here to
-land.
+land. The allowlist is pinned to its exact membership below so a third entry
+cannot appear without a deliberate edit.
 """
 
 import ast
@@ -47,10 +57,11 @@ BANNED_NETWORK_ROOTS = frozenset(
 # OpenCV calls that would write a frame or a video to disk.
 FRAME_WRITE_ATTRS = frozenset({"imwrite", "VideoWriter"})
 
-# Offline dataset preparation modules allowed to write training frames. These
-# never run on the device; they turn licensed dataset video into training
-# images under the gitignored data tree.
-FRAME_WRITE_ALLOWLIST = frozenset({"data/interval_frames.py"})
+# Offline dataset preparation modules allowed to write training pixels, whether
+# through OpenCV or through an array write. These never run on the device; they
+# turn licensed dataset video into training images and crops under the
+# gitignored data and features trees.
+FRAME_WRITE_ALLOWLIST = frozenset({"data/interval_frames.py", "data/yawdd_crops.py"})
 
 
 def network_imports(source: str) -> set[str]:
@@ -149,6 +160,14 @@ def test_frame_write_allowlist_is_exact() -> None:
             if module in imported:
                 importers.setdefault(module, []).append(rel)
     assert importers == {}, f"allowlisted frame writers must be import leaves: {importers}"
+
+
+def test_frame_write_allowlist_is_pinned() -> None:
+    # A new module writing dataset pixels, by any route including an array
+    # write the call scanner cannot see, must be added here deliberately.
+    assert FRAME_WRITE_ALLOWLIST == frozenset(
+        {"data/interval_frames.py", "data/yawdd_crops.py"}
+    )
 
 
 def test_network_scanner_flags_a_violation() -> None:

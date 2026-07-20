@@ -57,6 +57,7 @@ safeeyes-export-edge = "safeeyes.edge.export_models:main"
 safeeyes-bench-edge = "safeeyes.edge.bench:main"
 safeeyes-edge-run = "safeeyes.edge.run:main"
 safeeyes-extract-interval-frames = "safeeyes.data.interval_frames:main"
+safeeyes-extract-yawdd-crops = "safeeyes.data.yawdd_crops:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
