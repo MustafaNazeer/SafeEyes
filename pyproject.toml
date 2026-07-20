@@ -41,6 +41,7 @@ dev = [
 
 [project.scripts]
 safeeyes-build-splits = "safeeyes.data.build_splits:main"
+safeeyes-build-yawdd-split = "safeeyes.data.yawdd_splits:main"
 safeeyes-train-eye-state = "safeeyes.models.train_eye_state:main"
 safeeyes-eval-eye-state = "safeeyes.models.eval_eye_state:main"
 safeeyes-train-distraction = "safeeyes.models.train_distraction:main"
