@@ -50,3 +50,37 @@ def test_validation_is_carved_from_train_only(tmp_path):
     assert len({s.subject_id for s in inner}) == 56
     assert len({s.subject_id for s in val}) == 14
     assert {s.subject_id for s in val}.isdisjoint({s.subject_id for s in split.test})
+
+
+def test_wrong_subject_count_raises_value_error(tmp_path):
+    with pytest.raises(ValueError):
+        build_mirror_split(_manifest(tmp_path, 50), tmp_path, seed=0)
+
+
+def test_wrong_subject_count_error_names_actual_counts(tmp_path):
+    with pytest.raises(ValueError) as excinfo:
+        build_mirror_split(_manifest(tmp_path, 50), tmp_path, seed=0)
+    message = str(excinfo.value)
+    assert "70" in message
+    assert "20" in message
+    assert "39" in message
+    assert "11" in message
+
+
+def test_wrong_subject_count_writes_no_manifest(tmp_path):
+    with pytest.raises(ValueError):
+        build_mirror_split(_manifest(tmp_path, 50), tmp_path, seed=0)
+    assert not (tmp_path / "mirror-train.csv").exists()
+    assert not (tmp_path / "mirror-test.csv").exists()
+
+
+def test_ninety_subjects_still_succeeds_with_explicit_expected_counts(tmp_path):
+    split = build_mirror_split(
+        _manifest(tmp_path, 90),
+        tmp_path,
+        seed=0,
+        expected_train_subjects=70,
+        expected_test_subjects=20,
+    )
+    assert len({s.subject_id for s in split.train}) == 70
+    assert len({s.subject_id for s in split.test}) == 20

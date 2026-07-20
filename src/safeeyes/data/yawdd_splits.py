@@ -25,10 +25,29 @@ MIRROR_RATIOS = (0.78, 0.0, 0.22)
 VALIDATION_RATIOS = (0.8, 0.2, 0.0)
 
 
-def build_mirror_split(manifest_path: str | Path, out_dir: str | Path, seed: int = 0) -> Split:
+def build_mirror_split(
+    manifest_path: str | Path,
+    out_dir: str | Path,
+    seed: int = 0,
+    expected_train_subjects: int = 70,
+    expected_test_subjects: int = 20,
+) -> Split:
     samples = read_manifest(manifest_path)
     split = subject_independent_split(samples, ratios=MIRROR_RATIOS, seed=seed)
     assert_subject_independent(split)
+
+    actual_train_subjects = len({s.subject_id for s in split.train})
+    actual_test_subjects = len({s.subject_id for s in split.test})
+    if (
+        actual_train_subjects != expected_train_subjects
+        or actual_test_subjects != expected_test_subjects
+    ):
+        raise ValueError(
+            "mirror split subject counts do not match the expected contract: "
+            f"expected {expected_train_subjects} train and {expected_test_subjects} test, "
+            f"got {actual_train_subjects} train and {actual_test_subjects} test"
+        )
+
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     write_manifest(split.train, out_dir / "mirror-train.csv")
