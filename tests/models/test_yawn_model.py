@@ -8,11 +8,12 @@ import torch
 from torch import nn
 
 from safeeyes.data.yawdd_crops import extract_clip_crops, extract_manifest_crops
-from safeeyes.models.yawn_events import YawnEvent
+from safeeyes.models.yawn_events import YawnEvent, proposal_events, training_events
 from safeeyes.models.yawn_model import (
     MAX_SUBSTITUTION_ROWS,
     _event_crops,
     _nearest_available_row,
+    build_event_features,
     event_feature_vector,
     sample_event_rows,
     score_events,
@@ -104,6 +105,18 @@ def test_substitution_bound_stays_coupled_to_the_crop_extraction_margin():
     assert MAX_SUBSTITUTION_ROWS == CROP_MARGIN_STEPS
     for fn in (extract_clip_crops, extract_manifest_crops):
         assert inspect.signature(fn).parameters["margin_steps"].default == MAX_SUBSTITUTION_ROWS
+
+
+def test_event_features_default_to_the_leak_free_proposal_builder():
+    # The label blind proposal_events is the automatic default so that omitting
+    # the keyword fails safe: a caller that forgets it gets the rule a detector
+    # can actually run at test time, never the label aware training_events that
+    # reads a video's ground truth to decide which openings count. Read off the
+    # signature rather than exercised through a run, because the property under
+    # guard is which builder an omitted keyword resolves to.
+    default = inspect.signature(build_event_features).parameters["events_builder"].default
+    assert default is proposal_events
+    assert default is not training_events
 
 
 def test_nearest_available_row_returns_the_exact_row_when_present():

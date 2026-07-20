@@ -87,6 +87,13 @@ def test_min_duration_boundary_is_inclusive():
     assert video_predicts_yawning(mar, 0.5, min_duration=3) is True
 
 
-def test_default_min_duration_preserves_phase_12_behavior():
+def test_default_min_duration_preserves_the_bare_threshold_behavior():
     mar = np.array([0.1, 0.9, 0.1])
     assert video_predicts_yawning(mar, 0.5) is True
+
+
+def test_min_duration_must_be_positive():
+    mar = np.array([0.1, 0.9, 0.1])
+    for bad in (0, -1):
+        with pytest.raises(ValueError, match="min_duration must be positive"):
+            video_predicts_yawning(mar, 0.5, min_duration=bad)

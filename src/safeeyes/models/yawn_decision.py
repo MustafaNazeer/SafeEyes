@@ -36,7 +36,7 @@ def video_scores(events: Sequence[YawnEvent], scores: np.ndarray) -> dict[str, f
 
 
 def select_tau(
-    video_scores: dict[str, float],
+    scores_by_video: dict[str, float],
     truths: dict[str, bool],
     taus: Sequence[float],
     min_recall: float = 0.90,
@@ -45,7 +45,7 @@ def select_tau(
         (
             sample_id,
             _POSITIVE_LABEL if truth else _NEGATIVE_LABEL,
-            np.array([video_scores.get(sample_id, 0.0)]),
+            np.array([scores_by_video.get(sample_id, 0.0)]),
         )
         for sample_id, truth in truths.items()
     ]

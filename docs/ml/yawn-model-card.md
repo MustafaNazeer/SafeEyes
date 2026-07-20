@@ -11,9 +11,17 @@ For the system overview see [docs/architecture.md](../architecture.md); for the
 dataset, license, and crop derivation see
 [docs/source/datasets.md](../source/datasets.md); for the decision not to ship
 the classifier see
-[ADR 0006](../adr/0006-geometric-duration-rule-over-mouth-crop-cnn.md). Every
-number below traces to [yawn-model-metrics.json](yawn-model-metrics.json) in
-this directory.
+[ADR 0006](../adr/0006-geometric-duration-rule-over-mouth-crop-cnn.md).
+
+Two committed artifacts in this directory back the numbers below. The held out
+detector results come from
+[yawn-model-metrics.json](yawn-model-metrics.json), and the crop coverage
+fractions and row counts come from
+[yawdd-crop-coverage.json](yawdd-crop-coverage.json). One set of figures traces
+to neither: the validation fold figures quoted where the decision threshold is
+described are read from a run log under the gitignored features tree, are not
+pinned to any committed artifact, and are labelled as such at the point they
+appear.
 
 ## What this is and what it is not
 
@@ -144,7 +152,12 @@ One real consequence remains. The decision threshold of 0.26 was selected on the
 validation fold through the leaky path, so the validation figures (0.85
 precision at 1.00 recall, on only 17 positive videos) are **not** strictly
 comparable to the test figures and are quoted here only to describe how the
-threshold was chosen, never as a result.
+threshold was chosen, never as a result. Those three validation figures are also
+**un-pinned**: unlike every held out figure in this card, they were read from
+the threshold selection run log under the gitignored features tree rather than
+from a committed metrics artifact, so no regression test holds them in place.
+They are reported at the precision the log stated them at and should be read as
+descriptive of the selection procedure only.
 
 ## Caveats
 
@@ -182,7 +195,11 @@ threshold was chosen, never as a result.
 ## Limitations and disclaimer
 
 This is an assistive prototype, not a medical or safety of life device. It makes
-no diagnostic claim and does not decide fitness to drive. Every figure here
-traces to [yawn-model-metrics.json](yawn-model-metrics.json), produced by a
-single frozen evaluation run on a fixed, subject independent split, and is
-pinned by a regression test so it cannot drift from the committed metrics file.
+no diagnostic claim and does not decide fitness to drive. The held out detector
+figures here trace to [yawn-model-metrics.json](yawn-model-metrics.json),
+produced by a single frozen evaluation run on a fixed, subject independent
+split, and the crop coverage figures trace to
+[yawdd-crop-coverage.json](yawdd-crop-coverage.json); both sets are pinned by a
+regression test so they cannot drift from the committed artifacts. The
+validation fold figures behind the threshold selection are the one exception,
+un-pinned and read from a run log, and are marked as such where they appear.

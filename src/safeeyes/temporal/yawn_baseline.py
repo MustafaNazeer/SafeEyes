@@ -24,7 +24,15 @@ import numpy as np
 
 from safeeyes.data.manifest import read_manifest
 from safeeyes.data.yawdd import is_yawning
+from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.temporal.yawn_validation import MAR_YAWN_THRESHOLD, video_predicts_yawning
+
+# Bound to FEATURE_COLUMNS, the published source of truth for the feature
+# column order, rather than a bare literal, for the same reason the copies in
+# safeeyes.data.yawdd_crops and safeeyes.models.yawn_model are: the arrays this
+# module loads are written by that extraction, and a bare index would silently
+# read a different signal if the column order ever moved.
+MAR_COLUMN = FEATURE_COLUMNS.index("mar")
 
 Video = tuple[str, str, np.ndarray]
 
@@ -37,7 +45,7 @@ def load_mirror_mar(manifest_path: str | Path, feature_root: str | Path) -> list
         if not feature_path.exists():
             raise FileNotFoundError(f"missing feature array: {feature_path}")
         features = np.load(feature_path)
-        mar = features[:, 1]
+        mar = features[:, MAR_COLUMN]
         videos.append((sample.sample_id, sample.label, mar))
     return videos
 

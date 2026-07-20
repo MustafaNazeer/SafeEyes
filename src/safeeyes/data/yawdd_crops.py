@@ -51,7 +51,7 @@ from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.perception.mouth_crop import crop_mouth
 from safeeyes.temporal.yawn_validation import CROP_MARGIN_STEPS, MAR_YAWN_THRESHOLD
 
-__all__ = ["extract_clip_crops", "extract_manifest_crops", "extract_video_crops"]
+__all__ = ["extract_clip_crops", "extract_manifest_crops"]
 
 # Bound to FEATURE_COLUMNS, the published source of truth for the feature
 # column order, rather than a bare literal, so this module and the yawn model
@@ -142,14 +142,6 @@ def extract_clip_crops(
         "crop_rows": crop_rows,
         "crops": crops,
     }
-
-
-def extract_video_crops(
-    path: str | Path,
-    detector: LandmarkDetector,
-    **kwargs: object,
-) -> dict[str, np.ndarray]:
-    return extract_clip_crops(iter_video_frames(path), detector, **kwargs)  # type: ignore[arg-type]
 
 
 def extract_manifest_crops(

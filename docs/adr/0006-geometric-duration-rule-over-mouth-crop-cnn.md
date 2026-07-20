@@ -73,10 +73,17 @@ the weakly optimistic one on both axes and still loses.
 
 ## Consequences
 
-- The runtime yawn signal keeps its geometric form and gains only the minimum
-  duration requirement. No model file, no crop extraction, and no backbone
-  inference enter the live loop for this signal, so its edge cost stays at zero
-  beyond the geometry already computed for every frame.
+- The accepted rule for the yawn signal is its existing geometric form plus the
+  minimum duration requirement. No model file, no crop extraction, and no
+  backbone inference enter the live loop for this signal, so its edge cost
+  stays at zero beyond the geometry already computed for every frame.
+- Wiring that requirement into the runtime is follow on work and has not been
+  done. The live temporal feature in `safeeyes/temporal/features.py` still
+  counts a yawn on the bare threshold crossing, with no duration requirement,
+  and the duration aware predicate this comparison was measured with has no
+  caller on any runtime path. Integration was out of scope for the evaluation
+  recorded here. Until it lands, the runtime signal is the bare rule scored in
+  the first row of the table above, not the second.
 - The negative result is published rather than discarded, in
   [yawn-model-card.md](../ml/yawn-model-card.md), with the deploy rule stated
   before the results, the leak documented, and the caveats attached. A trained

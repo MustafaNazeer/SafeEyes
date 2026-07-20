@@ -24,6 +24,13 @@ ALERT_VALIDATION = "docs/ml/alert-validation.md"
 # both geometric baselines and the trained classifier that did not beat them.
 YAWN_CARD = "docs/ml/yawn-model-card.md"
 
+# The two other public documents that republish the yawn detector rate figures.
+# They are pinned to the same metrics file as the card so that regenerating the
+# artifact fails all three together, rather than failing the card while these
+# two quietly keep stale numbers.
+YAWN_ADR = "docs/adr/0006-geometric-duration-rule-over-mouth-crop-cnn.md"
+SAFETY_REVIEW = "docs/ml/safety-review.md"
+
 
 def public_docs() -> list[Path]:
     """Tracked Markdown that ships publicly: the README and the docs/ tree.

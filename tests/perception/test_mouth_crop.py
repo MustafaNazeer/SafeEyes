@@ -36,10 +36,27 @@ def _landmarks_with_unequal_spread(cx, cy, half_x, half_y, n=478):
 
 
 def test_box_is_square_with_unequal_horizontal_and_vertical_spread():
+    # The box squares on the larger of the two spreads, never the smaller. The
+    # horizontal spread here is 60 px, so the edge is 60 * (1 + 2 * 0.30) = 96.
+    # Squaring on the 20 px vertical spread instead would give a 32 px edge:
+    # still square, but it would cut away the vertical extent of an open mouth,
+    # so the edge length is asserted outright and not merely its squareness.
     x0, y0, x1, y1 = mouth_crop_box(
         _landmarks_with_unequal_spread(320, 240, half_x=30.0, half_y=10.0), 640, 480
     )
     assert (x1 - x0) == (y1 - y0)
+    assert (x1 - x0) == 96
+
+
+def test_box_squares_on_the_vertical_spread_when_it_dominates():
+    # The mirror of the case above: a mouth taller than it is wide, as an open
+    # mouth mid yawn is. The 60 px vertical spread must drive the same 96 px
+    # edge, so neither axis is privileged over the other.
+    x0, y0, x1, y1 = mouth_crop_box(
+        _landmarks_with_unequal_spread(320, 240, half_x=10.0, half_y=30.0), 640, 480
+    )
+    assert (x1 - x0) == (y1 - y0)
+    assert (y1 - y0) == 96
 
 
 def test_box_is_centered_on_the_mouth():

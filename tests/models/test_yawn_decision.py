@@ -11,8 +11,11 @@ def _event(sample_id):
 
 
 def test_video_score_is_the_maximum_event_score():
+    # a.avi's maximum and its last event score deliberately disagree, so an
+    # aggregation that simply overwrites on every event, keeping the last score
+    # rather than the largest, fails here instead of coinciding with the answer.
     events = [_event("a.avi"), _event("a.avi"), _event("b.avi")]
-    scores = np.array([0.2, 0.8, 0.4])
+    scores = np.array([0.8, 0.2, 0.4])
     assert video_scores(events, scores) == {"a.avi": 0.8, "b.avi": 0.4}
 
 
@@ -33,6 +36,17 @@ def test_tau_selection_reports_a_missed_floor():
     truths = {"y1": True, "y2": True}
     result = select_tau(scores, truths, taus=[0.5, 0.9], min_recall=0.9)
     assert result["floor_met"] is False
+
+
+def test_tau_selection_falls_back_to_the_best_recall_when_the_floor_is_missed():
+    # With no tau reaching the floor, the fallback takes the highest recall and
+    # breaks ties toward the smaller tau. y1 fires at 0.1 and 0.2 alike while y2
+    # never fires, so recall ties across those two taus and 0.1 must win.
+    scores = {"y1": 0.5, "y2": 0.0}
+    truths = {"y1": True, "y2": True}
+    result = select_tau(scores, truths, taus=[0.1, 0.2, 0.9], min_recall=0.9)
+    assert result["floor_met"] is False
+    assert result["selected"] == 0.1
 
 
 def test_a_video_with_no_proposed_event_never_fires():
