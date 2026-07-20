@@ -109,13 +109,16 @@ reported operating point is the preregistered threshold.
   beside the 100.0% drowsy clip detection rate on this test set) keeps the
   reliability claim blocked; see the [safety review](safety-review.md) for the
   standing verdict.
-- The geometric yawn signal fails its acceptance bar (0.70 video level precision
-  and recall; measured 46.7% precision at 99.1% recall). At video level it
-  cannot distinguish yawning from talking. It remains one input feature among
-  five to the temporal classifier, where it is not asked to stand alone, but it
-  is not a yawn detector. A trained yawn classifier, evaluated against this
-  geometric baseline on a subject independent YawDD split, is planned follow up
-  work.
+- The geometric yawn signal, as the bare threshold crossing rule measured here,
+  fails its acceptance bar (0.70 video level precision and recall; measured
+  46.7% precision at 99.1% recall over this 320 video population). In that form
+  it cannot distinguish yawning from talking at video level. It remains one
+  input feature among five to the temporal classifier, where it is not asked to
+  stand alone. Requiring the opening to last a minimum duration was tried next,
+  together with a trained classifier over mouth crops, on a subject independent
+  split of the Mirror set; the measured outcome and the decision not to deploy
+  the trained model are in [yawn-model-card.md](yawn-model-card.md) and
+  [ADR 0006](../adr/0006-geometric-duration-rule-over-mouth-crop-cnn.md).
 
 ## Citation
 

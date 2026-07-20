@@ -57,6 +57,34 @@ matters, is more likely to be caught than any single window suggests. Even so,
 half of drowsy windows being missed is a real limitation, and it is reported
 through the per class recall rather than averaged away into the headline number.
 
+## The yawn signal
+
+The yawn signal was previously reviewed as a bare mouth aspect ratio threshold
+crossing rule, and in that form it failed its precision bar: 46.7% precision at
+99.1% recall over the full 320 video YawDD Mirror population, with 80.0% of pure
+talking videos firing. That statement described a rule the project no longer
+uses on its own, and it is superseded by a measurement on held out subjects.
+
+On a subject independent split of the Mirror set (20 test subjects, 75 videos),
+requiring the opening to last at least roughly 1.4 seconds on top of the same
+preregistered threshold measured 0.8966 precision at 0.9286 recall, with a
+talking false positive rate of 0.1364. The same test set scores the bare rule at
+0.5283 precision at 1.0000 recall with a talking false positive rate of 0.7273,
+so the duration requirement is what closed the gap, not a trained model. A
+frozen mouth crop classifier measured 0.8750 precision at 1.0000 recall with a
+talking false positive rate of 0.1818, did not beat the duration rule's
+precision, and is not deployed. The evidence is in
+[yawn-model-card.md](yawn-model-card.md) and the decision in
+[ADR 0006](../adr/0006-geometric-duration-rule-over-mouth-crop-cnn.md).
+
+Three qualifications belong beside those numbers and are not softened here. The
+YawDD yawns are acted rather than naturally occurring, ground truth is video
+level only, and three videos separate the two best detectors on a 20 subject
+test set. The honest reading is that the duration rule is serviceable against
+talking on this data, not that yawn detection is solved. The signal stays one
+input among five to the temporal classifier and is not promoted to a standalone
+detector, so nothing in this section changes the standing verdict below.
+
 ## Nuisance behavior
 
 The four tier escalation, the minimum duration debounce, and the asymmetric

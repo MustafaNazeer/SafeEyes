@@ -76,7 +76,10 @@ it into fixed, subject independent splits.
 - **Use:** held out validation of the mouth aspect ratio yawn signal. The first
   reported YawDD numbers are in
   [alert-validation.md](../ml/alert-validation.md), scored at a detection
-  threshold fixed from UTA train statistics before any YawDD data was read.
+  threshold fixed from UTA train statistics before any YawDD data was read. A
+  later subject independent split of the Mirror set (70 train and 20 test
+  subjects, seed 0) supports the yawn detector comparison in
+  [yawn-model-card.md](../ml/yawn-model-card.md).
 - **Contents:** 349 driver videos in real, varying illumination: 320 mirror
   camera videos labeled by activity in the filename (normal, talking, yawning,
   and combined talking and yawning), and 29 dash camera videos that each contain
@@ -92,6 +95,38 @@ it into fixed, subject independent splits.
   Before any YawDD derived number is published, the working copy's file inventory
   is checked against the official distribution listing and re downloaded from the
   official source if they differ.
+
+### Derived mouth crops
+
+The yawn event classifier is trained on mouth crops derived from the Mirror
+videos rather than on the videos themselves. The derivation is fully specified
+so the crop set can be regenerated from the original distribution:
+
+- **Frame step 3.** Every third decoded frame is processed, the same cadence the
+  rest of the perception path uses. A frame with no detected face is skipped, and
+  each retained row records the video frame index it came from, so a crop and its
+  geometry row can never drift apart.
+- **Gate 0.45 on the mouth aspect ratio.** Pixels are kept only around rows whose
+  mouth aspect ratio clears 0.45, plus a fixed margin of rows on each side so the
+  onset and the release of an opening are covered, not only its peak. The gate
+  sits deliberately below the preregistered detection threshold of 0.616703: it
+  is a permissive pre filter over which frames are worth storing, never a
+  decision about which frames are yawns. Its effect on class balance is uneven
+  and is reported as a caveat in
+  [yawn-model-card.md](../ml/yawn-model-card.md).
+- **96 by 96 crops centred on the mouth.** The box follows the mean of the six
+  mouth aspect ratio landmarks rather than a static face box, so it tracks the
+  mouth as the driver moves. The box is squared before a 30 percent margin is
+  applied, so a downstream classifier never sees a distorted mouth, and it is
+  clamped to the frame at the edges.
+- **Crops never enter the repository.** Archives are written under the gitignored
+  `features/` tree only. No frame, crop, or other derivative of a licensed
+  dataset is committed, and the same applies to the generated split manifests.
+
+Any published number derived from these crops carries the YawDD citation above:
+S. Abtahi, M. Omidyeganeh, S. Shirmohammadi, and B. Hariri, "YawDD: A Yawning
+Detection Dataset", Proc. ACM Multimedia Systems, Singapore, March 19 to 21,
+2014, pp. 337 to 342.
 
 ## DMD (Driver Monitoring Dataset)
 

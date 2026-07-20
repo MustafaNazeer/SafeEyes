@@ -20,6 +20,10 @@ DISTRACTION_CARD = "docs/ml/distraction-model-card.md"
 # The alert level validation and YawDD results doc, pinned the same way.
 ALERT_VALIDATION = "docs/ml/alert-validation.md"
 
+# The yawn detector comparison card, which publishes the held out figures for
+# both geometric baselines and the trained classifier that did not beat them.
+YAWN_CARD = "docs/ml/yawn-model-card.md"
+
 
 def public_docs() -> list[Path]:
     """Tracked Markdown that ships publicly: the README and the docs/ tree.

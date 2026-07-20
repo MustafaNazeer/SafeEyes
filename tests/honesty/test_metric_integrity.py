@@ -7,6 +7,7 @@ import pytest
 from ._docs import (
     ALERT_VALIDATION,
     DISTRACTION_CARD,
+    YAWN_CARD,
     load_docs,
     load_metric,
     metric_value,
@@ -107,6 +108,43 @@ CLAIMS = [
         1,
     ),
     ("yawdd-yawn-metrics.json", ("dash_recall_only", "recall"), ALERT_VALIDATION, "pct", 1),
+    ("yawn-model-metrics.json", ("threshold",), YAWN_CARD, "ratio", 6),
+    ("yawn-model-metrics.json", ("tau",), YAWN_CARD, "ratio", 2),
+    ("yawn-model-metrics.json", ("baseline_mar", "precision"), YAWN_CARD, "ratio", 4),
+    ("yawn-model-metrics.json", ("baseline_mar", "recall"), YAWN_CARD, "ratio", 4),
+    (
+        "yawn-model-metrics.json",
+        ("baseline_mar", "talking_false_positive_rate"),
+        YAWN_CARD,
+        "ratio",
+        4,
+    ),
+    ("yawn-model-metrics.json", ("baseline_duration", "precision"), YAWN_CARD, "ratio", 4),
+    ("yawn-model-metrics.json", ("baseline_duration", "recall"), YAWN_CARD, "ratio", 4),
+    (
+        "yawn-model-metrics.json",
+        ("baseline_duration", "talking_false_positive_rate"),
+        YAWN_CARD,
+        "ratio",
+        4,
+    ),
+    ("yawn-model-metrics.json", ("cnn", "precision"), YAWN_CARD, "ratio", 4),
+    ("yawn-model-metrics.json", ("cnn", "recall"), YAWN_CARD, "ratio", 4),
+    (
+        "yawn-model-metrics.json",
+        ("cnn", "talking_false_positive_rate"),
+        YAWN_CARD,
+        "ratio",
+        4,
+    ),
+]
+
+# Each yawn detector's precision and the recall that must never be separated
+# from it. Rendered at the same precision the card publishes them at.
+YAWN_PRECISION_RECALL = [
+    (("baseline_mar", "precision"), ("baseline_mar", "recall")),
+    (("baseline_duration", "precision"), ("baseline_duration", "recall")),
+    (("cnn", "precision"), ("cnn", "recall")),
 ]
 
 TEMPORAL_ACCURACY = "47.1%"
@@ -162,6 +200,38 @@ def test_alert_detection_is_never_reported_without_false_alarms_per_hour() -> No
     assert offenders == [], (
         f"docs stating the alert detection rate without its false alarm rate: {offenders}"
     )
+
+
+def test_yawn_precision_is_never_reported_without_its_recall() -> None:
+    # Honesty rule: a yawn detector's precision never stands alone. Any table row
+    # that states one of these precisions states that detector's recall in the
+    # same row, and any document that states one states its recall somewhere.
+    data = load_metric("yawn-model-metrics.json")
+    offenders: list[str] = []
+    for precision_path, recall_path in YAWN_PRECISION_RECALL:
+        detector = precision_path[0]
+        precision = render_ratio(metric_value(data, precision_path), 4)
+        recall = render_ratio(metric_value(data, recall_path), 4)
+        for name, text in load_docs():
+            if precision in text and recall not in text:
+                offenders.append(f"{name} states {detector} precision with no recall in the doc")
+            for number, line in enumerate(text.splitlines(), start=1):
+                if not line.lstrip().startswith("|"):
+                    continue
+                if precision in line and recall not in line:
+                    offenders.append(f"{name}:{number} table row states {detector} precision alone")
+    assert offenders == [], f"yawn precision reported without its recall: {offenders}"
+
+
+def test_yawn_precision_recall_guard_flags_a_bare_row() -> None:
+    # Positive control: the row rule is what rejects a precision only table row.
+    data = load_metric("yawn-model-metrics.json")
+    precision = render_ratio(metric_value(data, ("cnn", "precision")), 4)
+    recall = render_ratio(metric_value(data, ("cnn", "recall")), 4)
+    bare_row = f"| Mouth crop classifier | {precision} |"
+    assert bare_row.lstrip().startswith("|")
+    assert precision in bare_row
+    assert recall not in bare_row
 
 
 def test_metric_check_catches_drift() -> None:
