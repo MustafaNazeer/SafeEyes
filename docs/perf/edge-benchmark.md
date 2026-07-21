@@ -65,6 +65,8 @@ benchmark is run on the device. No numbers are entered until they are measured.
 | End to end per frame | full pipeline, HUD on | one camera frame | n/a | 81.9 | 85.5 | 11.1 |
 | Integrated loop, no driver in frame | drowsiness only, headless | one camera frame | n/a | 13.4 | 24.5 | 15.0 |
 | Integrated loop, no driver in frame | plus distraction every 5th frame, headless | one camera frame | n/a | 13.6 | 50.6 | 14.9 |
+| Integrated loop, driver in frame | drowsiness only, headless | one camera frame | n/a | 75.8 | 78.5 | 12.88 |
+| Integrated loop, driver in frame | plus gaze every frame, headless | one camera frame | n/a | 78.8 | 92.7 | 12.02 |
 | Distraction mobilenet_v3_small | float | (1, 3, 224, 224) | 18.321 | 18.132 | 19.540 | 54.6 |
 | Distraction mobilenet_v3_small | int8 | (1, 3, 224, 224) | 62.022 | 61.791 | 63.227 | 16.1 |
 | Distraction mobilenet_v2 | float | (1, 3, 224, 224) | 46.598 | 46.142 | 50.156 | 21.5 |
@@ -100,6 +102,26 @@ cost is close to zero. And no integrated with driver row exists for the gaze
 track yet: the board has no capture camera attached, and a faceless run would be
 meaningless here because no face means no landmarks and therefore no gaze
 inference at all. That measurement is outstanding rather than reported.
+
+The two driver in frame integrated rows are 90 second headless runs on the same
+board with a USB webcam and a person in frame throughout (face detection rate
+1.00 across every 10 second interval after the first). Latency figures are the
+medians of the interval p50 and p95 values, and throughput counts whole loop
+iterations. Unlike the faceless rows above them, these exercise the full path:
+landmark detection, the temporal model, and the gaze model all run on real
+faces. Thermals were clear on both, 38.9 C to 51.6 C on the baseline and 42.8 C
+to 59.4 C with gaze, throttle flags 0x0 throughout.
+
+Adding the gaze track costs about 0.9 frames per second and 3.0 ms of median
+per frame latency. That is more than the model's own 0.080 ms and the gap is
+not fully accounted for. A first measurement showed 4.7 ms, of which about
+1.7 ms was a redundant head pose solve: the loop already solves pose for the
+drowsiness feature vector, and the gaze path was solving it again on the same
+landmarks. Reusing the existing solve removed that, and the rows above are the
+corrected measurement. The remaining difference is plausibly per call inference
+overhead from Python, the iris geometry, and the higher board temperature the
+gaze runs began at, but none of those has been measured separately, so the cost
+is reported as observed rather than attributed.
 
 The temporal rows were measured on the same board, runtime, and procedure (100
 timed runs after warmup, ONNX Runtime 1.27.0, Python 3.12, board at 37.0 C, no
