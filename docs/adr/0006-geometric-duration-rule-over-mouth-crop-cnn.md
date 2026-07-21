@@ -41,7 +41,9 @@ from clean code.
 ## Decision
 
 **The classifier is not deployed. The geometric rule with a minimum duration is
-the yawn signal.**
+the accepted yawn signal.** Accepted here means chosen on the evidence below,
+not wired into the running system: see the Consequences section, which records
+that no yawn signal reaches any runtime path today.
 
 All three detectors were scored on the same 75 held out videos by the same
 function. From [yawn-model-metrics.json](../ml/yawn-model-metrics.json):
@@ -73,17 +75,30 @@ the weakly optimistic one on both axes and still loses.
 
 ## Consequences
 
-- The accepted rule for the yawn signal is its existing geometric form plus the
-  minimum duration requirement. No model file, no crop extraction, and no
-  backbone inference enter the live loop for this signal, so its edge cost
-  stays at zero beyond the geometry already computed for every frame.
-- Wiring that requirement into the runtime is follow on work and has not been
-  done. The live temporal feature in `safeeyes/temporal/features.py` still
-  counts a yawn on the bare threshold crossing, with no duration requirement,
-  and the duration aware predicate this comparison was measured with has no
-  caller on any runtime path. Integration was out of scope for the evaluation
-  recorded here. Until it lands, the runtime signal is the bare rule scored in
-  the first row of the table above, not the second.
+- The accepted rule for the yawn signal is the geometric threshold plus the
+  minimum duration requirement. Should the signal ever enter the live loop, it
+  needs no model file, no crop extraction, and no backbone inference, so its
+  edge cost would be nothing beyond the geometry already computed for every
+  frame.
+- **There is no yawn signal on any runtime path today, and this decision does
+  not put one there.** The live loop feeds the temporal model the raw per frame
+  feature vector defined by `FEATURE_COLUMNS` in `safeeyes/perception/frame.py`.
+  Mouth aspect ratio is present in that vector as one undifferentiated input
+  column, but nothing thresholds it, counts an event from it, or derives a yawn
+  from it. The window summary in `safeeyes/temporal/features.py` that computes a
+  yawn count on the bare threshold crossing has no caller in the package, and
+  the duration aware predicate this comparison was measured with has no caller
+  on any runtime path either. Neither row of the table above describes deployed
+  behavior: both were measured offline on YawDD.
+- Introducing a yawn signal into the runtime is therefore new design work rather
+  than a small edit to an existing signal. It requires deciding whether the
+  alert state machine should consume a discrete yawn event at all, given that
+  the temporal model already receives mouth aspect ratio directly, and how such
+  an event would fuse with the existing fatigue tier. The duration chosen here
+  is also cadence dependent: 14 steps was swept on features extracted at roughly
+  ten rows per second, so any runtime port must express the requirement in
+  seconds and convert through the live frame rate rather than carry the integer
+  across unchanged.
 - The negative result is published rather than discarded, in
   [yawn-model-card.md](../ml/yawn-model-card.md), with the deploy rule stated
   before the results, the leak documented, and the caveats attached. A trained
