@@ -1,40 +1,42 @@
-"""Subject independent split for the DMD gaze bundle.
+"""Subject independent evaluation folds for the DMD gaze bundle.
 
-Fourteen subjects split 8 train, 2 validation, 4 test, following the ratio the
-distraction bundle used on its own 14 subjects. The validation fold exists so
-the deploy bar can be fixed without ever reading the test split, which is
-scored exactly once.
+Leave one subject out rather than a single held out split. The corpus is small
+in the way that matters: 14 subjects and roughly 208 annotation intervals, with
+about 100 to 230 near duplicate frames inside each interval. A 4 subject test
+fold would rest the eyes off road false alarm rate on roughly 14 independent
+forward glances, where one misclassified glance moves the figure by about seven
+percentage points.
 
-The split is a function of the seed and the subject set alone, never of the
-order they were listed in, so the manifests regenerate byte identically. That
-matters because DMD is CC BY-NC-ND: the manifests are not redistributed, so a
-reader reproduces them from this builder rather than downloading them.
+Holding out one subject at a time and pooling the folds puts every subject in
+the test position exactly once, so the same rate rests on all 51 forward
+glances instead. It also makes per subject variance visible, which a single
+split hides entirely.
+
+Nothing is tuned per fold. The classifier runs at fixed hyperparameters and the
+binary signal is the argmax collapsed to eyes on road versus off, so there is no
+inner selection loop and no validation fold to leak through. The deploy bar is
+written down before the folds are run and the pooled result is read once.
+
+Two subjects have a second s6 recording. Folds are built on subjects, never on
+recordings, so both recordings of one person always sit on the same side.
 """
 
 from __future__ import annotations
 
-import random
 from collections.abc import Sequence
 
-N_TRAIN = 8
-N_VAL = 2
-N_TEST = 4
-N_SUBJECTS = N_TRAIN + N_VAL + N_TEST
+N_SUBJECTS = 14
 
 
-def build_gaze_split(subjects: Sequence[str], seed: int = 0) -> dict[str, list[str]]:
+def subject_folds(subjects: Sequence[str]) -> list[tuple[list[str], str]]:
+    """One (train_subjects, held_out_subject) pair per subject, in sorted order."""
     listed = list(subjects)
     unique = set(listed)
     if len(listed) != len(unique):
         duplicates = sorted({s for s in listed if listed.count(s) > 1})
         raise ValueError(f"duplicate subjects in the corpus: {duplicates}")
-    if len(unique) != N_SUBJECTS:
-        raise ValueError(f"expected {N_SUBJECTS} subjects, got {len(unique)}")
+    if not unique:
+        raise ValueError("cannot build folds from an empty subject list")
 
-    shuffled = sorted(unique)
-    random.Random(seed).shuffle(shuffled)
-    return {
-        "train": sorted(shuffled[:N_TRAIN]),
-        "val": sorted(shuffled[N_TRAIN : N_TRAIN + N_VAL]),
-        "test": sorted(shuffled[N_TRAIN + N_VAL :]),
-    }
+    ordered = sorted(unique)
+    return [([s for s in ordered if s != held_out], held_out) for held_out in ordered]

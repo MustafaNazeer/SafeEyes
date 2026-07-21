@@ -1,6 +1,6 @@
 import pytest
 
-from safeeyes.data.gaze_splits import N_TEST, N_TRAIN, N_VAL, build_gaze_split
+from safeeyes.data.gaze_splits import N_SUBJECTS, subject_folds
 
 SUBJECTS = [
     "gA-1",
@@ -20,45 +20,46 @@ SUBJECTS = [
 ]
 
 
-def test_split_sizes_are_eight_two_four():
-    split = build_gaze_split(SUBJECTS, seed=0)
-    assert (len(split["train"]), len(split["val"]), len(split["test"])) == (8, 2, 4)
-    assert (N_TRAIN, N_VAL, N_TEST) == (8, 2, 4)
+def test_there_is_one_fold_per_subject():
+    folds = subject_folds(SUBJECTS)
+    assert len(folds) == len(SUBJECTS) == N_SUBJECTS
 
 
-def test_no_subject_appears_in_two_buckets():
-    split = build_gaze_split(SUBJECTS, seed=0)
-    everything = split["train"] + split["val"] + split["test"]
-    assert len(everything) == len(set(everything)) == 14
+def test_every_subject_is_held_out_exactly_once():
+    held_out = [fold[1] for fold in subject_folds(SUBJECTS)]
+    assert sorted(held_out) == sorted(SUBJECTS)
+    assert len(held_out) == len(set(held_out))
 
 
-def test_every_input_subject_is_placed():
-    split = build_gaze_split(SUBJECTS, seed=0)
-    placed = set(split["train"]) | set(split["val"]) | set(split["test"])
-    assert placed == set(SUBJECTS)
+def test_the_held_out_subject_never_appears_in_its_own_training_set():
+    """This is the whole point: a leak here would invalidate every number."""
+    for train, held_out in subject_folds(SUBJECTS):
+        assert held_out not in train
+        assert len(train) == len(SUBJECTS) - 1
 
 
-def test_split_is_deterministic_for_a_seed():
-    assert build_gaze_split(SUBJECTS, seed=0) == build_gaze_split(SUBJECTS, seed=0)
-
-
-def test_split_does_not_depend_on_input_order():
-    """Regeneration must be byte identical however the subjects were listed."""
-    forward = build_gaze_split(SUBJECTS, seed=0)
-    backward = build_gaze_split(list(reversed(SUBJECTS)), seed=0)
+def test_folds_do_not_depend_on_input_order():
+    forward = subject_folds(SUBJECTS)
+    backward = subject_folds(list(reversed(SUBJECTS)))
     assert forward == backward
 
 
-def test_a_different_seed_gives_a_different_split():
-    assert build_gaze_split(SUBJECTS, seed=0) != build_gaze_split(SUBJECTS, seed=1)
-
-
-def test_too_few_subjects_is_rejected():
-    with pytest.raises(ValueError, match="14"):
-        build_gaze_split(SUBJECTS[:5], seed=0)
+def test_folds_are_deterministic():
+    assert subject_folds(SUBJECTS) == subject_folds(SUBJECTS)
 
 
 def test_duplicate_subjects_are_rejected_rather_than_silently_deduplicated():
-    """Silently deduplicating would hide a corpus that listed a subject twice."""
     with pytest.raises(ValueError, match="duplicate"):
-        build_gaze_split([*SUBJECTS, "gA-1"], seed=0)
+        subject_folds([*SUBJECTS, "gA-1"])
+
+
+def test_an_empty_corpus_is_rejected():
+    with pytest.raises(ValueError, match="empty"):
+        subject_folds([])
+
+
+def test_a_smaller_corpus_still_produces_one_fold_each():
+    """The builder is not hard coded to 14, so a subset is still usable."""
+    folds = subject_folds(SUBJECTS[:5])
+    assert len(folds) == 5
+    assert all(len(train) == 4 for train, _ in folds)
