@@ -10,3 +10,4 @@ later record supersedes an earlier one rather than editing it.
 - [0004](0004-acquire-uta-from-kaggle-mirror.md) Acquire UTA-RLDD from the Kaggle mirror
 - [0005](0005-interval-samples-for-temporally-annotated-video.md) Interval samples for temporally annotated video
 - [0006](0006-geometric-duration-rule-over-mouth-crop-cnn.md) Geometric duration rule over the mouth crop classifier
+- [0007](0007-geometric-gaze-with-leave-one-subject-out.md) Geometric gaze zone classification, evaluated leave one subject out

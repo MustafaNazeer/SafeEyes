@@ -21,6 +21,9 @@ EYE_CARD = "docs/ml/eye-state-model-card.md"
 TEMPORAL_METHODOLOGY = "docs/ml/temporal-classifier-methodology.md"
 
 # (json file, key path, doc that reports it, render kind, decimals).
+GAZE_CARD = "docs/ml/gaze-model-card.md"
+GAZE_METRICS = "gaze-model-metrics.json"
+
 CLAIMS = [
     ("eye-state-metrics.json", ("overall_accuracy",), EYE_CARD, "pct", 2),
     ("eye-state-metrics.json", ("balanced_accuracy",), EYE_CARD, "pct", 2),
@@ -232,6 +235,17 @@ CLAIMS = [
         "count",
         0,
     ),
+    (GAZE_METRICS, ("interval", "binary", "false_alarm_rate"), GAZE_CARD, "ratio", 4),
+    (GAZE_METRICS, ("interval", "binary", "detection_rate"), GAZE_CARD, "ratio", 4),
+    (GAZE_METRICS, ("interval", "zone", "accuracy"), GAZE_CARD, "ratio", 4),
+    (GAZE_METRICS, ("frame", "binary", "false_alarm_rate"), GAZE_CARD, "ratio", 4),
+    (GAZE_METRICS, ("frame", "binary", "detection_rate"), GAZE_CARD, "ratio", 4),
+    (GAZE_METRICS, ("frame", "zone", "accuracy"), GAZE_CARD, "ratio", 4),
+    (GAZE_METRICS, ("interval", "binary", "n_on_road"), GAZE_CARD, "count", 0),
+    (GAZE_METRICS, ("interval", "binary", "n_off_road"), GAZE_CARD, "count", 0),
+    (GAZE_METRICS, ("interval", "binary", "false_alarms"), GAZE_CARD, "count", 0),
+    (GAZE_METRICS, ("interval", "binary", "detected"), GAZE_CARD, "count", 0),
+    (GAZE_METRICS, ("frame", "zone", "n"), GAZE_CARD, "count", 0),
 ]
 
 # Each yawn detector's precision and the recall that must never be separated
