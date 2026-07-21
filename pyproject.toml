@@ -30,6 +30,9 @@ dependencies = [
     "onnx>=1.16",
     "onnxruntime>=1.17",
     "onnxscript>=0.7",
+    # Converts the scikit-learn gaze classifier to ONNX so the Pi can run it with
+    # onnxruntime alone; scikit-learn is never installed on the device.
+    "skl2onnx>=1.16",
 ]
 
 [project.optional-dependencies]
