@@ -169,8 +169,15 @@ def run(
             gaze_tier: AlertTier | None = None
             if gaze_track is not None:
                 if gaze_classify is not None and features is not None and landmarks is not None:
+                    # FEATURE_COLUMNS is (ear, mar, pitch, yaw, roll), so the
+                    # pose was already solved for the drowsiness vector. Reusing
+                    # it avoids a second solvePnP on the same landmarks.
                     gaze_zone = gaze_classify(
-                        gaze_features(landmarks, default_camera_matrix(width, height))
+                        gaze_features(
+                            landmarks,
+                            default_camera_matrix(width, height),
+                            pose=(float(features[2]), float(features[3]), float(features[4])),
+                        )
                     )
                     gaze_tier = gaze_track.update(not is_eyes_on_road(gaze_zone))
                 else:

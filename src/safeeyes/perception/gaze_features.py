@@ -33,12 +33,25 @@ GAZE_FEATURE_COLUMNS: tuple[str, ...] = (
 )
 
 
-def gaze_features(landmarks: np.ndarray, camera_matrix: np.ndarray) -> np.ndarray:
-    try:
-        head_points = extract_points(landmarks, HEAD_POSE_INDICES)
-        pitch, yaw, roll = estimate_head_pose(head_points, camera_matrix)
-    except (cv2.error, RuntimeError, ValueError):
-        pitch, yaw, roll = 0.0, 0.0, 0.0
+def gaze_features(
+    landmarks: np.ndarray,
+    camera_matrix: np.ndarray,
+    pose: tuple[float, float, float] | None = None,
+) -> np.ndarray:
+    """Assemble the gaze vector, reusing a head pose when the caller has one.
+
+    The live loop already solves head pose for the drowsiness features on the
+    same landmarks. Solving it again here costs several milliseconds per frame,
+    far more than the gaze model itself, so the loop passes in what it has.
+    """
+    if pose is not None:
+        pitch, yaw, roll = pose
+    else:
+        try:
+            head_points = extract_points(landmarks, HEAD_POSE_INDICES)
+            pitch, yaw, roll = estimate_head_pose(head_points, camera_matrix)
+        except (cv2.error, RuntimeError, ValueError):
+            pitch, yaw, roll = 0.0, 0.0, 0.0
 
     left_dx, left_dy = iris_offset(landmarks, "left")
     right_dx, right_dy = iris_offset(landmarks, "right")

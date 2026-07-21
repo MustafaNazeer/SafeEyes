@@ -69,3 +69,30 @@ def test_iris_columns_track_the_iris_offset():
     shifted = gaze_features(face, default_camera_matrix(640, 480))
     assert shifted[3] > baseline[3]
     assert shifted[5] == baseline[5]
+
+
+def test_a_precomputed_pose_is_reused_rather_than_solved_again():
+    """The live loop already solves head pose for the drowsiness features.
+
+    Solving it a second time on the same landmarks costs far more per frame
+    than the gaze model itself, so the caller can pass the pose it already has.
+    """
+    face = _face()
+    matrix = default_camera_matrix(640, 480)
+    solved = gaze_features(face, matrix)
+    reused = gaze_features(face, matrix, pose=(solved[0], solved[1], solved[2]))
+    assert np.allclose(solved, reused)
+
+
+def test_the_supplied_pose_is_what_lands_in_the_output():
+    face = _face()
+    vector = gaze_features(face, default_camera_matrix(640, 480), pose=(1.0, 2.0, 3.0))
+    assert vector[:3].tolist() == [1.0, 2.0, 3.0]
+
+
+def test_the_iris_columns_are_unaffected_by_the_supplied_pose():
+    face = _face()
+    matrix = default_camera_matrix(640, 480)
+    solved = gaze_features(face, matrix)
+    reused = gaze_features(face, matrix, pose=(9.0, 9.0, 9.0))
+    assert np.allclose(solved[3:], reused[3:])
