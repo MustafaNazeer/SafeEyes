@@ -51,11 +51,16 @@ def test_main_wires_logging_arguments_into_run(monkeypatch) -> None:
 
     exit_code = main(
         [
-            "--model", "models/edge/temporal.int8.onnx",
-            "--camera", "1",
-            "--window", "120",
-            "--log-file", "edge.jsonl",
-            "--metrics-interval", "10",
+            "--model",
+            "models/edge/temporal.int8.onnx",
+            "--camera",
+            "1",
+            "--window",
+            "120",
+            "--log-file",
+            "edge.jsonl",
+            "--metrics-interval",
+            "10",
         ]
     )
 
@@ -67,6 +72,10 @@ def test_main_wires_logging_arguments_into_run(monkeypatch) -> None:
         "distraction_model": None,
         "distraction_every_n": 5,
         "distraction_alpha": 0.5,
+        "gaze_model": None,
+        "gaze_min_seconds": 2.0,
+        "gaze_audible_seconds": 4.0,
+        "gaze_fps": 11.0,
         "log_file": "edge.jsonl",
         "metrics_interval": 10.0,
         "show_display": True,
@@ -79,10 +88,14 @@ def test_main_wires_distraction_arguments_into_run(monkeypatch) -> None:
 
     exit_code = main(
         [
-            "--model", "models/edge/temporal.int8.onnx",
-            "--distraction-model", "models/edge/distraction.onnx",
-            "--distraction-every-n", "3",
-            "--distraction-alpha", "0.25",
+            "--model",
+            "models/edge/temporal.int8.onnx",
+            "--distraction-model",
+            "models/edge/distraction.onnx",
+            "--distraction-every-n",
+            "3",
+            "--distraction-alpha",
+            "0.25",
         ]
     )
 
@@ -100,3 +113,29 @@ def test_main_wires_no_display_into_run(monkeypatch) -> None:
 
     assert exit_code == 0
     assert calls["show_display"] is False
+
+
+def test_main_wires_gaze_arguments_into_run(monkeypatch) -> None:
+    calls = {}
+    monkeypatch.setattr(run_module, "run", lambda **kwargs: calls.update(kwargs))
+
+    exit_code = main(
+        [
+            "--model",
+            "models/edge/temporal.int8.onnx",
+            "--gaze-model",
+            "models/gaze/edge/gaze_zone.onnx",
+            "--gaze-min-seconds",
+            "1.5",
+            "--gaze-audible-seconds",
+            "3.0",
+            "--gaze-fps",
+            "15",
+        ]
+    )
+
+    assert exit_code == 0
+    assert calls["gaze_model"] == "models/gaze/edge/gaze_zone.onnx"
+    assert calls["gaze_min_seconds"] == 1.5
+    assert calls["gaze_audible_seconds"] == 3.0
+    assert calls["gaze_fps"] == 15.0

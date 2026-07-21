@@ -19,9 +19,7 @@ import onnxruntime as ort
 
 class OnnxModel:
     def __init__(self, path: str | Path) -> None:
-        self._session = ort.InferenceSession(
-            str(path), providers=["CPUExecutionProvider"]
-        )
+        self._session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
         self._input_name = self._session.get_inputs()[0].name
 
     def run(self, array: np.ndarray) -> np.ndarray:
@@ -67,5 +65,20 @@ def make_onnx_eye_classifier(model: OnnxModel) -> Callable[[np.ndarray], int]:
             array = array[None]
         logits = model.run(array)
         return int(logits.argmax(axis=1)[0])
+
+    return classify
+
+
+def make_onnx_gaze_classifier(model: OnnxModel) -> Callable[[np.ndarray], str]:
+    """Wrap an exported gaze model as a feature vector to zone name adapter.
+
+    The exported scikit-learn classifier emits the predicted zone label
+    directly, so there are no logits to argmax here. The caller collapses the
+    zone to the binary eyes off road signal.
+    """
+
+    def classify(features: np.ndarray) -> str:
+        prediction = model.run(np.asarray(features, dtype=np.float32)[None])
+        return str(np.asarray(prediction).ravel()[0])
 
     return classify

@@ -44,3 +44,29 @@ def test_torch_block_actually_blocks() -> None:
     # Positive control: the guard would be vacuous if the block did not work.
     result = _import_in_subprocess("import torch")
     assert result.returncode != 0
+
+
+def test_gaze_edge_path_imports_without_torch() -> None:
+    result = _import_in_subprocess("import safeeyes.alert.gaze_track")
+    assert result.returncode == 0, result.stderr
+    assert "imported" in result.stdout
+
+
+def test_gaze_edge_path_imports_without_scikit_learn() -> None:
+    """The device runs the gaze model as ONNX and has no scikit-learn installed.
+
+    A stray import of the training module in the edge path would work on the
+    laptop and fail only once deployed.
+    """
+    block = "import sys; sys.modules['sklearn'] = None; "
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            block + "import safeeyes.edge.runtime, safeeyes.alert.gaze_track; print('imported')",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "imported" in result.stdout

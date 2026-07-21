@@ -23,21 +23,25 @@ from pathlib import Path
 
 import numpy as np
 
+from safeeyes.alert.gaze_track import EyesOffRoadTrack
 from safeeyes.alert.hud import draw_hud
 from safeeyes.alert.monitor import DriverMonitorPipeline
 from safeeyes.alert.pipeline import DrowsinessPipeline
-from safeeyes.alert.state_machine import AlertTier, DistractionAlertTrack
+from safeeyes.alert.state_machine import AlertTier, DistractionAlertTrack, fuse_tiers
+from safeeyes.data.dmd_gaze import is_eyes_on_road
 from safeeyes.distraction.labels import DISTRACTION_LABELS
 from safeeyes.distraction.scheduler import DistractionScheduler
 from safeeyes.edge.preprocess import preprocess_distraction_frame
 from safeeyes.edge.runtime import (
     OnnxModel,
     make_onnx_distraction_classifier,
+    make_onnx_gaze_classifier,
     make_onnx_window_classifier,
 )
 from safeeyes.observability.session import make_run_observer
 from safeeyes.perception.facemesh import FaceMeshDetector
 from safeeyes.perception.frame import FEATURE_COLUMNS, frame_features
+from safeeyes.perception.gaze_features import gaze_features
 from safeeyes.perception.head_pose import default_camera_matrix
 
 
@@ -57,9 +61,7 @@ def build_distraction_scheduler(
     def classify(frame: np.ndarray) -> np.ndarray:
         return adapter(preprocess_distraction_frame(frame, size))
 
-    return DistractionScheduler(
-        classify, DISTRACTION_LABELS, every_n=every_n, ema_alpha=ema_alpha
-    )
+    return DistractionScheduler(classify, DISTRACTION_LABELS, every_n=every_n, ema_alpha=ema_alpha)
 
 
 def run(
@@ -72,6 +74,10 @@ def run(
     distraction_model: str | None = None,
     distraction_every_n: int = 5,
     distraction_alpha: float = 0.5,
+    gaze_model: str | None = None,
+    gaze_min_seconds: float = 2.0,
+    gaze_audible_seconds: float = 4.0,
+    gaze_fps: float = 11.0,
     log_file: str | None = None,
     metrics_interval: float = 5.0,
     show_display: bool = True,
@@ -102,6 +108,16 @@ def run(
             ),
         )
 
+    gaze_classify = None
+    gaze_track = None
+    if gaze_model is not None:
+        gaze_classify = make_onnx_gaze_classifier(OnnxModel(gaze_model))
+        gaze_track = EyesOffRoadTrack(
+            min_seconds=gaze_min_seconds,
+            audible_seconds=gaze_audible_seconds,
+            fps=gaze_fps,
+        )
+
     detector = FaceMeshDetector()
     capture = cv2.VideoCapture(camera_index)
     observer, log_closer = make_run_observer(log_file=log_file, metrics_interval_s=metrics_interval)
@@ -110,6 +126,8 @@ def run(
             "backend": "onnx",
             "model": Path(model_path).name,
             "distraction_model": Path(distraction_model).name if distraction_model else None,
+            "gaze_model": Path(gaze_model).name if gaze_model else None,
+            "gaze_min_seconds": gaze_min_seconds if gaze_model else None,
             "camera": camera_index,
             "window": window_capacity,
             "escalate_steps": escalate_steps,
@@ -146,6 +164,20 @@ def run(
             else:
                 tier = drowsiness.current_tier
                 fatigue_level = drowsiness.fatigue_level
+
+            gaze_zone: str | None = None
+            gaze_tier: AlertTier | None = None
+            if gaze_track is not None:
+                if gaze_classify is not None and features is not None and landmarks is not None:
+                    gaze_zone = gaze_classify(
+                        gaze_features(landmarks, default_camera_matrix(width, height))
+                    )
+                    gaze_tier = gaze_track.update(not is_eyes_on_road(gaze_zone))
+                else:
+                    # No face means no gaze evidence, so the track stands down
+                    # rather than holding a stale off road streak.
+                    gaze_tier = gaze_track.update(False)
+                tier = fuse_tiers(tier, gaze_tier)
 
             observer.observe(
                 tier=tier.name,
@@ -205,6 +237,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="EMA smoothing factor for distraction probabilities",
     )
     parser.add_argument(
+        "--gaze-model",
+        default=None,
+        help="exported gaze zone ONNX model; omit to run without the eyes off road track",
+    )
+    parser.add_argument(
+        "--gaze-min-seconds",
+        type=float,
+        default=2.0,
+        help="seconds of continuous off road gaze before the track warns",
+    )
+    parser.add_argument(
+        "--gaze-audible-seconds",
+        type=float,
+        default=4.0,
+        help="seconds of continuous off road gaze before the track escalates",
+    )
+    parser.add_argument(
+        "--gaze-fps",
+        type=float,
+        default=11.0,
+        help="measured loop frame rate, used to convert the gaze durations to frames",
+    )
+    parser.add_argument(
         "--log-file", default=None, help="write structured JSON logs here instead of stderr"
     )
     parser.add_argument(
@@ -223,6 +278,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         distraction_model=args.distraction_model,
         distraction_every_n=args.distraction_every_n,
         distraction_alpha=args.distraction_alpha,
+        gaze_model=args.gaze_model,
+        gaze_min_seconds=args.gaze_min_seconds,
+        gaze_audible_seconds=args.gaze_audible_seconds,
+        gaze_fps=args.gaze_fps,
         log_file=args.log_file,
         metrics_interval=args.metrics_interval,
         show_display=not args.no_display,
