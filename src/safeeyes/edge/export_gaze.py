@@ -18,6 +18,7 @@ import argparse
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -25,7 +26,7 @@ from safeeyes.models.gaze_model import load_corpus, train_gaze_model
 from safeeyes.perception.gaze_features import GAZE_FEATURE_COLUMNS
 
 
-def export_gaze_onnx(model, path: str | Path, n_features: int) -> Path:
+def export_gaze_onnx(model: Any, path: str | Path, n_features: int) -> Path:
     from skl2onnx import convert_sklearn
     from skl2onnx.common.data_types import FloatTensorType
 
@@ -38,7 +39,7 @@ def export_gaze_onnx(model, path: str | Path, n_features: int) -> Path:
     return out
 
 
-def verify_parity(model, onnx_path: str | Path, probe: np.ndarray) -> int:
+def verify_parity(model: Any, onnx_path: str | Path, probe: np.ndarray) -> int:
     """Return the number of rows where the ONNX artifact and the model disagree."""
     from safeeyes.edge.runtime import OnnxModel
 

@@ -74,21 +74,14 @@ def summarize_replays(
 
     nd_alarms = sum(count_alarms(c.events, threshold) for c in not_drowsy)
     ao_alarms = sum(count_alarms(c.events, threshold) for c in alert_only)
-    detections = [
-        f
-        for c in drowsy
-        if (f := first_alarm_frame(c.events, threshold)) is not None
-    ]
+    detections = [f for c in drowsy if (f := first_alarm_frame(c.events, threshold)) is not None]
     return {
         "n_clips": len(clips),
         "n_not_drowsy_clips": len(not_drowsy),
         "n_drowsy_clips": len(drowsy),
-        "false_alarms_per_hour": (
-            nd_alarms / _hours(not_drowsy, fps) if not_drowsy else None
-        ),
+        "false_alarms_per_hour": (nd_alarms / _hours(not_drowsy, fps) if not_drowsy else None),
         "fraction_not_drowsy_clips_with_alarm": (
-            sum(1 for c in not_drowsy if count_alarms(c.events, threshold) > 0)
-            / len(not_drowsy)
+            sum(1 for c in not_drowsy if count_alarms(c.events, threshold) > 0) / len(not_drowsy)
             if not_drowsy
             else None
         ),
@@ -105,8 +98,7 @@ def summarize_replays(
 DEFAULT_PARAMS = (5, 15, 45)
 
 SWEEP_GRID = [
-    (e, d, a)
-    for e, d, a in itertools.product((3, 5, 8, 12), (8, 15, 25, 40), (15, 30, 45, 90))
+    (e, d, a) for e, d, a in itertools.product((3, 5, 8, 12), (8, 15, 25, 40), (15, 30, 45, 90))
 ]
 
 
@@ -202,16 +194,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--window", type=int, default=150)
     parser.add_argument("--fps", type=float, required=True)
     parser.add_argument(
-        "--params", type=int, nargs=3, default=None,
+        "--params",
+        type=int,
+        nargs=3,
+        default=None,
         help="escalate, de_escalate, alarm_after (evaluate mode)",
     )
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
 
     classifier = load_classifier(args.checkpoint)
-    sequences = _load_level_sequences(
-        args.manifest, args.feature_root, classifier, args.window
-    )
+    sequences = _load_level_sequences(args.manifest, args.feature_root, classifier, args.window)
     if args.mode == "sweep":
         rows = sweep_parameters(sequences, SWEEP_GRID, AlertTier.AUDIBLE, args.fps)
         payload = {
@@ -226,9 +219,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         machine_rows = sweep_parameters(sequences, [params], AlertTier.AUDIBLE, args.fps)
         thresholds = {}
         for tier in (AlertTier.VISUAL, AlertTier.AUDIBLE, AlertTier.ALARM):
-            thresholds[tier.name] = sweep_parameters(
-                sequences, [params], tier, args.fps
-            )[0]
+            thresholds[tier.name] = sweep_parameters(sequences, [params], tier, args.fps)[0]
         payload = {
             "fps": args.fps,
             "checkpoint": Path(args.checkpoint).name,

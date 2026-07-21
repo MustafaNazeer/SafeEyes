@@ -62,9 +62,7 @@ def evaluate_intervals(
         for c in range(N_CLASSES)
     }
     present = [c for c in range(N_CLASSES) if support[c] > 0]
-    balanced = (
-        float(np.mean([recalls[DISTRACTION_LABELS[c]] for c in present])) if present else 0.0
-    )
+    balanced = float(np.mean([recalls[DISTRACTION_LABELS[c]] for c in present])) if present else 0.0
     absent_classes = [DISTRACTION_LABELS[c] for c in range(N_CLASSES) if support[c] == 0]
 
     return {

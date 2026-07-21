@@ -143,7 +143,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 raise FileNotFoundError(f"missing annotation for {video}")
             result = extract_recording(video, annotation, detector)
             result["subject"] = np.array(subject, dtype="U")
-            np.savez_compressed(out_path, **result)
+            # The numpy stub types the second parameter as allow_pickle, so a
+            # mapping of arrays cannot match it. The call itself is correct.
+            np.savez_compressed(out_path, **result)  # type: ignore[arg-type]
             print(
                 f"[{index}/{len(videos)}] {subject}: {len(result['frame_indices'])} rows "
                 f"from {int(result['n_frames_labelled'])} labelled frames",

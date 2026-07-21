@@ -248,9 +248,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--size", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument(
-        "--pretrained", action=argparse.BooleanOptionalAction, default=True
-    )
+    parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args(argv)
 
     size = args.size if args.size is not None else default_size(args.backbone)

@@ -142,9 +142,7 @@ def train_and_evaluate_windows(
     return evaluate_predictions(y_val, predictions, scores, n_classes, alarm)
 
 
-def _predict_scores(
-    model: nn.Module, x: np.ndarray, n_classes: int, batch_size: int
-) -> np.ndarray:
+def _predict_scores(model: nn.Module, x: np.ndarray, n_classes: int, batch_size: int) -> np.ndarray:
     tensor = torch.tensor(x, dtype=torch.float32)
     batches: list[np.ndarray] = []
     with torch.no_grad():
@@ -220,13 +218,24 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.model == "gbt":
         report = train_and_evaluate_gbt(
-            train_items, val_items, n_classes=3, window_size=args.window_size, stride=args.stride,
+            train_items,
+            val_items,
+            n_classes=3,
+            window_size=args.window_size,
+            stride=args.stride,
             seed=args.seed,
         )
     else:
         report = train_and_evaluate(
-            train_items, val_items, n_classes=3, window_size=args.window_size, stride=args.stride,
-            epochs=args.epochs, lr=args.lr, seed=args.seed, batch_size=args.batch_size,
+            train_items,
+            val_items,
+            n_classes=3,
+            window_size=args.window_size,
+            stride=args.stride,
+            epochs=args.epochs,
+            lr=args.lr,
+            seed=args.seed,
+            batch_size=args.batch_size,
             save_path=args.out,
         )
 

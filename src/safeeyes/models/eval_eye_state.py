@@ -49,8 +49,7 @@ def eye_state_metrics(y_true: IntSeq, y_pred: IntSeq) -> dict[str, object]:
     total = int(cm.sum())
     overall = correct / total if total else 0.0
     recalls = {
-        _INDEX_TO_LABEL[c]: (float(cm[c, c] / support[c]) if support[c] else 0.0)
-        for c in range(2)
+        _INDEX_TO_LABEL[c]: (float(cm[c, c] / support[c]) if support[c] else 0.0) for c in range(2)
     }
     balanced = float(np.mean(list(recalls.values())))
     return {

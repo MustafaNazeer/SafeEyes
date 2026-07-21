@@ -73,9 +73,7 @@ def extract_manifest_frames(
             wanted: dict[int, list[Path]] = defaultdict(list)
             for s in video_samples:
                 out_dir = out_root / sanitize_sample_id(s.sample_id)
-                indices = interval_frame_indices(
-                    s.start_frame, s.end_frame, stride, max_frames
-                )
+                indices = interval_frame_indices(s.start_frame, s.end_frame, stride, max_frames)
                 # DMD annotations systematically run a few frames past the end of
                 # the exported video; clamp to the frames that actually exist.
                 kept = [i for i in indices if i < frame_count]

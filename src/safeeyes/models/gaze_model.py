@@ -17,6 +17,7 @@ import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
@@ -82,9 +83,9 @@ def load_corpus(
     return merged
 
 
-def _annotation_index(gaze_root: str | Path) -> dict[str, dict]:
+def _annotation_index(gaze_root: str | Path) -> dict[str, dict[str, Any]]:
     """Annotation JSON for each recording, keyed by the feature file stem."""
-    index: dict[str, dict] = {}
+    index: dict[str, dict[str, Any]] = {}
     for annotation_path in Path(gaze_root).rglob("*_rgb_ann_gaze.json"):
         stem = annotation_path.name.replace("_rgb_ann_gaze.json", "_rgb_face")
         with open(annotation_path) as handle:
@@ -94,7 +95,7 @@ def _annotation_index(gaze_root: str | Path) -> dict[str, dict]:
     return index
 
 
-def _annotation_ids(frames: np.ndarray, annotation: dict) -> np.ndarray:
+def _annotation_ids(frames: np.ndarray, annotation: dict[str, Any]) -> np.ndarray:
     keys = frame_interval_keys(annotation, 10**9)
     dense: dict[str, int] = {}
     ids: list[int] = []
@@ -106,7 +107,9 @@ def _annotation_ids(frames: np.ndarray, annotation: dict) -> np.ndarray:
     return np.array(ids, dtype=int)
 
 
-def _stack(corpus: dict[str, dict[str, np.ndarray]], subjects: Sequence[str]) -> dict:
+def _stack(
+    corpus: dict[str, dict[str, np.ndarray]], subjects: Sequence[str]
+) -> dict[str, np.ndarray]:
     return {
         key: np.concatenate([corpus[s][key] for s in subjects])
         for key in ("features", "labels", "interval_ids")
@@ -182,7 +185,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     # Held out predictions are saved beside the metrics so the pooled result can
     # be regrouped or re-scored later without repeating the fourteen fold run.
-    predictions = results.pop("_predictions")
+    predictions = cast("dict[str, np.ndarray]", results.pop("_predictions"))
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n")
@@ -190,7 +193,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.predictions_out:
         predictions_path = Path(args.predictions_out)
         predictions_path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(predictions_path, **predictions)
+        # See the note in extract_gaze: the numpy stub types the second
+        # parameter as allow_pickle, so a mapping of arrays cannot match it.
+        np.savez_compressed(predictions_path, **predictions)  # type: ignore[arg-type]
         print(f"wrote {predictions_path}")
 
     print(f"wrote {out}")

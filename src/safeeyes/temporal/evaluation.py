@@ -53,9 +53,7 @@ def macro_auroc(y_true: IntArrayLike, y_score: np.ndarray, n_classes: int) -> fl
     labels = list(range(n_classes))
     if n_classes == 2:
         return float(roc_auc_score(y_true, scores[:, 1], labels=labels))
-    return float(
-        roc_auc_score(y_true, scores, multi_class="ovr", average="macro", labels=labels)
-    )
+    return float(roc_auc_score(y_true, scores, multi_class="ovr", average="macro", labels=labels))
 
 
 def evaluate_predictions(

@@ -43,9 +43,7 @@ def run(
     import cv2
 
     n_features = len(FEATURE_COLUMNS)
-    classifier = make_gru_classifier(
-        _build_model(checkpoint, n_features, n_classes)
-    )
+    classifier = make_gru_classifier(_build_model(checkpoint, n_features, n_classes))
     pipeline = DrowsinessPipeline(
         classifier=classifier,
         window_capacity=window_capacity,

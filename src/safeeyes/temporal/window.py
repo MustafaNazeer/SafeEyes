@@ -68,9 +68,7 @@ class FeatureWindow:
 
     def push(self, features: Sequence[float] | np.ndarray) -> None:
         if len(features) != self._n_features:
-            raise ValueError(
-                f"expected {self._n_features} features, got {len(features)}"
-            )
+            raise ValueError(f"expected {self._n_features} features, got {len(features)}")
         self._frames.append([float(v) for v in features])
 
     def __len__(self) -> int:

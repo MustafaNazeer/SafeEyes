@@ -72,8 +72,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     split = build_mirror_split(args.manifest, args.out_dir, seed=args.seed)
     print(
-        f"wrote split to {args.out_dir}: "
-        f"{len(split.train)} train, {len(split.test)} test samples"
+        f"wrote split to {args.out_dir}: {len(split.train)} train, {len(split.test)} test samples"
     )
     return 0
 

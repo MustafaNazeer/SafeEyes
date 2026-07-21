@@ -15,6 +15,8 @@ behaviour measured across every session in the distraction work.
 
 from __future__ import annotations
 
+from typing import Any
+
 GAZE_ZONES: tuple[str, ...] = (
     "left_mirror",
     "left",
@@ -43,7 +45,7 @@ def is_eyes_on_road(zone: str) -> bool:
     return zone == "front"
 
 
-def frame_interval_keys(annotation: dict, n_frames: int) -> dict[int, str]:
+def frame_interval_keys(annotation: dict[str, Any], n_frames: int) -> dict[int, str]:
     """Map each labelled frame to the annotation interval it belongs to.
 
     The annotated interval is the independent unit: one sustained glance,
@@ -70,7 +72,7 @@ def frame_interval_keys(annotation: dict, n_frames: int) -> dict[int, str]:
     return keys
 
 
-def frame_gaze_labels(annotation: dict, n_frames: int) -> dict[int, str]:
+def frame_gaze_labels(annotation: dict[str, Any], n_frames: int) -> dict[int, str]:
     root = annotation.get("openlabel", annotation)
     labels: dict[int, str] = {}
     for action in root.get("actions", {}).values():

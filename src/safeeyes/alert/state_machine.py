@@ -70,9 +70,7 @@ class AlertStateMachine:
                 self._candidate = fatigue_level
                 self._candidate_count = 1
             threshold = (
-                self._escalate_steps
-                if fatigue_level > self._committed
-                else self._de_escalate_steps
+                self._escalate_steps if fatigue_level > self._committed else self._de_escalate_steps
             )
             if self._candidate_count >= threshold:
                 self._committed = fatigue_level
@@ -144,7 +142,5 @@ class DistractionAlertTrack:
         if not self._committed:
             return AlertTier.NONE
         return (
-            AlertTier.AUDIBLE
-            if self._distracted_steps >= self._audible_after
-            else AlertTier.VISUAL
+            AlertTier.AUDIBLE if self._distracted_steps >= self._audible_after else AlertTier.VISUAL
         )

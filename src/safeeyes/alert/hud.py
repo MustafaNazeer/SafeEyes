@@ -49,8 +49,14 @@ def draw_hud(
         )
         line_color = (0, 140, 255) if distracted else (200, 200, 200)
         cv2.putText(
-            out, text, (8, height - 26), cv2.FONT_HERSHEY_SIMPLEX,
-            0.5, line_color, 1, cv2.LINE_AA,
+            out,
+            text,
+            (8, height - 26),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            line_color,
+            1,
+            cv2.LINE_AA,
         )
 
     readouts = []
@@ -60,7 +66,13 @@ def draw_hud(
         readouts.append(f"level {fatigue_level}")
     if readouts:
         cv2.putText(
-            out, "  ".join(readouts), (8, height - 8), cv2.FONT_HERSHEY_SIMPLEX,
-            0.5, (255, 255, 255), 1, cv2.LINE_AA,
+            out,
+            "  ".join(readouts),
+            (8, height - 8),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (255, 255, 255),
+            1,
+            cv2.LINE_AA,
         )
     return out

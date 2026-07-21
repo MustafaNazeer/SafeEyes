@@ -104,9 +104,7 @@ class ImageTransform:
         self.augmentations: list[nn.Module] = []
         if train:
             self.augmentations = [
-                transforms.ColorJitter(
-                    brightness=0.2, contrast=0.2, saturation=0.2, hue=0.02
-                ),
+                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.02),
                 transforms.RandomRotation(degrees=10),
             ]
         self._augment = transforms.Compose(self.augmentations)
@@ -175,9 +173,7 @@ def train_distraction(
     return epoch_losses
 
 
-def frame_accuracy(
-    model: nn.Module, loader: DataLoader[tuple[torch.Tensor, int]]
-) -> float:
+def frame_accuracy(model: nn.Module, loader: DataLoader[tuple[torch.Tensor, int]]) -> float:
     model.eval()
     correct = 0
     total = 0
@@ -202,9 +198,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--size", type=int, default=None)
     parser.add_argument("--freeze-backbone", action="store_true")
-    parser.add_argument(
-        "--pretrained", action=argparse.BooleanOptionalAction, default=True
-    )
+    parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args(argv)
 
     torch.manual_seed(args.seed)
@@ -214,9 +208,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     num_classes = len(DISTRACTION_LABELS)
 
     train_records = frame_records(args.train_manifest, args.frames_root)
-    train_ds = FrameDataset(
-        train_records, build_transform(train=True, size=size, normalize=True)
-    )
+    train_ds = FrameDataset(train_records, build_transform(train=True, size=size, normalize=True))
     train_loader: DataLoader[tuple[torch.Tensor, int]] = DataLoader(
         train_ds, batch_size=args.batch_size, shuffle=True
     )
