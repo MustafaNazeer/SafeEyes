@@ -101,7 +101,10 @@ def extract_recording(
     features = np.vstack(rows) if rows else np.empty((0, GAZE_FEATURE_DIM), dtype=float)
     return {
         "features": features,
-        "labels": np.array(kept_zones, dtype=object),
+        # Unicode rather than object dtype so the archives load without
+        # allow_pickle, which would otherwise make reading a feature file a
+        # code execution path.
+        "labels": np.array(kept_zones, dtype="U"),
         "frame_indices": np.array(kept_frames, dtype=int),
         "interval_ids": assign_interval_ids(kept_frames, kept_zones),
         "n_frames_total": np.array(total, dtype=int),
@@ -139,7 +142,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             if not annotation.exists():
                 raise FileNotFoundError(f"missing annotation for {video}")
             result = extract_recording(video, annotation, detector)
-            result["subject"] = np.array(subject, dtype=object)
+            result["subject"] = np.array(subject, dtype="U")
             np.savez_compressed(out_path, **result)
             print(
                 f"[{index}/{len(videos)}] {subject}: {len(result['frame_indices'])} rows "
