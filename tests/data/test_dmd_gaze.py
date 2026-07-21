@@ -1,6 +1,11 @@
 import pytest
 
-from safeeyes.data.dmd_gaze import GAZE_ZONES, frame_gaze_labels, is_eyes_on_road
+from safeeyes.data.dmd_gaze import (
+    GAZE_ZONES,
+    frame_gaze_labels,
+    frame_interval_keys,
+    is_eyes_on_road,
+)
 
 
 def _annotation(actions):
@@ -87,3 +92,36 @@ def test_only_front_counts_as_eyes_on_road():
     for zone in GAZE_ZONES:
         if zone != "front":
             assert is_eyes_on_road(zone) is False
+
+
+def test_interval_keys_group_one_glance_under_one_key():
+    ann = _annotation([("gaze_zone/front", [{"frame_start": 2, "frame_end": 4}])])
+    keys = frame_interval_keys(ann, 10)
+    assert len(set(keys.values())) == 1
+    assert set(keys) == {2, 3, 4}
+
+
+def test_two_intervals_of_one_zone_get_distinct_keys():
+    """Returning to a zone later is a second independent glance."""
+    ann = _annotation(
+        [
+            (
+                "gaze_zone/front",
+                [{"frame_start": 0, "frame_end": 1}, {"frame_start": 5, "frame_end": 6}],
+            )
+        ]
+    )
+    assert len(set(frame_interval_keys(ann, 10).values())) == 2
+
+
+def test_interval_keys_survive_a_detection_gap():
+    """A dropped frame must not split one annotated glance into two units."""
+    ann = _annotation([("gaze_zone/left", [{"frame_start": 0, "frame_end": 5}])])
+    keys = frame_interval_keys(ann, 10)
+    detected = [0, 1, 4, 5]
+    assert len({keys[f] for f in detected}) == 1
+
+
+def test_interval_keys_exclude_not_valid():
+    ann = _annotation([("gaze_zone/not_valid", [{"frame_start": 0, "frame_end": 3}])])
+    assert frame_interval_keys(ann, 10) == {}

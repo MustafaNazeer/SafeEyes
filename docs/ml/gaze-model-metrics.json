@@ -1,0 +1,1623 @@
+{
+  "frame": {
+    "binary": {
+      "detected": 28592,
+      "detection_rate": 0.9723847095633247,
+      "false_alarm_rate": 0.07347605224963716,
+      "false_alarms": 405,
+      "n_off_road": 29404,
+      "n_on_road": 5512
+    },
+    "zone": {
+      "accuracy": 0.7867166914881429,
+      "correct": 27469,
+      "n": 34916,
+      "per_class": {
+        "center_mirror": {
+          "correct": 2639,
+          "n": 3632
+        },
+        "front": {
+          "correct": 5107,
+          "n": 5512
+        },
+        "front_right": {
+          "correct": 2175,
+          "n": 4047
+        },
+        "infotainment": {
+          "correct": 3260,
+          "n": 3709
+        },
+        "left": {
+          "correct": 2458,
+          "n": 2876
+        },
+        "left_mirror": {
+          "correct": 3493,
+          "n": 4185
+        },
+        "right": {
+          "correct": 2307,
+          "n": 2925
+        },
+        "right_mirror": {
+          "correct": 2014,
+          "n": 3538
+        },
+        "steering_wheel": {
+          "correct": 4016,
+          "n": 4492
+        }
+      }
+    }
+  },
+  "interval": {
+    "binary": {
+      "detected": 154,
+      "detection_rate": 0.9871794871794872,
+      "false_alarm_rate": 0.0784313725490196,
+      "false_alarms": 4,
+      "n_off_road": 156,
+      "n_on_road": 51
+    },
+    "zone": {
+      "accuracy": 0.8357487922705314,
+      "correct": 173,
+      "n": 207,
+      "per_class": {
+        "center_mirror": {
+          "correct": 17,
+          "n": 21
+        },
+        "front": {
+          "correct": 47,
+          "n": 51
+        },
+        "front_right": {
+          "correct": 14,
+          "n": 23
+        },
+        "infotainment": {
+          "correct": 17,
+          "n": 18
+        },
+        "left": {
+          "correct": 15,
+          "n": 16
+        },
+        "left_mirror": {
+          "correct": 16,
+          "n": 18
+        },
+        "right": {
+          "correct": 15,
+          "n": 17
+        },
+        "right_mirror": {
+          "correct": 9,
+          "n": 19
+        },
+        "steering_wheel": {
+          "correct": 23,
+          "n": 24
+        }
+      }
+    }
+  },
+  "n_subjects": 14,
+  "per_subject": {
+    "gA-1": {
+      "frame": {
+        "binary": {
+          "detected": 1680,
+          "detection_rate": 0.9165302782324058,
+          "false_alarm_rate": 0.07657657657657657,
+          "false_alarms": 17,
+          "n_off_road": 1833,
+          "n_on_road": 222
+        },
+        "zone": {
+          "accuracy": 0.5912408759124088,
+          "correct": 1215,
+          "n": 2055,
+          "per_class": {
+            "center_mirror": {
+              "correct": 13,
+              "n": 215
+            },
+            "front": {
+              "correct": 205,
+              "n": 222
+            },
+            "front_right": {
+              "correct": 58,
+              "n": 218
+            },
+            "infotainment": {
+              "correct": 155,
+              "n": 168
+            },
+            "left": {
+              "correct": 40,
+              "n": 214
+            },
+            "left_mirror": {
+              "correct": 266,
+              "n": 269
+            },
+            "right": {
+              "correct": 128,
+              "n": 128
+            },
+            "right_mirror": {
+              "correct": 64,
+              "n": 186
+            },
+            "steering_wheel": {
+              "correct": 286,
+              "n": 435
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 8,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 8,
+          "n_on_road": 1
+        },
+        "zone": {
+          "accuracy": 0.5555555555555556,
+          "correct": 5,
+          "n": 9,
+          "per_class": {
+            "center_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "front": {
+              "correct": 1,
+              "n": 1
+            },
+            "front_right": {
+              "correct": 0,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 0,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gA-5": {
+      "frame": {
+        "binary": {
+          "detected": 1991,
+          "detection_rate": 0.9562920268972143,
+          "false_alarm_rate": 0.05397727272727273,
+          "false_alarms": 19,
+          "n_off_road": 2082,
+          "n_on_road": 352
+        },
+        "zone": {
+          "accuracy": 0.7029580936729664,
+          "correct": 1711,
+          "n": 2434,
+          "per_class": {
+            "center_mirror": {
+              "correct": 32,
+              "n": 213
+            },
+            "front": {
+              "correct": 333,
+              "n": 352
+            },
+            "front_right": {
+              "correct": 10,
+              "n": 241
+            },
+            "infotainment": {
+              "correct": 106,
+              "n": 223
+            },
+            "left": {
+              "correct": 127,
+              "n": 174
+            },
+            "left_mirror": {
+              "correct": 289,
+              "n": 290
+            },
+            "right": {
+              "correct": 186,
+              "n": 217
+            },
+            "right_mirror": {
+              "correct": 284,
+              "n": 284
+            },
+            "steering_wheel": {
+              "correct": 344,
+              "n": 440
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 8,
+          "detection_rate": 0.8888888888888888,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 9,
+          "n_on_road": 4
+        },
+        "zone": {
+          "accuracy": 0.6923076923076923,
+          "correct": 9,
+          "n": 13,
+          "per_class": {
+            "center_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "front": {
+              "correct": 4,
+              "n": 4
+            },
+            "front_right": {
+              "correct": 0,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 0,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 2
+            }
+          }
+        }
+      }
+    },
+    "gB-10": {
+      "frame": {
+        "binary": {
+          "detected": 1756,
+          "detection_rate": 0.9782729805013928,
+          "false_alarm_rate": 0.13059701492537312,
+          "false_alarms": 70,
+          "n_off_road": 1795,
+          "n_on_road": 536
+        },
+        "zone": {
+          "accuracy": 0.8163878163878164,
+          "correct": 1903,
+          "n": 2331,
+          "per_class": {
+            "center_mirror": {
+              "correct": 252,
+              "n": 256
+            },
+            "front": {
+              "correct": 466,
+              "n": 536
+            },
+            "front_right": {
+              "correct": 208,
+              "n": 240
+            },
+            "infotainment": {
+              "correct": 190,
+              "n": 200
+            },
+            "left": {
+              "correct": 132,
+              "n": 217
+            },
+            "left_mirror": {
+              "correct": 7,
+              "n": 196
+            },
+            "right": {
+              "correct": 194,
+              "n": 212
+            },
+            "right_mirror": {
+              "correct": 226,
+              "n": 237
+            },
+            "steering_wheel": {
+              "correct": 228,
+              "n": 237
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 9,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 9,
+          "n_on_road": 4
+        },
+        "zone": {
+          "accuracy": 0.9230769230769231,
+          "correct": 12,
+          "n": 13,
+          "per_class": {
+            "center_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "front": {
+              "correct": 4,
+              "n": 4
+            },
+            "front_right": {
+              "correct": 1,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gB-6": {
+      "frame": {
+        "binary": {
+          "detected": 1596,
+          "detection_rate": 0.9551166965888689,
+          "false_alarm_rate": 0.09411764705882353,
+          "false_alarms": 48,
+          "n_off_road": 1671,
+          "n_on_road": 510
+        },
+        "zone": {
+          "accuracy": 0.7679963319578175,
+          "correct": 1675,
+          "n": 2181,
+          "per_class": {
+            "center_mirror": {
+              "correct": 100,
+              "n": 186
+            },
+            "front": {
+              "correct": 462,
+              "n": 510
+            },
+            "front_right": {
+              "correct": 150,
+              "n": 270
+            },
+            "infotainment": {
+              "correct": 218,
+              "n": 243
+            },
+            "left": {
+              "correct": 178,
+              "n": 178
+            },
+            "left_mirror": {
+              "correct": 243,
+              "n": 245
+            },
+            "right": {
+              "correct": 151,
+              "n": 164
+            },
+            "right_mirror": {
+              "correct": 35,
+              "n": 162
+            },
+            "steering_wheel": {
+              "correct": 138,
+              "n": 223
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 11,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.2,
+          "false_alarms": 1,
+          "n_off_road": 11,
+          "n_on_road": 5
+        },
+        "zone": {
+          "accuracy": 0.8125,
+          "correct": 13,
+          "n": 16,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "front": {
+              "correct": 4,
+              "n": 5
+            },
+            "front_right": {
+              "correct": 2,
+              "n": 2
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 2,
+              "n": 2
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 2
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gB-7": {
+      "frame": {
+        "binary": {
+          "detected": 1578,
+          "detection_rate": 0.9868667917448405,
+          "false_alarm_rate": 0.06501547987616099,
+          "false_alarms": 42,
+          "n_off_road": 1599,
+          "n_on_road": 646
+        },
+        "zone": {
+          "accuracy": 0.8619153674832962,
+          "correct": 1935,
+          "n": 2245,
+          "per_class": {
+            "center_mirror": {
+              "correct": 167,
+              "n": 264
+            },
+            "front": {
+              "correct": 604,
+              "n": 646
+            },
+            "front_right": {
+              "correct": 289,
+              "n": 321
+            },
+            "infotainment": {
+              "correct": 174,
+              "n": 203
+            },
+            "left": {
+              "correct": 173,
+              "n": 174
+            },
+            "left_mirror": {
+              "correct": 201,
+              "n": 208
+            },
+            "right": {
+              "correct": 7,
+              "n": 12
+            },
+            "right_mirror": {
+              "correct": 126,
+              "n": 219
+            },
+            "steering_wheel": {
+              "correct": 194,
+              "n": 198
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 10,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 10,
+          "n_on_road": 5
+        },
+        "zone": {
+          "accuracy": 1.0,
+          "correct": 15,
+          "n": 15,
+          "per_class": {
+            "center_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "front": {
+              "correct": 5,
+              "n": 5
+            },
+            "front_right": {
+              "correct": 2,
+              "n": 2
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gB-9": {
+      "frame": {
+        "binary": {
+          "detected": 1711,
+          "detection_rate": 0.9965055329062318,
+          "false_alarm_rate": 0.009216589861751152,
+          "false_alarms": 2,
+          "n_off_road": 1717,
+          "n_on_road": 217
+        },
+        "zone": {
+          "accuracy": 0.6804550155118925,
+          "correct": 1316,
+          "n": 1934,
+          "per_class": {
+            "center_mirror": {
+              "correct": 237,
+              "n": 243
+            },
+            "front": {
+              "correct": 215,
+              "n": 217
+            },
+            "front_right": {
+              "correct": 6,
+              "n": 227
+            },
+            "infotainment": {
+              "correct": 179,
+              "n": 198
+            },
+            "left": {
+              "correct": 198,
+              "n": 199
+            },
+            "left_mirror": {
+              "correct": 61,
+              "n": 270
+            },
+            "right": {
+              "correct": 192,
+              "n": 194
+            },
+            "right_mirror": {
+              "correct": 51,
+              "n": 202
+            },
+            "steering_wheel": {
+              "correct": 177,
+              "n": 184
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 8,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 8,
+          "n_on_road": 1
+        },
+        "zone": {
+          "accuracy": 0.6666666666666666,
+          "correct": 6,
+          "n": 9,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "front": {
+              "correct": 1,
+              "n": 1
+            },
+            "front_right": {
+              "correct": 0,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gC-13": {
+      "frame": {
+        "binary": {
+          "detected": 1691,
+          "detection_rate": 0.9958775029446407,
+          "false_alarm_rate": 0.034482758620689655,
+          "false_alarms": 8,
+          "n_off_road": 1698,
+          "n_on_road": 232
+        },
+        "zone": {
+          "accuracy": 0.861139896373057,
+          "correct": 1662,
+          "n": 1930,
+          "per_class": {
+            "center_mirror": {
+              "correct": 223,
+              "n": 237
+            },
+            "front": {
+              "correct": 224,
+              "n": 232
+            },
+            "front_right": {
+              "correct": 158,
+              "n": 191
+            },
+            "infotainment": {
+              "correct": 251,
+              "n": 258
+            },
+            "left": {
+              "correct": 193,
+              "n": 194
+            },
+            "left_mirror": {
+              "correct": 220,
+              "n": 222
+            },
+            "right": {
+              "correct": 205,
+              "n": 220
+            },
+            "right_mirror": {
+              "correct": 12,
+              "n": 195
+            },
+            "steering_wheel": {
+              "correct": 176,
+              "n": 181
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 9,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 9,
+          "n_on_road": 2
+        },
+        "zone": {
+          "accuracy": 0.9090909090909091,
+          "correct": 10,
+          "n": 11,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "front": {
+              "correct": 2,
+              "n": 2
+            },
+            "front_right": {
+              "correct": 1,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gC-14": {
+      "frame": {
+        "binary": {
+          "detected": 2706,
+          "detection_rate": 0.9568599717114569,
+          "false_alarm_rate": 0.057971014492753624,
+          "false_alarms": 20,
+          "n_off_road": 2828,
+          "n_on_road": 345
+        },
+        "zone": {
+          "accuracy": 0.8465174913331233,
+          "correct": 2686,
+          "n": 3173,
+          "per_class": {
+            "center_mirror": {
+              "correct": 178,
+              "n": 259
+            },
+            "front": {
+              "correct": 325,
+              "n": 345
+            },
+            "front_right": {
+              "correct": 147,
+              "n": 319
+            },
+            "infotainment": {
+              "correct": 270,
+              "n": 366
+            },
+            "left": {
+              "correct": 235,
+              "n": 249
+            },
+            "left_mirror": {
+              "correct": 599,
+              "n": 601
+            },
+            "right": {
+              "correct": 232,
+              "n": 243
+            },
+            "right_mirror": {
+              "correct": 137,
+              "n": 219
+            },
+            "steering_wheel": {
+              "correct": 563,
+              "n": 572
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 11,
+          "detection_rate": 0.9166666666666666,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 12,
+          "n_on_road": 5
+        },
+        "zone": {
+          "accuracy": 0.9411764705882353,
+          "correct": 16,
+          "n": 17,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "front": {
+              "correct": 5,
+              "n": 5
+            },
+            "front_right": {
+              "correct": 2,
+              "n": 3
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 3,
+              "n": 3
+            }
+          }
+        }
+      }
+    },
+    "gE-28": {
+      "frame": {
+        "binary": {
+          "detected": 1735,
+          "detection_rate": 0.9914285714285714,
+          "false_alarm_rate": 0.11854103343465046,
+          "false_alarms": 39,
+          "n_off_road": 1750,
+          "n_on_road": 329
+        },
+        "zone": {
+          "accuracy": 0.6835016835016835,
+          "correct": 1421,
+          "n": 2079,
+          "per_class": {
+            "center_mirror": {
+              "correct": 37,
+              "n": 241
+            },
+            "front": {
+              "correct": 290,
+              "n": 329
+            },
+            "front_right": {
+              "correct": 174,
+              "n": 336
+            },
+            "infotainment": {
+              "correct": 189,
+              "n": 226
+            },
+            "left": {
+              "correct": 31,
+              "n": 33
+            },
+            "left_mirror": {
+              "correct": 253,
+              "n": 279
+            },
+            "right": {
+              "correct": 32,
+              "n": 166
+            },
+            "right_mirror": {
+              "correct": 224,
+              "n": 278
+            },
+            "steering_wheel": {
+              "correct": 191,
+              "n": 191
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 12,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.16666666666666666,
+          "false_alarms": 1,
+          "n_off_road": 12,
+          "n_on_road": 6
+        },
+        "zone": {
+          "accuracy": 0.6666666666666666,
+          "correct": 12,
+          "n": 18,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 3
+            },
+            "front": {
+              "correct": 5,
+              "n": 6
+            },
+            "front_right": {
+              "correct": 1,
+              "n": 2
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 0,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 1,
+              "n": 2
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gE-29": {
+      "frame": {
+        "binary": {
+          "detected": 1343,
+          "detection_rate": 0.9043771043771044,
+          "false_alarm_rate": 0.040106951871657755,
+          "false_alarms": 15,
+          "n_off_road": 1485,
+          "n_on_road": 374
+        },
+        "zone": {
+          "accuracy": 0.6691769768692846,
+          "correct": 1244,
+          "n": 1859,
+          "per_class": {
+            "center_mirror": {
+              "correct": 235,
+              "n": 249
+            },
+            "front": {
+              "correct": 359,
+              "n": 374
+            },
+            "front_right": {
+              "correct": 69,
+              "n": 317
+            },
+            "infotainment": {
+              "correct": 218,
+              "n": 258
+            },
+            "left": {
+              "correct": 5,
+              "n": 10
+            },
+            "left_mirror": {
+              "correct": 157,
+              "n": 246
+            },
+            "right": {
+              "correct": 16,
+              "n": 18
+            },
+            "right_mirror": {
+              "correct": 10,
+              "n": 192
+            },
+            "steering_wheel": {
+              "correct": 175,
+              "n": 195
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 12,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 12,
+          "n_on_road": 3
+        },
+        "zone": {
+          "accuracy": 0.7333333333333333,
+          "correct": 11,
+          "n": 15,
+          "per_class": {
+            "center_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "front": {
+              "correct": 3,
+              "n": 3
+            },
+            "front_right": {
+              "correct": 0,
+              "n": 3
+            },
+            "infotainment": {
+              "correct": 2,
+              "n": 2
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gF-23": {
+      "frame": {
+        "binary": {
+          "detected": 3746,
+          "detection_rate": 0.992317880794702,
+          "false_alarm_rate": 0.12898936170212766,
+          "false_alarms": 97,
+          "n_off_road": 3775,
+          "n_on_road": 752
+        },
+        "zone": {
+          "accuracy": 0.8553125690302629,
+          "correct": 3872,
+          "n": 4527,
+          "per_class": {
+            "center_mirror": {
+              "correct": 426,
+              "n": 436
+            },
+            "front": {
+              "correct": 655,
+              "n": 752
+            },
+            "front_right": {
+              "correct": 322,
+              "n": 475
+            },
+            "infotainment": {
+              "correct": 489,
+              "n": 503
+            },
+            "left": {
+              "correct": 404,
+              "n": 413
+            },
+            "left_mirror": {
+              "correct": 433,
+              "n": 460
+            },
+            "right": {
+              "correct": 401,
+              "n": 412
+            },
+            "right_mirror": {
+              "correct": 100,
+              "n": 411
+            },
+            "steering_wheel": {
+              "correct": 642,
+              "n": 665
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 21,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.14285714285714285,
+          "false_alarms": 1,
+          "n_off_road": 21,
+          "n_on_road": 7
+        },
+        "zone": {
+          "accuracy": 0.8928571428571429,
+          "correct": 25,
+          "n": 28,
+          "per_class": {
+            "center_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "front": {
+              "correct": 6,
+              "n": 7
+            },
+            "front_right": {
+              "correct": 2,
+              "n": 2
+            },
+            "infotainment": {
+              "correct": 3,
+              "n": 3
+            },
+            "left": {
+              "correct": 2,
+              "n": 2
+            },
+            "left_mirror": {
+              "correct": 3,
+              "n": 3
+            },
+            "right": {
+              "correct": 2,
+              "n": 2
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 2
+            },
+            "steering_wheel": {
+              "correct": 5,
+              "n": 5
+            }
+          }
+        }
+      }
+    },
+    "gZ-33": {
+      "frame": {
+        "binary": {
+          "detected": 3794,
+          "detection_rate": 0.9947561615102255,
+          "false_alarm_rate": 0.03761061946902655,
+          "false_alarms": 17,
+          "n_off_road": 3814,
+          "n_on_road": 452
+        },
+        "zone": {
+          "accuracy": 0.873652133145804,
+          "correct": 3727,
+          "n": 4266,
+          "per_class": {
+            "center_mirror": {
+              "correct": 362,
+              "n": 445
+            },
+            "front": {
+              "correct": 435,
+              "n": 452
+            },
+            "front_right": {
+              "correct": 466,
+              "n": 528
+            },
+            "infotainment": {
+              "correct": 421,
+              "n": 432
+            },
+            "left": {
+              "correct": 407,
+              "n": 417
+            },
+            "left_mirror": {
+              "correct": 367,
+              "n": 476
+            },
+            "right": {
+              "correct": 357,
+              "n": 538
+            },
+            "right_mirror": {
+              "correct": 528,
+              "n": 582
+            },
+            "steering_wheel": {
+              "correct": 384,
+              "n": 396
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 17,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 17,
+          "n_on_road": 3
+        },
+        "zone": {
+          "accuracy": 1.0,
+          "correct": 20,
+          "n": 20,
+          "per_class": {
+            "center_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "front": {
+              "correct": 3,
+              "n": 3
+            },
+            "front_right": {
+              "correct": 2,
+              "n": 2
+            },
+            "infotainment": {
+              "correct": 2,
+              "n": 2
+            },
+            "left": {
+              "correct": 2,
+              "n": 2
+            },
+            "left_mirror": {
+              "correct": 2,
+              "n": 2
+            },
+            "right": {
+              "correct": 2,
+              "n": 2
+            },
+            "right_mirror": {
+              "correct": 3,
+              "n": 3
+            },
+            "steering_wheel": {
+              "correct": 2,
+              "n": 2
+            }
+          }
+        }
+      }
+    },
+    "gZ-36": {
+      "frame": {
+        "binary": {
+          "detected": 1655,
+          "detection_rate": 0.9851190476190477,
+          "false_alarm_rate": 0.0029850746268656717,
+          "false_alarms": 1,
+          "n_off_road": 1680,
+          "n_on_road": 335
+        },
+        "zone": {
+          "accuracy": 0.9270471464019852,
+          "correct": 1868,
+          "n": 2015,
+          "per_class": {
+            "center_mirror": {
+              "correct": 190,
+              "n": 200
+            },
+            "front": {
+              "correct": 334,
+              "n": 335
+            },
+            "front_right": {
+              "correct": 118,
+              "n": 191
+            },
+            "infotainment": {
+              "correct": 219,
+              "n": 241
+            },
+            "left": {
+              "correct": 182,
+              "n": 188
+            },
+            "left_mirror": {
+              "correct": 202,
+              "n": 202
+            },
+            "right": {
+              "correct": 203,
+              "n": 219
+            },
+            "right_mirror": {
+              "correct": 199,
+              "n": 203
+            },
+            "steering_wheel": {
+              "correct": 221,
+              "n": 236
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 8,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.0,
+          "false_alarms": 0,
+          "n_off_road": 8,
+          "n_on_road": 2
+        },
+        "zone": {
+          "accuracy": 1.0,
+          "correct": 10,
+          "n": 10,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "front": {
+              "correct": 2,
+              "n": 2
+            },
+            "front_right": {
+              "correct": 1,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 1,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 1,
+              "n": 1
+            }
+          }
+        }
+      }
+    },
+    "gZ-37": {
+      "frame": {
+        "binary": {
+          "detected": 1610,
+          "detection_rate": 0.9600477042337507,
+          "false_alarm_rate": 0.047619047619047616,
+          "false_alarms": 10,
+          "n_off_road": 1677,
+          "n_on_road": 210
+        },
+        "zone": {
+          "accuracy": 0.6539480657127716,
+          "correct": 1234,
+          "n": 1887,
+          "per_class": {
+            "center_mirror": {
+              "correct": 187,
+              "n": 188
+            },
+            "front": {
+              "correct": 200,
+              "n": 210
+            },
+            "front_right": {
+              "correct": 0,
+              "n": 173
+            },
+            "infotainment": {
+              "correct": 181,
+              "n": 190
+            },
+            "left": {
+              "correct": 153,
+              "n": 216
+            },
+            "left_mirror": {
+              "correct": 195,
+              "n": 221
+            },
+            "right": {
+              "correct": 3,
+              "n": 182
+            },
+            "right_mirror": {
+              "correct": 18,
+              "n": 168
+            },
+            "steering_wheel": {
+              "correct": 297,
+              "n": 339
+            }
+          }
+        }
+      },
+      "interval": {
+        "binary": {
+          "detected": 10,
+          "detection_rate": 1.0,
+          "false_alarm_rate": 0.3333333333333333,
+          "false_alarms": 1,
+          "n_off_road": 10,
+          "n_on_road": 3
+        },
+        "zone": {
+          "accuracy": 0.6923076923076923,
+          "correct": 9,
+          "n": 13,
+          "per_class": {
+            "center_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "front": {
+              "correct": 2,
+              "n": 3
+            },
+            "front_right": {
+              "correct": 0,
+              "n": 1
+            },
+            "infotainment": {
+              "correct": 1,
+              "n": 1
+            },
+            "left": {
+              "correct": 1,
+              "n": 1
+            },
+            "left_mirror": {
+              "correct": 1,
+              "n": 1
+            },
+            "right": {
+              "correct": 0,
+              "n": 1
+            },
+            "right_mirror": {
+              "correct": 0,
+              "n": 1
+            },
+            "steering_wheel": {
+              "correct": 3,
+              "n": 3
+            }
+          }
+        }
+      }
+    }
+  }
+}

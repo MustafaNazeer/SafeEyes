@@ -21,6 +21,7 @@ from pathlib import Path
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
+from safeeyes.data.dmd_gaze import frame_interval_keys
 from safeeyes.data.gaze_splits import subject_folds
 from safeeyes.models.eval_gaze import (
     binary_rates,
@@ -35,16 +36,24 @@ def train_gaze_model(x: np.ndarray, y: np.ndarray, seed: int = 0) -> GradientBoo
     return model
 
 
-def load_corpus(feature_root: str | Path) -> dict[str, dict[str, np.ndarray]]:
+def load_corpus(
+    feature_root: str | Path, gaze_root: str | Path | None = None
+) -> dict[str, dict[str, np.ndarray]]:
     """Load every recording, keyed by subject, with globally unique interval ids.
 
-    Interval ids restart at zero in each recording, so they are offset while
-    loading. Without that, intervals from different people would merge and the
-    interval level metrics would silently pool unrelated glances.
+    When ``gaze_root`` is given, intervals are the annotated glances read back
+    from the annotation files. That is the correct independent unit. The ids
+    stored at extraction time instead break on any gap in detected frames,
+    which splits one glance wherever face detection dropped a frame, and those
+    dropouts cluster on the zones that turn the head away from the camera.
+
+    Ids are offset per recording either way, since they restart at zero in each
+    file and intervals from different people must never merge.
     """
     paths = sorted(Path(feature_root).glob("*.npz"))
     if not paths:
         raise FileNotFoundError(f"no gaze feature files under {feature_root}")
+    annotations = _annotation_index(gaze_root) if gaze_root is not None else None
 
     by_subject: dict[str, list[dict[str, np.ndarray]]] = {}
     offset = 0
@@ -53,7 +62,12 @@ def load_corpus(feature_root: str | Path) -> dict[str, dict[str, np.ndarray]]:
         # feature file is never a code execution path.
         with np.load(path) as data:
             subject = str(data["subject"])
-            ids = np.asarray(data["interval_ids"], dtype=int)
+            frames = np.asarray(data["frame_indices"], dtype=int)
+            ids = (
+                _annotation_ids(frames, annotations[path.stem])
+                if annotations is not None
+                else np.asarray(data["interval_ids"], dtype=int)
+            )
             record = {
                 "features": np.asarray(data["features"], dtype=float),
                 "labels": np.asarray(data["labels"]),
@@ -66,6 +80,30 @@ def load_corpus(feature_root: str | Path) -> dict[str, dict[str, np.ndarray]]:
     for subject, records in by_subject.items():
         merged[subject] = {key: np.concatenate([r[key] for r in records]) for key in records[0]}
     return merged
+
+
+def _annotation_index(gaze_root: str | Path) -> dict[str, dict]:
+    """Annotation JSON for each recording, keyed by the feature file stem."""
+    index: dict[str, dict] = {}
+    for annotation_path in Path(gaze_root).rglob("*_rgb_ann_gaze.json"):
+        stem = annotation_path.name.replace("_rgb_ann_gaze.json", "_rgb_face")
+        with open(annotation_path) as handle:
+            index[stem] = json.load(handle)
+    if not index:
+        raise FileNotFoundError(f"no gaze annotations under {gaze_root}")
+    return index
+
+
+def _annotation_ids(frames: np.ndarray, annotation: dict) -> np.ndarray:
+    keys = frame_interval_keys(annotation, 10**9)
+    dense: dict[str, int] = {}
+    ids: list[int] = []
+    for frame in frames.tolist():
+        key = keys[frame]
+        if key not in dense:
+            dense[key] = len(dense)
+        ids.append(dense[key])
+    return np.array(ids, dtype=int)
 
 
 def _stack(corpus: dict[str, dict[str, np.ndarray]], subjects: Sequence[str]) -> dict:
@@ -122,23 +160,39 @@ def run_leave_one_subject_out(
             "binary": binary_rates(i_true, i_pred),
         },
         "per_subject": per_subject,
+        "_predictions": {"true": true, "pred": pred, "interval_ids": ids},
     }
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Leave one subject out gaze evaluation.")
     parser.add_argument("--feature-root", required=True)
+    parser.add_argument(
+        "--gaze-root",
+        help="extracted DMD gaze tree; groups metrics by annotated glance",
+    )
     parser.add_argument("--out", required=True, help="metrics JSON destination")
+    parser.add_argument("--predictions-out", help="npz destination for held out predictions")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args(argv)
 
-    corpus = load_corpus(args.feature_root)
+    corpus = load_corpus(args.feature_root, args.gaze_root)
     print(f"loaded {len(corpus)} subjects", flush=True)
     results = run_leave_one_subject_out(corpus, seed=args.seed)
 
+    # Held out predictions are saved beside the metrics so the pooled result can
+    # be regrouped or re-scored later without repeating the fourteen fold run.
+    predictions = results.pop("_predictions")
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n")
+
+    if args.predictions_out:
+        predictions_path = Path(args.predictions_out)
+        predictions_path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(predictions_path, **predictions)
+        print(f"wrote {predictions_path}")
+
     print(f"wrote {out}")
     return 0
 

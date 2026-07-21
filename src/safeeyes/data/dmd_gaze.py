@@ -43,6 +43,33 @@ def is_eyes_on_road(zone: str) -> bool:
     return zone == "front"
 
 
+def frame_interval_keys(annotation: dict, n_frames: int) -> dict[int, str]:
+    """Map each labelled frame to the annotation interval it belongs to.
+
+    The annotated interval is the independent unit: one sustained glance,
+    scored once. Grouping instead by runs of consecutively detected frames
+    splits a single glance wherever face detection drops a frame, and those
+    dropouts are not random. They cluster on the zones that turn the head away
+    from the camera, so that grouping inflates apparent independence precisely
+    where the head is turned.
+    """
+    root = annotation.get("openlabel", annotation)
+    keys: dict[int, str] = {}
+    for action in root.get("actions", {}).values():
+        action_type = str(action.get("type", ""))
+        if not action_type.startswith(GAZE_PREFIX):
+            continue
+        zone = action_type[len(GAZE_PREFIX) :]
+        if zone == EXCLUDED_ZONE:
+            continue
+        for interval in action.get("frame_intervals", []):
+            start = int(interval["frame_start"])
+            end = min(int(interval["frame_end"]), n_frames - 1)
+            for frame in range(start, end + 1):
+                keys[frame] = f"{zone}:{start}-{end}"
+    return keys
+
+
 def frame_gaze_labels(annotation: dict, n_frames: int) -> dict[int, str]:
     root = annotation.get("openlabel", annotation)
     labels: dict[int, str] = {}
