@@ -12,6 +12,7 @@ from safeeyes.edge.runtime import OnnxModel, make_onnx_window_classifier
 from safeeyes.models.distraction_data import DISTRACTION_LABELS
 from safeeyes.models.eye_state import EyeStateCNN
 from safeeyes.models.train_distraction import BACKBONES
+from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.temporal.model import TemporalGRU
 
 
@@ -140,3 +141,22 @@ def test_main_exports_temporal_checkpoint(tmp_path) -> None:
     assert code == 0
     assert (out_dir / "temporal.onnx").exists()
     assert (out_dir / "temporal.int8.onnx").exists()
+
+
+def test_main_temporal_default_matches_the_runtime_feature_count(tmp_path) -> None:
+    """An export run without --n-features must load in the live loop.
+
+    Both live loops build the window from len(FEATURE_COLUMNS), so a default
+    that disagrees with it yields an artifact the runtime cannot consume.
+    """
+    model = TemporalGRU(n_features=len(FEATURE_COLUMNS), num_classes=3).eval()
+    ckpt = tmp_path / "temporal.pt"
+    torch.save(model.state_dict(), ckpt)
+    out_dir = tmp_path / "artifacts"
+
+    code = main(["--temporal-checkpoint", str(ckpt), "--out-dir", str(out_dir)])
+
+    assert code == 0
+    classifier = make_onnx_window_classifier(OnnxModel(out_dir / "temporal.onnx"))
+    window = np.zeros((150, len(FEATURE_COLUMNS)), dtype=np.float32)
+    assert classifier(window) in {0, 1, 2}

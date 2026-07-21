@@ -6,7 +6,7 @@ once after training, copy the resulting ``.int8.onnx`` files to the Pi, and poin
 the runtime at them.
 
     python -m safeeyes.edge.export_models \
-        --temporal-checkpoint models/temporal.pt --n-features 8 --out-dir models/edge
+        --temporal-checkpoint models/temporal.pt --out-dir models/edge
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ from safeeyes.edge.export import (
 )
 from safeeyes.edge.quantize import quantize_dynamic_onnx
 from safeeyes.models.eye_state import EyeStateCNN
+from safeeyes.perception.frame import FEATURE_COLUMNS
 from safeeyes.temporal.model import TemporalGRU
 
 
@@ -98,7 +99,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="one or more trained distraction backbone checkpoints",
     )
     parser.add_argument("--out-dir", required=True, help="directory to write the artifacts into")
-    parser.add_argument("--n-features", type=int, default=8, help="temporal feature count")
+    parser.add_argument(
+        "--n-features",
+        type=int,
+        default=len(FEATURE_COLUMNS),
+        help="temporal feature count",
+    )
     parser.add_argument("--n-classes", type=int, default=3, help="temporal fatigue classes")
     parser.add_argument("--crop-size", type=int, default=24, help="eye crop side length")
     parser.add_argument("--distraction-size", type=int, default=224, help="distraction input side")
