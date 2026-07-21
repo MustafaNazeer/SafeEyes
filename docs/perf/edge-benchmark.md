@@ -61,6 +61,7 @@ benchmark is run on the device. No numbers are entered until they are measured.
 | Perception eye state | eye_state.int8.onnx | (2, 1, 24, 24) | 0.753 | 0.745 | 0.784 | 1327.9 |
 | Temporal fatigue | temporal.onnx (float) | (1, 150, 5) | 0.503 | 0.499 | 0.520 | 1988.4 |
 | Temporal fatigue | temporal.int8.onnx | (1, 150, 5) | 0.478 | 0.474 | 0.496 | 2092.2 |
+| Gaze zone | gaze_zone.onnx | (1, 7) | 0.080 | 0.078 | 0.098 | 12434.9 |
 | End to end per frame | full pipeline, HUD on | one camera frame | n/a | 81.9 | 85.5 | 11.1 |
 | Integrated loop, no driver in frame | drowsiness only, headless | one camera frame | n/a | 13.4 | 24.5 | 15.0 |
 | Integrated loop, no driver in frame | plus distraction every 5th frame, headless | one camera frame | n/a | 13.6 | 50.6 | 14.9 |
@@ -82,6 +83,23 @@ quantization outweighs the int8 compute savings. The deployed eye state model is
 therefore the float export. The board read 44.3 C during these runs with no
 throttling; both figures are short burst measurements, and the sustained
 thermal picture will be recorded with the end to end pipeline run.
+
+The gaze zone row was measured on the same board (200 timed runs after 20 warmup
+runs, board at 35.0 C, throttle state 0x0). At 0.080 ms it is the cheapest model
+in the system by a wide margin, roughly six times faster than the temporal GRU
+and two orders of magnitude faster than the distraction network, because a
+gradient boosted tree ensemble over seven features does far less arithmetic than
+any of the neural models. Against a live loop running near 11 frames per second,
+the gaze stage consumes well under a tenth of one percent of the frame budget,
+so it runs on every frame rather than on a schedule and needs no accelerator.
+
+Two caveats attach to that row. It measures model inference only, not the
+feature assembly that precedes it, though the head pose solve and iris offsets
+reuse landmarks the drowsiness path already computes, so the marginal perception
+cost is close to zero. And no integrated with driver row exists for the gaze
+track yet: the board has no capture camera attached, and a faceless run would be
+meaningless here because no face means no landmarks and therefore no gaze
+inference at all. That measurement is outstanding rather than reported.
 
 The temporal rows were measured on the same board, runtime, and procedure (100
 timed runs after warmup, ONNX Runtime 1.27.0, Python 3.12, board at 37.0 C, no
