@@ -27,6 +27,13 @@ MOUTH_MAR_INDICES: tuple[int, ...] = (61, 37, 267, 291, 314, 84)
 # right eye outer corners, left and right mouth corners.
 HEAD_POSE_INDICES: tuple[int, ...] = (1, 152, 33, 263, 61, 291)
 
+# Iris points appended to the canonical mesh by the refined FaceLandmarker
+# topology, centre first in each group. The pairing with the eye contours above
+# was verified against a real detection: point 468 falls inside the socket
+# spanned by 33 and 133, and point 473 inside the socket spanned by 362 and 263.
+LEFT_IRIS_INDICES: tuple[int, ...] = (468, 469, 470, 471, 472)
+RIGHT_IRIS_INDICES: tuple[int, ...] = (473, 474, 475, 476, 477)
+
 
 def extract_points(landmarks: np.ndarray, indices: Sequence[int]) -> np.ndarray:
     return np.asarray(landmarks)[list(indices)]
