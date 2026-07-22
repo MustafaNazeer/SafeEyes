@@ -235,6 +235,14 @@ CLAIMS = [
         "count",
         0,
     ),
+    # The per class recalls in the primary vs baseline table (stored as
+    # per_class_accuracy: 0 alert, 1 low vigilance, 2 drowsy for both models).
+    ("temporal-metrics.json", ("per_class_accuracy", "0"), TEMPORAL_METHODOLOGY, "pct", 1),
+    ("temporal-metrics.json", ("per_class_accuracy", "1"), TEMPORAL_METHODOLOGY, "pct", 1),
+    ("temporal-metrics.json", ("per_class_accuracy", "2"), TEMPORAL_METHODOLOGY, "pct", 1),
+    ("temporal-metrics-gbt.json", ("per_class_accuracy", "0"), TEMPORAL_METHODOLOGY, "pct", 1),
+    ("temporal-metrics-gbt.json", ("per_class_accuracy", "1"), TEMPORAL_METHODOLOGY, "pct", 1),
+    ("temporal-metrics-gbt.json", ("per_class_accuracy", "2"), TEMPORAL_METHODOLOGY, "pct", 1),
     (GAZE_METRICS, ("interval", "binary", "false_alarm_rate"), GAZE_CARD, "ratio", 4),
     (GAZE_METRICS, ("interval", "binary", "detection_rate"), GAZE_CARD, "ratio", 4),
     (GAZE_METRICS, ("interval", "zone", "accuracy"), GAZE_CARD, "ratio", 4),
@@ -364,6 +372,99 @@ def test_yawn_precision_recall_guard_flags_a_bare_row() -> None:
     offenders = yawn_precision_recall_offenders([("synthetic.md", synthetic)], data)
     assert offenders != [], "the scan failed to flag a table row stating precision without recall"
     assert any("table row" in offender for offender in offenders)
+
+
+def gaze_per_zone_recall_offenders(card_text: str, data: dict) -> list[str]:
+    """Per zone recall rows in the gaze card that disagree with the metrics.
+
+    The card publishes a recall per zone that is not stored as a key: it is
+    correct over glances. Pinning only the counts would miss a typo in the
+    recall column, so each row is checked as a whole. The glance count, the
+    correct count, and the recall computed from them must all appear together
+    in one table row.
+    """
+    offenders: list[str] = []
+    per_class = data["interval"]["zone"]["per_class"]
+    rows = [line for line in card_text.splitlines() if line.lstrip().startswith("|")]
+    for zone, counts in per_class.items():
+        n = counts["n"]
+        correct = counts["correct"]
+        recall = render_ratio(correct / n, 3)
+        row = next((line for line in rows if f"| {zone} " in line), None)
+        if row is None:
+            offenders.append(f"gaze card has no per zone row for {zone}")
+            continue
+        for label, value in (("glances", str(n)), ("correct", str(correct)), ("recall", recall)):
+            if value not in row:
+                offenders.append(f"gaze card {zone} row is missing {label} {value}: {row.strip()}")
+    return offenders
+
+
+def test_gaze_per_zone_recall_matches_the_metrics() -> None:
+    offenders = gaze_per_zone_recall_offenders(_doc_text(GAZE_CARD), load_metric(GAZE_METRICS))
+    assert offenders == [], f"gaze per zone recall drifted from the metrics: {offenders}"
+
+
+def test_gaze_per_zone_recall_guard_flags_a_drifted_row() -> None:
+    # Positive control: a row whose recall does not equal correct over glances
+    # must be flagged, which asserting on a hand built string would not prove
+    # about the real scan.
+    data = load_metric(GAZE_METRICS)
+    synthetic = (
+        "| Zone | Glances | Correct | Recall |\n"
+        "|------|---------|---------|--------|\n"
+        "| front | 51 | 47 | 0.999 |\n"
+    )
+    offenders = gaze_per_zone_recall_offenders(synthetic, data)
+    assert offenders != [], "the scan failed to flag a per zone recall that does not match its counts"
+
+
+def distraction_per_class_offenders(card_text: str, data: dict) -> list[str]:
+    """Per class recall rows in the distraction card that disagree with the metrics.
+
+    The card publishes a recall and a test support for every testable class, of
+    which only two were pinned individually. A class absent from the test split
+    (support zero) is shown as untestable rather than as a recall, so those are
+    checked for the support only. Every other class row must carry both the
+    recall the JSON stores and its support count.
+    """
+    offenders: list[str] = []
+    recalls = data["per_class_recall"]
+    support = data["support"]
+    rows = [line for line in card_text.splitlines() if line.lstrip().startswith("|")]
+    for cls, n in support.items():
+        row = next((line for line in rows if f"| {cls} " in line), None)
+        if row is None:
+            offenders.append(f"distraction card has no row for {cls}")
+            continue
+        if n == 0:
+            if "untestable" not in row:
+                offenders.append(f"distraction card {cls} has zero support but is not untestable")
+            continue
+        recall = render_pct(recalls[cls], 2)
+        for label, value in (("recall", recall), ("support", str(n))):
+            if value not in row:
+                offenders.append(f"distraction card {cls} row is missing {label} {value}")
+    return offenders
+
+
+def test_distraction_per_class_recall_matches_the_metrics() -> None:
+    offenders = distraction_per_class_offenders(
+        _doc_text(DISTRACTION_CARD), load_metric("distraction-mobilenet_v3_small-metrics.json")
+    )
+    assert offenders == [], f"distraction per class recall drifted from the metrics: {offenders}"
+
+
+def test_distraction_per_class_guard_flags_a_drifted_row() -> None:
+    # Positive control: a recall that does not match the JSON must be flagged.
+    data = load_metric("distraction-mobilenet_v3_small-metrics.json")
+    synthetic = (
+        "| Class | Recall | Test support |\n"
+        "|-------|--------|--------------|\n"
+        "| safe_drive | 99.99% | 192 |\n"
+    )
+    offenders = distraction_per_class_offenders(synthetic, data)
+    assert offenders != [], "the scan failed to flag a per class recall that does not match the JSON"
 
 
 def test_metric_check_catches_drift() -> None:
