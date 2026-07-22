@@ -6,11 +6,14 @@ instruments, and shoulder checks all take the eyes off the forward view for a
 moment. What distinguishes a hazard is duration, so the track fires only once
 the gaze has stayed off road continuously.
 
-Durations are stored in **seconds** and converted through the loop's frame rate
-at construction, never held as raw frame counts. A frame count silently means a
-different amount of real time on a device running at a different rate, which is
-exactly how a duration tuned at one cadence became wrong at another in the yawn
-work. The conversion happens once, here, so callers reason in wall clock time.
+Durations are wall clock seconds and the track measures them itself from an
+injected clock. It deliberately knows nothing about the loop's frame rate. An
+earlier version converted seconds to a frame count using a rate supplied at
+construction, which is correct only while that rate is accurate: the live loop
+passed a nominal 11 fps and then ran at 7 under screen capture, silently
+stretching a 2 second bar to 3.1 seconds of real time. Measuring elapsed time
+directly removes the caller's ability to get it wrong, which is the same class
+of defect the yawn cadence trap recorded.
 
 The track never reaches ALARM. Eyes off road is a lesser cue than sustained
 drowsiness, matching how the distraction track is bounded at AUDIBLE.
@@ -18,7 +21,8 @@ drowsiness, matching how the distraction track is bounded at AUDIBLE.
 
 from __future__ import annotations
 
-import math
+import time
+from collections.abc import Callable
 
 from safeeyes.alert.state_machine import AlertTier
 
@@ -27,13 +31,11 @@ class EyesOffRoadTrack:
     def __init__(
         self,
         min_seconds: float = 2.0,
-        fps: float = 10.0,
         audible_seconds: float | None = None,
+        clock: Callable[[], float] = time.monotonic,
     ) -> None:
         if min_seconds <= 0:
             raise ValueError(f"min_seconds must be positive, got {min_seconds}")
-        if fps <= 0:
-            raise ValueError(f"fps must be positive, got {fps}")
         if audible_seconds is not None and audible_seconds < min_seconds:
             raise ValueError(
                 f"audible_seconds {audible_seconds} must not precede min_seconds {min_seconds}"
@@ -41,29 +43,24 @@ class EyesOffRoadTrack:
 
         self.min_seconds = min_seconds
         self.audible_seconds = audible_seconds
-        self.fps = fps
-        self._visual_steps = self._to_steps(min_seconds, fps)
-        self._audible_steps = (
-            self._to_steps(audible_seconds, fps) if audible_seconds is not None else None
-        )
+        self._clock = clock
         self.reset()
 
-    @staticmethod
-    def _to_steps(seconds: float, fps: float) -> int:
-        """Frames needed to cover a duration, rounded up so the bar is never short."""
-        return max(1, math.ceil(seconds * fps))
-
     def reset(self) -> None:
-        self._off_road_steps = 0
+        self._streak_started: float | None = None
 
     def update(self, off_road: bool) -> AlertTier:
         if not off_road:
-            self._off_road_steps = 0
+            self._streak_started = None
             return AlertTier.NONE
 
-        self._off_road_steps += 1
-        if self._audible_steps is not None and self._off_road_steps >= self._audible_steps:
+        now = self._clock()
+        if self._streak_started is None:
+            self._streak_started = now
+        elapsed = now - self._streak_started
+
+        if self.audible_seconds is not None and elapsed >= self.audible_seconds:
             return AlertTier.AUDIBLE
-        if self._off_road_steps >= self._visual_steps:
+        if elapsed >= self.min_seconds:
             return AlertTier.VISUAL
         return AlertTier.NONE

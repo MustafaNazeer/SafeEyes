@@ -77,7 +77,6 @@ def run(
     gaze_model: str | None = None,
     gaze_min_seconds: float = 2.0,
     gaze_audible_seconds: float = 4.0,
-    gaze_fps: float = 11.0,
     log_file: str | None = None,
     metrics_interval: float = 5.0,
     show_display: bool = True,
@@ -115,7 +114,6 @@ def run(
         gaze_track = EyesOffRoadTrack(
             min_seconds=gaze_min_seconds,
             audible_seconds=gaze_audible_seconds,
-            fps=gaze_fps,
         )
 
     detector = FaceMeshDetector()
@@ -264,12 +262,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="seconds of continuous off road gaze before the track escalates",
     )
     parser.add_argument(
-        "--gaze-fps",
-        type=float,
-        default=11.0,
-        help="measured loop frame rate, used to convert the gaze durations to frames",
-    )
-    parser.add_argument(
         "--log-file", default=None, help="write structured JSON logs here instead of stderr"
     )
     parser.add_argument(
@@ -291,7 +283,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         gaze_model=args.gaze_model,
         gaze_min_seconds=args.gaze_min_seconds,
         gaze_audible_seconds=args.gaze_audible_seconds,
-        gaze_fps=args.gaze_fps,
         log_file=args.log_file,
         metrics_interval=args.metrics_interval,
         show_display=not args.no_display,
