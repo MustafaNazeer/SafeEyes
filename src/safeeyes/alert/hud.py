@@ -29,6 +29,8 @@ def draw_hud(
     fatigue_level: int | None = None,
     distraction_activity: str | None = None,
     distraction_tier: AlertTier | None = None,
+    gaze_zone: str | None = None,
+    gaze_tier: AlertTier | None = None,
 ) -> np.ndarray:
     out = frame.copy()
     height, width = out.shape[:2]
@@ -52,6 +54,21 @@ def draw_hud(
             out,
             text,
             (8, height - 26),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            line_color,
+            1,
+            cv2.LINE_AA,
+        )
+
+    if gaze_zone is not None:
+        off_road = gaze_tier is not None and gaze_tier > AlertTier.NONE
+        text = f"EYES OFF ROAD: {gaze_zone}" if off_road else f"gaze: {gaze_zone}"
+        line_color = (0, 140, 255) if off_road else (200, 200, 200)
+        cv2.putText(
+            out,
+            text,
+            (8, height - 44),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
             line_color,

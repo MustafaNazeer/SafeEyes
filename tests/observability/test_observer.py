@@ -94,3 +94,50 @@ def test_stop_flushes_a_final_metrics_line_then_a_stop() -> None:
 
     events = [r["event"] for r in _records(stream)]
     assert events[-2:] == ["metrics", "stop"]
+
+
+def test_gaze_zone_change_emitted_only_on_a_transition() -> None:
+    observer, stream, _ = _build()
+    observer.start({})
+
+    observer.observe(
+        tier="none", fatigue=0, face_detected=True, latency_s=0.01, gaze_zone="road_ahead"
+    )
+    observer.observe(
+        tier="none", fatigue=0, face_detected=True, latency_s=0.01, gaze_zone="road_ahead"
+    )
+    observer.observe(tier="none", fatigue=0, face_detected=True, latency_s=0.01, gaze_zone="phone")
+
+    events = [r["event"] for r in _records(stream)]
+    assert events == ["start", "gaze_change"]
+    change = next(r for r in _records(stream) if r["event"] == "gaze_change")
+    assert change["from"] == "road_ahead"
+    assert change["to"] == "phone"
+
+
+def test_no_gaze_events_when_the_track_is_not_running() -> None:
+    observer, stream, _ = _build()
+    observer.start({})
+
+    observer.observe(tier="none", fatigue=0, face_detected=True, latency_s=0.01)
+    observer.observe(tier="visual", fatigue=1, face_detected=True, latency_s=0.01)
+
+    events = [r["event"] for r in _records(stream)]
+    assert "gaze_change" not in events
+
+
+def test_gaze_zone_lost_on_a_dropped_face_does_not_emit_a_change() -> None:
+    observer, stream, _ = _build()
+    observer.start({})
+
+    observer.observe(
+        tier="none", fatigue=0, face_detected=True, latency_s=0.01, gaze_zone="road_ahead"
+    )
+    # No face means no gaze evidence, so the zone is unknown rather than changed.
+    observer.observe(tier="none", fatigue=0, face_detected=False, latency_s=0.01, gaze_zone=None)
+    observer.observe(
+        tier="none", fatigue=0, face_detected=True, latency_s=0.01, gaze_zone="road_ahead"
+    )
+
+    events = [r["event"] for r in _records(stream)]
+    assert "gaze_change" not in events

@@ -191,6 +191,7 @@ def run(
                 fatigue=fatigue_level,
                 face_detected=landmarks is not None,
                 latency_s=time.perf_counter() - started,
+                gaze_zone=gaze_zone,
             )
             if tier != last_tier and tier in (AlertTier.AUDIBLE, AlertTier.ALARM):
                 print("\a", end="", flush=True)  # terminal bell as a placeholder chime
@@ -203,6 +204,8 @@ def run(
                     fatigue_level=fatigue_level,
                     distraction_activity=distraction_activity,
                     distraction_tier=distraction_tier,
+                    gaze_zone=gaze_zone,
+                    gaze_tier=gaze_tier,
                 )
                 cv2.imshow("SafeEyes", overlay)
                 if cv2.waitKey(1) & 0xFF == ord("q"):

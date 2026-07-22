@@ -30,6 +30,7 @@ class RunObserver:
         self._clock = clock
         self._last_tier: str | None = None
         self._last_face: bool | None = None
+        self._last_gaze: str | None = None
         self._last_flush = clock()
 
     def start(self, config: Mapping[str, object]) -> None:
@@ -43,6 +44,7 @@ class RunObserver:
         fatigue: int,
         face_detected: bool,
         latency_s: float,
+        gaze_zone: str | None = None,
     ) -> None:
         self._metrics.record(latency_s, face_detected=face_detected)
 
@@ -51,6 +53,14 @@ class RunObserver:
                 "tier_change", **{"from": self._last_tier, "to": tier, "fatigue": fatigue}
             )
         self._last_tier = tier
+
+        # A missing zone means no gaze evidence this frame (no face, or the
+        # track is not running), which is not the same as a zone change, so the
+        # last known zone is held rather than cleared.
+        if gaze_zone is not None:
+            if self._last_gaze is not None and gaze_zone != self._last_gaze:
+                self._emitter.emit("gaze_change", **{"from": self._last_gaze, "to": gaze_zone})
+            self._last_gaze = gaze_zone
 
         if self._last_face is not None and face_detected != self._last_face:
             self._emitter.emit("face_regained" if face_detected else "face_lost")
