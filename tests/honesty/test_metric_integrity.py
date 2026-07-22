@@ -416,7 +416,9 @@ def test_gaze_per_zone_recall_guard_flags_a_drifted_row() -> None:
         "| front | 51 | 47 | 0.999 |\n"
     )
     offenders = gaze_per_zone_recall_offenders(synthetic, data)
-    assert offenders != [], "the scan failed to flag a per zone recall that does not match its counts"
+    assert offenders != [], (
+        "the scan failed to flag a per zone recall that does not match its counts"
+    )
 
 
 def distraction_per_class_offenders(card_text: str, data: dict) -> list[str]:
@@ -464,7 +466,9 @@ def test_distraction_per_class_guard_flags_a_drifted_row() -> None:
         "| safe_drive | 99.99% | 192 |\n"
     )
     offenders = distraction_per_class_offenders(synthetic, data)
-    assert offenders != [], "the scan failed to flag a per class recall that does not match the JSON"
+    assert offenders != [], (
+        "the scan failed to flag a per class recall that does not match the JSON"
+    )
 
 
 def test_metric_check_catches_drift() -> None:

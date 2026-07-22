@@ -63,6 +63,30 @@ FRAME_WRITE_ATTRS = frozenset({"imwrite", "VideoWriter"})
 # gitignored data and features trees.
 FRAME_WRITE_ALLOWLIST = frozenset({"data/interval_frames.py", "data/yawdd_crops.py"})
 
+# Modules that run inside the live loop and therefore must stay within the
+# scanned source tree, so the network and frame-write invariants above cover
+# them. Naming them explicitly means relocating one outside src/safeeyes (out
+# of the rglob scan) fails here rather than silently dropping its coverage. The
+# gaze and distraction paths were added after the invariants and are the reason
+# this pin exists.
+RUNTIME_MODULES = frozenset(
+    {
+        "alert/gaze_track.py",
+        "alert/gaze_smoothing.py",
+        "alert/hud.py",
+        "alert/state_machine.py",
+        "perception/gaze_features.py",
+        "perception/iris.py",
+        "perception/frame.py",
+        "data/dmd_gaze.py",
+        "distraction/scheduler.py",
+        "distraction/labels.py",
+        "edge/preprocess.py",
+        "edge/run.py",
+        "observability/observer.py",
+    }
+)
+
 
 def network_imports(source: str) -> set[str]:
     """Banned network module roots imported anywhere in a source string."""
@@ -168,6 +192,28 @@ def test_frame_write_allowlist_is_pinned() -> None:
     assert FRAME_WRITE_ALLOWLIST == frozenset(
         {"data/interval_frames.py", "data/yawdd_crops.py"}
     )
+
+
+def test_runtime_modules_are_within_the_scanned_tree() -> None:
+    # Every live-loop module must sit under the scanned source root, so the
+    # network and frame-write invariants cover it. A module moved out of src/
+    # would leave the runtime scan without a silent gap; this catches that.
+    existing = {str(p.relative_to(SRC_ROOT)) for p in _source_files()}
+    missing = sorted(RUNTIME_MODULES - existing)
+    assert missing == [], f"runtime modules no longer under the privacy scan: {missing}"
+
+
+def test_runtime_modules_are_free_of_network_and_frame_writes() -> None:
+    # A direct assertion that the specific gaze and distraction runtime modules
+    # added after these invariants carry no network import and no raw frame
+    # write, rather than relying only on the whole-tree scan to have reached them.
+    offenders: dict[str, list[str]] = {}
+    for rel in sorted(RUNTIME_MODULES):
+        source = (SRC_ROOT / rel).read_text(encoding="utf-8")
+        problems = sorted(network_imports(source)) + frame_persistence_calls(source)
+        if problems:
+            offenders[rel] = problems
+    assert offenders == {}, f"runtime modules with a network or frame-write leak: {offenders}"
 
 
 def test_network_scanner_flags_a_violation() -> None:
