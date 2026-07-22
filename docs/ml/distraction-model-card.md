@@ -150,6 +150,22 @@ above.
   and two classes are entirely untested. These numbers characterize this split,
   not driving in general.
 
+## Camera view mismatch on a face mounted deployment
+
+The training and evaluation imagery is the source dataset's body facing view,
+which frames the torso, hands, and lap where phones, cups, and reaches occur.
+The SafeEyes demo camera sits above a monitor and frames the head and shoulders.
+A scripted live check on that camera, running the deployed model through the same
+preprocessing and smoothing the runtime uses, found that it labels nearly every
+activity `safe_drive`: scripted texting, a phone call, drinking, and reaching all
+read as `safe_drive` for most of their frames, and the distracted flag fired more
+often on the plain forward baseline than during the texting. This is consistent
+with the weak offline balanced accuracy above and with the view mismatch: the
+cues the model was trained on are largely outside a head and shoulders frame. The
+track is therefore integrated into the live loop but is not demonstrated as a
+working live signal on a face mounted camera. A fair live evaluation would need a
+body facing camera comparable to the training view.
+
 ## Limitations and disclaimer
 
 This is an assistive prototype, not a medical or safety of life device. It makes

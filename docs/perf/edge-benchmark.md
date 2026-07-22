@@ -63,6 +63,7 @@ benchmark is run on the device. No numbers are entered until they are measured.
 | Temporal fatigue | temporal.int8.onnx | (1, 150, 5) | 0.478 | 0.474 | 0.496 | 2092.2 |
 | Gaze zone | gaze_zone.onnx | (1, 7) | 0.080 | 0.078 | 0.098 | 12434.9 |
 | End to end per frame | full pipeline, HUD on | one camera frame | n/a | 81.9 | 85.5 | 11.1 |
+| End to end per frame | drowsiness plus gaze, HUD on | one camera frame | n/a | 85.0 | 102.0 | 10.3 |
 | Integrated loop, no driver in frame | drowsiness only, headless | one camera frame | n/a | 13.4 | 24.5 | 15.0 |
 | Integrated loop, no driver in frame | plus distraction every 5th frame, headless | one camera frame | n/a | 13.6 | 50.6 | 14.9 |
 | Integrated loop, driver in frame | drowsiness only, headless | one camera frame | n/a | 75.8 | 78.5 | 12.88 |
@@ -144,7 +145,21 @@ iterations. A separately recorded per frame mean was not logged, which is why
 that cell is n/a; the loop period (about 90 ms at 11.1 fps) is its upper bound.
 Perception dominates the budget: the temporal and eye state models measure
 under a millisecond each above, and the rest of the frame is MediaPipe landmark
-detection. Thermal, sustained: the board went from 37.9 C at launch to 52.1 C
+detection.
+
+The drowsiness plus gaze row is the same HUD on live configuration with the
+eyes off road track active alongside drowsiness, a driver in frame throughout
+(face detection rate 1.00 across every 15 second interval), the board at 60.3 C
+with the throttle flags clear. It sustains 10.3 frames per second at a 85 ms
+median and 102 ms p95, so adding the gaze track to the full HUD on loop costs
+about 0.8 frames per second against the drowsiness only end to end row above.
+That is consistent with the gaze model itself costing 0.080 ms: the difference
+is the extra iris landmark read and the per frame classify, not the tree
+inference. Real time is preserved and the Coral verdict is unchanged. This row
+measures throughput and latency only; the alert transitions during the run were
+not a controlled false alarm measurement and no alert rate is drawn from it.
+
+Thermal, sustained: the board went from 37.9 C at launch to 52.1 C
 after 5 minutes with the throttle flags clear (0x0), far from the 80 C
 throttling threshold.
 
