@@ -23,6 +23,7 @@ from pathlib import Path
 
 import numpy as np
 
+from safeeyes.alert.gaze_smoothing import GazeZoneSmoother
 from safeeyes.alert.gaze_track import EyesOffRoadTrack
 from safeeyes.alert.hud import draw_hud
 from safeeyes.alert.monitor import DriverMonitorPipeline
@@ -77,6 +78,7 @@ def run(
     gaze_model: str | None = None,
     gaze_min_seconds: float = 2.0,
     gaze_audible_seconds: float = 4.0,
+    gaze_smoothing_seconds: float = 1.0,
     log_file: str | None = None,
     metrics_interval: float = 5.0,
     show_display: bool = True,
@@ -109,8 +111,10 @@ def run(
 
     gaze_classify = None
     gaze_track = None
+    gaze_smoother = None
     if gaze_model is not None:
         gaze_classify = make_onnx_gaze_classifier(OnnxModel(gaze_model))
+        gaze_smoother = GazeZoneSmoother(window_seconds=gaze_smoothing_seconds)
         gaze_track = EyesOffRoadTrack(
             min_seconds=gaze_min_seconds,
             audible_seconds=gaze_audible_seconds,
@@ -126,6 +130,7 @@ def run(
             "distraction_model": Path(distraction_model).name if distraction_model else None,
             "gaze_model": Path(gaze_model).name if gaze_model else None,
             "gaze_min_seconds": gaze_min_seconds if gaze_model else None,
+            "gaze_smoothing_seconds": gaze_smoothing_seconds if gaze_model else None,
             "camera": camera_index,
             "window": window_capacity,
             "escalate_steps": escalate_steps,
@@ -165,22 +170,29 @@ def run(
 
             gaze_zone: str | None = None
             gaze_tier: AlertTier | None = None
-            if gaze_track is not None:
+            if gaze_track is not None and gaze_smoother is not None:
                 if gaze_classify is not None and features is not None and landmarks is not None:
                     # FEATURE_COLUMNS is (ear, mar, pitch, yaw, roll), so the
                     # pose was already solved for the drowsiness vector. Reusing
                     # it avoids a second solvePnP on the same landmarks.
-                    gaze_zone = gaze_classify(
-                        gaze_features(
-                            landmarks,
-                            default_camera_matrix(width, height),
-                            pose=(float(features[2]), float(features[3]), float(features[4])),
+                    # The raw per frame label flips on classifier noise, so it is
+                    # voted over a short window before it can raise an alert.
+                    gaze_zone = gaze_smoother.update(
+                        gaze_classify(
+                            gaze_features(
+                                landmarks,
+                                default_camera_matrix(width, height),
+                                pose=(float(features[2]), float(features[3]), float(features[4])),
+                            )
                         )
                     )
-                    gaze_tier = gaze_track.update(not is_eyes_on_road(gaze_zone))
+                    gaze_tier = gaze_track.update(
+                        gaze_zone is not None and not is_eyes_on_road(gaze_zone)
+                    )
                 else:
                     # No face means no gaze evidence, so the track stands down
                     # rather than holding a stale off road streak.
+                    gaze_smoother.update(None)
                     gaze_tier = gaze_track.update(False)
                 tier = fuse_tiers(tier, gaze_tier)
 
@@ -262,6 +274,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="seconds of continuous off road gaze before the track escalates",
     )
     parser.add_argument(
+        "--gaze-smoothing-seconds",
+        type=float,
+        default=1.0,
+        help="seconds of gaze labels voted over before the zone can raise an alert",
+    )
+    parser.add_argument(
         "--log-file", default=None, help="write structured JSON logs here instead of stderr"
     )
     parser.add_argument(
@@ -283,6 +301,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         gaze_model=args.gaze_model,
         gaze_min_seconds=args.gaze_min_seconds,
         gaze_audible_seconds=args.gaze_audible_seconds,
+        gaze_smoothing_seconds=args.gaze_smoothing_seconds,
         log_file=args.log_file,
         metrics_interval=args.metrics_interval,
         show_display=not args.no_display,

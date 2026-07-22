@@ -75,6 +75,7 @@ def test_main_wires_logging_arguments_into_run(monkeypatch) -> None:
         "gaze_model": None,
         "gaze_min_seconds": 2.0,
         "gaze_audible_seconds": 4.0,
+        "gaze_smoothing_seconds": 1.0,
         "log_file": "edge.jsonl",
         "metrics_interval": 10.0,
         "show_display": True,
@@ -128,6 +129,8 @@ def test_main_wires_gaze_arguments_into_run(monkeypatch) -> None:
             "1.5",
             "--gaze-audible-seconds",
             "3.0",
+            "--gaze-smoothing-seconds",
+            "0.5",
         ]
     )
 
@@ -135,3 +138,4 @@ def test_main_wires_gaze_arguments_into_run(monkeypatch) -> None:
     assert calls["gaze_model"] == "models/gaze/edge/gaze_zone.onnx"
     assert calls["gaze_min_seconds"] == 1.5
     assert calls["gaze_audible_seconds"] == 3.0
+    assert calls["gaze_smoothing_seconds"] == 0.5
