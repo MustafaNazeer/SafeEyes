@@ -1,21 +1,7 @@
-# Local-only project scaffolding (never tracked, never pushed)
-CLAUDE.md
+# Local working files
 SPEC.md
-STATUS.md
-GETTING-STARTED.md
-future-ideas.md
-agents/
-docs/plan.md
 docs/audits/
 scratchpad/
-
-# Tooling artifacts
-.claude/
-.claude-plugins/
-.specstory/
-.serena/
-claude-mem*
-*.mem.json
 
 # Python
 __pycache__/
